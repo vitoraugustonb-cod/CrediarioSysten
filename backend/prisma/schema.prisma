@@ -1,0 +1,96 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PerfilUsuario {
+  GERENTE
+  VENDEDOR_COBRADOR
+}
+
+enum StatusParcela {
+  PENDENTE
+  PAGA
+  ATRASADA
+  PARCIAL
+}
+
+model Usuario {
+  id        Int           @id @default(autoincrement())
+  nome      String
+  email     String        @unique
+  senhaHash String
+  perfil    PerfilUsuario
+  ativo     Boolean       @default(true)
+  criadoEm  DateTime      @default(now())
+
+  vendas    Venda[]   @relation("VendedorVendas")
+  cobrancas Parcela[] @relation("CobradorParcelas")
+}
+
+model Cliente {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  telefone    String
+  endereco    String
+  referencias String?
+  criadoEm    DateTime @default(now())
+
+  vendas Venda[]
+}
+
+model Produto {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  descricao String?
+  preco     Decimal  @db.Decimal(10, 2)
+
+  vendas Venda[]
+}
+
+model Venda {
+  id           Int      @id @default(autoincrement())
+  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  clienteId    Int
+  produto      Produto  @relation(fields: [produtoId], references: [id])
+  produtoId    Int
+  vendedor     Usuario  @relation("VendedorVendas", fields: [vendedorId], references: [id])
+  vendedorId   Int
+  valorTotal   Decimal  @db.Decimal(10, 2)
+  valorEntrada Decimal? @db.Decimal(10, 2)
+  numParcelas  Int
+  dataVenda    DateTime @default(now())
+
+  parcelas Parcela[]
+}
+
+model Parcela {
+  id             Int           @id @default(autoincrement())
+  venda          Venda         @relation(fields: [vendaId], references: [id])
+  vendaId        Int
+  cobrador       Usuario       @relation("CobradorParcelas", fields: [cobradorId], references: [id])
+  cobradorId     Int
+  numero         Int
+  valor          Decimal       @db.Decimal(10, 2)
+  valorPago      Decimal?      @db.Decimal(10, 2)
+  dataVencimento DateTime
+  dataPagamento  DateTime?
+  status         StatusParcela @default(PENDENTE)
+  observacao     String?
+
+  auditorias Auditoria[]
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  parcela   Parcela? @relation(fields: [parcelaId], references: [id])
+  parcelaId Int?
+  usuarioId Int
+  acao      String
+  detalhes  String?
+  criadoEm  DateTime @default(now())
+}
