@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
+import { CategoriaProduto } from '@prisma/client';
 
 export const criarProduto = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nome, descricao, preco } = req.body;
+    const { nome, descricao, preco, categoria } = req.body;
 
     if (!nome || preco === undefined || preco === null) {
       res.status(400).json({ erro: 'Nome e preço são obrigatórios.' });
@@ -16,11 +17,16 @@ export const criarProduto = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    const categoriaFinal: CategoriaProduto = (categoria === 'VARIEDADES')
+      ? CategoriaProduto.VARIEDADES
+      : CategoriaProduto.MOVEIS;
+
     const produto = await prisma.produto.create({
       data: {
         nome,
         descricao: descricao || null,
-        preco: precoNumero
+        preco: precoNumero,
+        categoria: categoriaFinal
       }
     });
 

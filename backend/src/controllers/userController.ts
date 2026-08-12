@@ -52,3 +52,24 @@ export const criarUsuario = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ erro: 'Erro interno ao criar usuário.' });
   }
 };
+
+export const listarUsuarios = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        ativo: true,
+        criadoEm: true
+      },
+      orderBy: { nome: 'asc' }
+    });
+    res.json(usuarios);
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error);
+    res.status(500).json({ erro: 'Erro interno ao listar usuários.' });
+  }
+};
+

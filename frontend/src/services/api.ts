@@ -1,0 +1,308 @@
+// API Service Module for Crediário System
+// Base URL points to backend port 3300
+export const API_BASE_URL = 'http://localhost:3300';
+
+export interface Cliente {
+  id: number;
+  nome: string;
+  telefone: string;
+  endereco: string;
+  referencias?: string | null;
+  criadoEm?: string;
+}
+
+export type CategoriaProduto = 'MOVEIS' | 'VARIEDADES';
+
+export interface Produto {
+  id: number;
+  nome: string;
+  descricao?: string | null;
+  preco: number | string;
+  categoria: CategoriaProduto;
+}
+
+export interface ItemVendaItem {
+  id?: number;
+  vendaId?: number;
+  produtoId: number;
+  quantidade: number;
+  valorUnitario: number | string;
+  subtotal: number | string;
+  produto?: Produto;
+}
+
+export interface Parcela {
+  id: number;
+  vendaId: number;
+  cobradorId: number;
+  numero: number;
+  valor: number | string;
+  valorPago?: number | string | null;
+  dataVencimento: string;
+  dataPagamento?: string | null;
+  status: 'PENDENTE' | 'PAGA' | 'ATRASADA' | 'PARCIAL';
+  observacao?: string | null;
+  cobrador?: {
+    id: number;
+    nome: string;
+    email: string;
+  };
+  venda?: {
+    id: number;
+    valorTotal: number | string;
+    numParcelas: number;
+    cliente: Cliente;
+    produto?: Produto;
+    itens?: ItemVendaItem[];
+  };
+}
+
+export interface PrestacaoContasDia {
+  totalVendido: number;
+  totalVendidoMoveis: number;
+  totalVendidoVariedades: number;
+  totalCobrado: number;
+  qtdVendas: number;
+  qtdCobrancas: number;
+}
+
+export interface SaldoDevedorCliente {
+  cliente: Cliente;
+  saldoDevedorTotal: number;
+  totalParcelasEmAberto: number;
+  parcelasEmAtraso: number;
+}
+
+export interface UsuarioItem {
+  id: number;
+  nome: string;
+  email: string;
+  perfil: 'GERENTE' | 'VENDEDOR_COBRADOR';
+  ativo: boolean;
+  criadoEm?: string;
+}
+
+export interface RelatorioMensalItem {
+  funcionario: {
+    id: number;
+    nome: string;
+    email: string;
+  };
+  totalVendido: number;
+  totalVendidoMoveis: number;
+  totalVendidoVariedades: number;
+  totalCobrado: number;
+  parcelasEmAtraso: number;
+}
+
+export interface VendaItem {
+  id: number;
+  clienteId: number;
+  vendedorId: number;
+  produtoId?: number;
+  produto?: Produto;
+  valorTotal: number | string;
+  valorEntrada?: number | string | null;
+  numParcelas: number;
+  dataVenda: string;
+  cliente?: Cliente;
+  vendedor?: { id: number; nome: string; email: string };
+  itens?: ItemVendaItem[];
+  parcelas?: Parcela[];
+}
+
+// Helper to make authenticated requests to backend REST API
+async function fetchWithAuth(endpoint: string, token: string | null, options: RequestInit = {}) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.erro || data.message || 'Erro ao comunicar com o servidor');
+  }
+
+  return data;
+}
+
+// 1. GET /parcelas
+export async function getParcelas(token: string | null): Promise<Parcela[]> {
+  return await fetchWithAuth('/parcelas', token);
+}
+
+// 2. PATCH /parcelas/:id/pagamento
+export async function registrarPagamentoAPI(
+  id: number,
+  valorPago: number,
+  dataPagamento?: string,
+  token: string | null = null
+): Promise<Parcela> {
+  return await fetchWithAuth(`/parcelas/${id}/pagamento`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ valorPago, dataPagamento }),
+  });
+}
+
+// 3. PATCH /parcelas/:id/observacao
+export async function registrarObservacaoAPI(
+  id: number,
+  observacao: string,
+  token: string | null = null
+): Promise<Parcela> {
+  return await fetchWithAuth(`/parcelas/${id}/observacao`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ observacao }),
+  });
+}
+
+// 4. GET /clientes
+export async function getClientes(token: string | null): Promise<Cliente[]> {
+  return await fetchWithAuth('/clientes', token);
+}
+
+// 5. POST /clientes
+export async function criarClienteAPI(
+  clienteData: { nome: string; telefone: string; endereco: string; referencias?: string },
+  token: string | null = null
+): Promise<Cliente> {
+  return await fetchWithAuth('/clientes', token, {
+    method: 'POST',
+    body: JSON.stringify(clienteData),
+  });
+}
+
+// 6. GET /clientes/:id/saldo
+export async function getSaldoCliente(id: number, token: string | null): Promise<SaldoDevedorCliente> {
+  return await fetchWithAuth(`/clientes/${id}/saldo`, token);
+}
+
+// 6.1 GET /clientes/:id (Dados completos + Histórico de Vendas)
+export async function getClientePorId(id: number, token: string | null): Promise<any> {
+  return await fetchWithAuth(`/clientes/${id}`, token);
+}
+
+// 7. GET /produtos
+export async function getProdutos(token: string | null): Promise<Produto[]> {
+  return await fetchWithAuth('/produtos', token);
+}
+
+// 8. POST /vendas
+export async function criarVendaAPI(
+  vendaData: {
+    clienteId: number;
+    itens: Array<{ produtoId: number; quantidade: number }>;
+    valorEntrada?: number;
+    numParcelas: number;
+    dataVenda?: string;
+  },
+  token: string | null = null
+) {
+  return await fetchWithAuth('/vendas', token, {
+    method: 'POST',
+    body: JSON.stringify(vendaData),
+  });
+}
+
+// 9. GET /prestacao-contas/dia
+export async function getPrestacaoContasDia(token: string | null, dataIso?: string): Promise<PrestacaoContasDia> {
+  const endpoint = dataIso ? `/prestacao-contas/dia?data=${dataIso}` : '/prestacao-contas/dia';
+  return await fetchWithAuth(endpoint, token);
+}
+
+// 10. GET /usuarios
+export async function getUsuarios(token: string | null): Promise<UsuarioItem[]> {
+  return await fetchWithAuth('/usuarios', token);
+}
+
+// 11. POST /usuarios
+export async function criarUsuarioAPI(
+  usuarioData: { nome: string; email: string; senha: string; perfil: 'GERENTE' | 'VENDEDOR_COBRADOR' },
+  token: string | null = null
+): Promise<UsuarioItem> {
+  return await fetchWithAuth('/usuarios', token, {
+    method: 'POST',
+    body: JSON.stringify(usuarioData),
+  });
+}
+
+// 12. GET /prestacao-contas/dia/:usuarioId
+export async function getPrestacaoContasFuncionarioDia(
+  usuarioId: number,
+  token: string | null,
+  dataIso?: string
+): Promise<PrestacaoContasDia> {
+  const endpoint = dataIso
+    ? `/prestacao-contas/dia/${usuarioId}?data=${dataIso}`
+    : `/prestacao-contas/dia/${usuarioId}`;
+  return await fetchWithAuth(endpoint, token);
+}
+
+// 13. GET /relatorios/mensal
+export async function getRelatorioMensal(
+  mes?: number,
+  ano?: number,
+  token: string | null = null
+): Promise<RelatorioMensalItem[]> {
+  let endpoint = '/relatorios/mensal';
+  if (mes && ano) {
+    endpoint += `?mes=${mes}&ano=${ano}`;
+  }
+  const data = await fetchWithAuth(endpoint, token);
+  return data.consolidadoPorFuncionario || data;
+}
+
+// 14. GET /vendas
+export async function getVendas(
+  dataInicio?: string,
+  dataFim?: string,
+  token: string | null = null
+): Promise<VendaItem[]> {
+  let endpoint = '/vendas';
+  const params = new URLSearchParams();
+  if (dataInicio) params.append('dataInicio', dataInicio);
+  if (dataFim) params.append('dataFim', dataFim);
+  if (params.toString()) endpoint += `?${params.toString()}`;
+
+  return await fetchWithAuth(endpoint, token);
+}
+
+// 15. GET /vendas/:id
+export async function getVendaPorId(id: number, token: string | null): Promise<VendaItem> {
+  return await fetchWithAuth(`/vendas/${id}`, token);
+}
+
+// 16. PATCH /parcelas/:id/ajuste (GERENTE only)
+export async function ajustarParcelaAPI(
+  id: number,
+  valor?: number,
+  dataVencimento?: string,
+  motivo?: string,
+  token: string | null = null
+): Promise<Parcela> {
+  return await fetchWithAuth(`/parcelas/${id}/ajuste`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ valor, dataVencimento, motivo }),
+  });
+}
+
+// 17. POST /produtos
+export async function criarProdutoAPI(
+  produtoData: { nome: string; descricao?: string; preco: number; categoria?: CategoriaProduto },
+  token: string | null = null
+): Promise<Produto> {
+  return await fetchWithAuth('/produtos', token, {
+    method: 'POST',
+    body: JSON.stringify(produtoData),
+  });
+}

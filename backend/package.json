@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "tsx src/scripts/seedGerente.ts"
+    "seed": "tsx src/scripts/seedGerente.ts",
+    "reset-db": "tsx src/scripts/resetBanco.ts"
   },
   "keywords": [],
   "author": "",

@@ -19,6 +19,11 @@ enum StatusParcela {
   PARCIAL
 }
 
+enum CategoriaProduto {
+  MOVEIS
+  VARIEDADES
+}
+
 model Usuario {
   id        Int           @id @default(autoincrement())
   nome      String
@@ -44,20 +49,19 @@ model Cliente {
 }
 
 model Produto {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   nome      String
   descricao String?
-  preco     Decimal  @db.Decimal(10, 2)
+  preco     Decimal          @db.Decimal(10, 2)
+  categoria CategoriaProduto @default(MOVEIS)
 
-  vendas Venda[]
+  itensVenda ItemVenda[]
 }
 
 model Venda {
   id           Int      @id @default(autoincrement())
   cliente      Cliente  @relation(fields: [clienteId], references: [id])
   clienteId    Int
-  produto      Produto  @relation(fields: [produtoId], references: [id])
-  produtoId    Int
   vendedor     Usuario  @relation("VendedorVendas", fields: [vendedorId], references: [id])
   vendedorId   Int
   valorTotal   Decimal  @db.Decimal(10, 2)
@@ -65,7 +69,19 @@ model Venda {
   numParcelas  Int
   dataVenda    DateTime @default(now())
 
+  itens    ItemVenda[]
   parcelas Parcela[]
+}
+
+model ItemVenda {
+  id            Int     @id @default(autoincrement())
+  venda         Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+  vendaId       Int
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  produtoId     Int
+  quantidade    Int     @default(1)
+  valorUnitario Decimal @db.Decimal(10, 2)
+  subtotal      Decimal @db.Decimal(10, 2)
 }
 
 model Parcela {

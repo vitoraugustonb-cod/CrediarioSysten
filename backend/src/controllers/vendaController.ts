@@ -4,16 +4,33 @@ import { StatusParcela } from '@prisma/client';
 
 export const registrarVenda = async (req: Request, res: Response): Promise<void> => {
   try {
-    // 🔒 REQUISITO OBRIGATÓRIO DE SEGURANÇA:
-    // O vendedorId é extraído EXCLUSIVAMENTE do token JWT do usuário autenticado (req.usuario.id).
-    // Qualquer parâmetro 'vendedorId' que venha no req.body é ignorado por segurança.
     const vendedorId = req.usuario!.id;
 
-    const { clienteId, produtoId, valorTotal, valorEntrada, numParcelas, dataVenda } = req.body;
+    const { clienteId, itens, produtoId, quantidade, valorEntrada, numParcelas, dataVenda } = req.body;
 
-    if (!clienteId || !produtoId || valorTotal === undefined || !numParcelas) {
+    if (!clienteId || !numParcelas) {
       res.status(400).json({
-        erro: 'clienteId, produtoId, valorTotal e numParcelas são obrigatórios.'
+        erro: 'clienteId e numParcelas são obrigatórios.'
+      });
+      return;
+    }
+
+    // Suporte tanto para o formato novo (itens array) quanto para o formato legado (produtoId único)
+    let listaItensInput: Array<{ produtoId: number; quantidade: number }> = [];
+
+    if (Array.isArray(itens) && itens.length > 0) {
+      listaItensInput = itens.map((item: any) => ({
+        produtoId: parseInt(item.produtoId, 10),
+        quantidade: item.quantidade ? parseInt(item.quantidade, 10) : 1
+      }));
+    } else if (produtoId) {
+      listaItensInput = [{
+        produtoId: parseInt(produtoId, 10),
+        quantidade: quantidade ? parseInt(quantidade, 10) : 1
+      }];
+    } else {
+      res.status(400).json({
+        erro: 'É necessário informar ao menos um produto no campo "itens".'
       });
       return;
     }
@@ -24,29 +41,51 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const valorTotalNum = parseFloat(valorTotal);
-    const valorEntradaNum = valorEntrada ? parseFloat(valorEntrada) : 0;
-
-    if (isNaN(valorTotalNum) || valorTotalNum <= 0) {
-      res.status(400).json({ erro: 'valorTotal deve ser um número válido maior que zero.' });
-      return;
-    }
-
-    if (isNaN(valorEntradaNum) || valorEntradaNum < 0 || valorEntradaNum >= valorTotalNum) {
-      res.status(400).json({ erro: 'valorEntrada deve ser maior ou igual a zero e menor que o valorTotal.' });
-      return;
-    }
-
-    // Valida existência do cliente e do produto
-    const clienteExistente = await prisma.cliente.findUnique({ where: { id: parseInt(clienteId, 10) } });
+    // Valida existência do cliente
+    const clienteExistente = await prisma.cliente.findUnique({
+      where: { id: parseInt(clienteId, 10) }
+    });
     if (!clienteExistente) {
       res.status(404).json({ erro: 'Cliente não encontrado.' });
       return;
     }
 
-    const produtoExistente = await prisma.produto.findUnique({ where: { id: parseInt(produtoId, 10) } });
-    if (!produtoExistente) {
-      res.status(404).json({ erro: 'Produto não encontrado.' });
+    // Processa os produtos e calcula subtotais e valorTotal da venda
+    const itensParaCriar = [];
+    let valorTotalCalculado = 0;
+
+    for (const item of listaItensInput) {
+      if (isNaN(item.produtoId) || item.quantidade <= 0) {
+        res.status(400).json({ erro: 'Item de venda inválido: produtoId e quantidade devem ser válidos.' });
+        return;
+      }
+
+      const produto = await prisma.produto.findUnique({
+        where: { id: item.produtoId }
+      });
+
+      if (!produto) {
+        res.status(404).json({ erro: `Produto com ID ${item.produtoId} não encontrado.` });
+        return;
+      }
+
+      const valorUnitarioNum = Number(produto.preco);
+      const subtotalNum = Math.round((valorUnitarioNum * item.quantidade) * 100) / 100;
+      valorTotalCalculado += subtotalNum;
+
+      itensParaCriar.push({
+        produtoId: produto.id,
+        quantidade: item.quantidade,
+        valorUnitario: valorUnitarioNum,
+        subtotal: subtotalNum
+      });
+    }
+
+    const valorTotalNum = Math.round(valorTotalCalculado * 100) / 100;
+    const valorEntradaNum = valorEntrada ? parseFloat(valorEntrada) : 0;
+
+    if (isNaN(valorEntradaNum) || valorEntradaNum < 0 || valorEntradaNum >= valorTotalNum) {
+      res.status(400).json({ erro: 'valorEntrada deve ser maior ou igual a zero e menor que o valorTotal.' });
       return;
     }
 
@@ -57,14 +96,13 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
     const baseParcela = Math.floor((valorFinanciado / numParcelasInt) * 100) / 100;
     const restoCentavos = Math.round((valorFinanciado - (baseParcela * numParcelasInt)) * 100) / 100;
 
-    // Executa a criação da venda e das parcelas em uma transação atômica
+    // Transação atômica de criação de Venda, ItemVenda e Parcelas
     const resultado = await prisma.$transaction(async (tx) => {
-      // 1. Cria o registro da Venda vinculando ao vendedorId do TOKEN JWT
+      // 1. Criar Venda
       const venda = await tx.venda.create({
         data: {
           clienteId: parseInt(clienteId, 10),
-          produtoId: parseInt(produtoId, 10),
-          vendedorId: vendedorId, // 🔒 Fonte segura via JWT
+          vendedorId: vendedorId,
           valorTotal: valorTotalNum,
           valorEntrada: valorEntradaNum > 0 ? valorEntradaNum : null,
           numParcelas: numParcelasInt,
@@ -72,20 +110,30 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         }
       });
 
-      // 2. Gerar o carnê de parcelas (RF09 & RF10)
-      const parcelasParaCriar = [];
+      // 2. Criar os itens da venda (ItemVenda)
+      for (const item of itensParaCriar) {
+        await tx.itemVenda.create({
+          data: {
+            vendaId: venda.id,
+            produtoId: item.produtoId,
+            quantidade: item.quantidade,
+            valorUnitario: item.valorUnitario,
+            subtotal: item.subtotal
+          }
+        });
+      }
 
+      // 3. Gerar o carnê de parcelas
+      const parcelasParaCriar = [];
       for (let i = 1; i <= numParcelasInt; i++) {
-        // Vencimento mensal (i meses após a data da venda)
         const dataVencimento = new Date(dataVendaBase);
         dataVencimento.setMonth(dataVencimento.getMonth() + i);
 
-        // A última parcela recebe os centavos residuais de arredondamento
         const valorParcela = i === numParcelasInt ? baseParcela + restoCentavos : baseParcela;
 
         parcelasParaCriar.push({
           vendaId: venda.id,
-          cobradorId: vendedorId, // RF10: mesmo vendedorId da venda
+          cobradorId: vendedorId,
           numero: i,
           valor: valorParcela,
           dataVencimento,
@@ -97,13 +145,17 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         data: parcelasParaCriar
       });
 
-      // Retorna a venda completa criada com suas parcelas
+      // Retorna a venda completa criada com seus itens e parcelas
       return await tx.venda.findUnique({
         where: { id: venda.id },
         include: {
           cliente: true,
-          produto: true,
           vendedor: { select: { id: true, nome: true, email: true, perfil: true } },
+          itens: {
+            include: {
+              produto: { select: { id: true, nome: true, descricao: true, preco: true, categoria: true } }
+            }
+          },
           parcelas: { orderBy: { numero: 'asc' } }
         }
       });
@@ -116,20 +168,15 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
   }
 };
 
-/**
- * GET /vendas (com suporte aos filtros por período dataInicio e dataFim - RF15)
- */
 export const listarVendas = async (req: Request, res: Response): Promise<void> => {
   try {
     const usuario = req.usuario!;
     const { dataInicio, dataFim } = req.query;
 
-    // Filtro por Usuário (GERENTE vê todas; VENDEDOR_COBRADOR vê apenas as suas)
     const ondeFiltro: any = usuario.perfil === 'GERENTE'
       ? {}
       : { vendedorId: usuario.id };
 
-    // RF15: Filtro por Período em dataVenda
     if (dataInicio || dataFim) {
       ondeFiltro.dataVenda = {};
       if (dataInicio && typeof dataInicio === 'string') {
@@ -144,8 +191,12 @@ export const listarVendas = async (req: Request, res: Response): Promise<void> =
       where: ondeFiltro,
       include: {
         cliente: true,
-        produto: true,
         vendedor: { select: { id: true, nome: true, email: true, perfil: true } },
+        itens: {
+          include: {
+            produto: { select: { id: true, nome: true, descricao: true, preco: true, categoria: true } }
+          }
+        },
         parcelas: { orderBy: { numero: 'asc' } }
       },
       orderBy: { dataVenda: 'desc' }
@@ -174,8 +225,12 @@ export const obterVendaPorId = async (req: Request, res: Response): Promise<void
       where: { id: vendaId },
       include: {
         cliente: true,
-        produto: true,
         vendedor: { select: { id: true, nome: true, email: true, perfil: true } },
+        itens: {
+          include: {
+            produto: { select: { id: true, nome: true, descricao: true, preco: true, categoria: true } }
+          }
+        },
         parcelas: { orderBy: { numero: 'asc' } }
       }
     });
@@ -185,7 +240,6 @@ export const obterVendaPorId = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Regra de segurança: VENDEDOR_COBRADOR só pode visualizar suas próprias vendas
     if (usuario.perfil !== 'GERENTE' && venda.vendedorId !== usuario.id) {
       res.status(403).json({ erro: 'Acesso negado: você não tem permissão para visualizar esta venda.' });
       return;

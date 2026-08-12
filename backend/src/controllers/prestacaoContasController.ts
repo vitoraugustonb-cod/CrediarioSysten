@@ -3,13 +3,13 @@ import { prisma } from '../lib/prisma.js';
 import { StatusParcela } from '@prisma/client';
 
 /**
- * Função auxiliar que calcula o total vendido e o total cobrado de um usuário em uma data específica
+ * Função auxiliar que calcula o total vendido (separado por MOVEIS e VARIEDADES) e o total cobrado
  */
 async function calcularPrestacaoContasDia(usuarioId: number, dataIso: string) {
   const inicioDia = new Date(`${dataIso}T00:00:00.000Z`);
   const fimDia = new Date(`${dataIso}T23:59:59.999Z`);
 
-  // 1. Total vendido no dia
+  // 1. Vendas do dia com os seus itens e produtos
   const vendasDia = await prisma.venda.findMany({
     where: {
       vendedorId: usuarioId,
@@ -17,10 +17,31 @@ async function calcularPrestacaoContasDia(usuarioId: number, dataIso: string) {
         gte: inicioDia,
         lte: fimDia
       }
+    },
+    include: {
+      itens: {
+        include: {
+          produto: true
+        }
+      }
     }
   });
 
-  const totalVendido = vendasDia.reduce((acc, v) => acc + Number(v.valorTotal), 0);
+  let totalVendidoMoveis = 0;
+  let totalVendidoVariedades = 0;
+  let totalVendido = 0;
+
+  for (const venda of vendasDia) {
+    totalVendido += Number(venda.valorTotal);
+    for (const item of venda.itens) {
+      const sub = Number(item.subtotal);
+      if (item.produto?.categoria === 'VARIEDADES') {
+        totalVendidoVariedades += sub;
+      } else {
+        totalVendidoMoveis += sub;
+      }
+    }
+  }
 
   // 2. Total cobrado no dia (soma de valorPago das parcelas pagas/parciais naquele dia)
   const parcelasCobradasDia = await prisma.parcela.findMany({
@@ -38,16 +59,14 @@ async function calcularPrestacaoContasDia(usuarioId: number, dataIso: string) {
 
   return {
     totalVendido: Math.round(totalVendido * 100) / 100,
+    totalVendidoMoveis: Math.round(totalVendidoMoveis * 100) / 100,
+    totalVendidoVariedades: Math.round(totalVendidoVariedades * 100) / 100,
     totalCobrado: Math.round(totalCobrado * 100) / 100,
     qtdVendas: vendasDia.length,
     qtdCobrancas: parcelasCobradasDia.length
   };
 }
 
-/**
- * RF14: Resumo do próprio dia (VENDEDOR_COBRADOR ou qualquer usuário logado)
- * GET /prestacao-contas/dia?data=YYYY-MM-DD
- */
 export const obterPrestacaoContasProprioDia = async (req: Request, res: Response): Promise<void> => {
   try {
     const usuario = req.usuario!;
@@ -72,10 +91,6 @@ export const obterPrestacaoContasProprioDia = async (req: Request, res: Response
   }
 };
 
-/**
- * RF04: Prestação de contas diária de cada funcionário (GERENTE)
- * GET /prestacao-contas/dia/:usuarioId?data=YYYY-MM-DD
- */
 export const obterPrestacaoContasFuncionarioDia = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usuarioId: idParam } = req.params;
@@ -88,7 +103,6 @@ export const obterPrestacaoContasFuncionarioDia = async (req: Request, res: Resp
       return;
     }
 
-    // Regra: Apenas GERENTE (ou o próprio usuário) pode consultar
     if (usuarioLogado.perfil !== 'GERENTE' && usuarioLogado.id !== usuarioAlvoId) {
       res.status(403).json({ erro: 'Acesso negado: Apenas o Gerente pode consultar a prestação de contas de outros funcionários.' });
       return;

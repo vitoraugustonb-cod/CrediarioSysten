@@ -3,10 +3,6 @@ import { prisma } from '../lib/prisma.js';
 import { StatusParcela } from '@prisma/client';
 import { atualizarStatusParcelasAtrasadas } from './parcelaController.js';
 
-/**
- * RF05: Relatórios mensais consolidados (GERENTE)
- * GET /relatorios/mensal?mes=MM&ano=YYYY
- */
 export const relatorioMensalConsolidado = async (req: Request, res: Response): Promise<void> => {
   try {
     const usuarioLogado = req.usuario!;
@@ -16,7 +12,6 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
       return;
     }
 
-    // 1. Atualiza atrasos no banco (RF17)
     await atualizarStatusParcelasAtrasadas();
 
     const agora = new Date();
@@ -36,7 +31,6 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
     const inicioMes = new Date(Date.UTC(anoQuery, mesQuery - 1, 1, 0, 0, 0));
     const fimMes = new Date(Date.UTC(anoQuery, mesQuery, 0, 23, 59, 59, 999));
 
-    // Busca todos os funcionários ativos
     const funcionarios = await prisma.usuario.findMany({
       select: { id: true, nome: true, email: true, perfil: true },
       orderBy: { nome: 'asc' }
@@ -45,7 +39,7 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
     const consolidado = [];
 
     for (const f of funcionarios) {
-      // 1. Total Vendido pelo funcionário no mês
+      // Vendas do mês com itens e produtos
       const vendasMes = await prisma.venda.findMany({
         where: {
           vendedorId: f.id,
@@ -53,11 +47,33 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
             gte: inicioMes,
             lte: fimMes
           }
+        },
+        include: {
+          itens: {
+            include: {
+              produto: true
+            }
+          }
         }
       });
-      const totalVendido = vendasMes.reduce((acc, v) => acc + Number(v.valorTotal), 0);
 
-      // 2. Total Cobrado pelo funcionário no mês
+      let totalVendidoMoveis = 0;
+      let totalVendidoVariedades = 0;
+      let totalVendido = 0;
+
+      for (const v of vendasMes) {
+        totalVendido += Number(v.valorTotal);
+        for (const item of v.itens) {
+          const sub = Number(item.subtotal);
+          if (item.produto?.categoria === 'VARIEDADES') {
+            totalVendidoVariedades += sub;
+          } else {
+            totalVendidoMoveis += sub;
+          }
+        }
+      }
+
+      // Total Cobrado pelo funcionário no mês
       const cobrancasMes = await prisma.parcela.findMany({
         where: {
           cobradorId: f.id,
@@ -70,8 +86,8 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
       });
       const totalCobrado = cobrancasMes.reduce((acc, p) => acc + (p.valorPago ? Number(p.valorPago) : 0), 0);
 
-      // 3. Quantidade de parcelas em atraso atualmente sob responsabilidade do funcionário
-      const qtdParcelasAtrasadas = await prisma.parcela.count({
+      // Quantidade de parcelas em atraso sob responsabilidade do funcionário
+      const parcelasEmAtraso = await prisma.parcela.count({
         where: {
           cobradorId: f.id,
           status: StatusParcela.ATRASADA
@@ -79,13 +95,17 @@ export const relatorioMensalConsolidado = async (req: Request, res: Response): P
       });
 
       consolidado.push({
-        usuarioId: f.id,
-        nome: f.nome,
-        email: f.email,
-        perfil: f.perfil,
+        funcionario: {
+          id: f.id,
+          nome: f.nome,
+          email: f.email,
+          perfil: f.perfil
+        },
         totalVendido: Math.round(totalVendido * 100) / 100,
+        totalVendidoMoveis: Math.round(totalVendidoMoveis * 100) / 100,
+        totalVendidoVariedades: Math.round(totalVendidoVariedades * 100) / 100,
         totalCobrado: Math.round(totalCobrado * 100) / 100,
-        qtdParcelasAtrasadas
+        parcelasEmAtraso
       });
     }
 
