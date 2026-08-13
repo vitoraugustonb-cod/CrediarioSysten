@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   PlusCircle, 
   Search, 
@@ -23,22 +23,22 @@ export const ProdutosDesktopView: React.FC = () => {
   const [categoria, setCategoria] = useState<CategoriaProduto>('MOVEIS');
   const [salvando, setSalvando] = useState<boolean>(false);
 
-  const carregarProdutos = async () => {
+  const carregarProdutos = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getProdutos(token);
       setProdutos(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar catálogo de produtos.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     carregarProdutos();
-  }, []);
+  }, [carregarProdutos]);
 
   const handleCadastrarProduto = async (e: React.FormEvent) => {
     e.preventDefault();

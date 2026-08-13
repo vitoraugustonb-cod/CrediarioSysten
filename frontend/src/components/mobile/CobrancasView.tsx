@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Search, 
   Phone, 
@@ -35,22 +35,22 @@ export const CobrancasView: React.FC = () => {
   const [observacaoInput, setObservacaoInput] = useState<string>('');
   const [salvando, setSalvando] = useState<boolean>(false);
 
-  const carregarParcelas = async () => {
+  const carregarParcelas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getParcelas(token);
       setParcelas(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar parcelas de cobrança.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     carregarParcelas();
-  }, []);
+  }, [carregarParcelas]);
 
   const abrirDetalhe = (p: Parcela) => {
     setParcelaSelecionada(p);

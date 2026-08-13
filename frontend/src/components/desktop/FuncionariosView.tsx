@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   UserPlus, 
   Search, 
@@ -38,22 +38,22 @@ export const FuncionariosView: React.FC = () => {
   const [prestacao, setPrestacao] = useState<PrestacaoContasDia | null>(null);
   const [loadingPrestacao, setLoadingPrestacao] = useState<boolean>(false);
 
-  const carregarUsuarios = async () => {
+  const carregarUsuarios = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getUsuarios(token);
       setUsuarios(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar lista de funcionários.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     carregarUsuarios();
-  }, []);
+  }, [carregarUsuarios]);
 
   const handleCadastrarFuncionario = async (e: React.FormEvent) => {
     e.preventDefault();

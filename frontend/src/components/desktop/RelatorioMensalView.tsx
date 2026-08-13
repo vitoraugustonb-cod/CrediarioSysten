@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Calendar, 
   RefreshCw
@@ -14,22 +14,22 @@ export const RelatorioMensalView: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const carregarRelatorio = async () => {
+  const carregarRelatorio = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getRelatorioMensal(mes, ano, token);
       setRelatorio(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar relatório mensal consolidado.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [mes, ano, token]);
 
   useEffect(() => {
     carregarRelatorio();
-  }, [mes, ano]);
+  }, [carregarRelatorio]);
 
   const totalVendidoEmpresa = relatorio.reduce((acc, r) => acc + r.totalVendido, 0);
   const totalCobradoEmpresa = relatorio.reduce((acc, r) => acc + r.totalCobrado, 0);

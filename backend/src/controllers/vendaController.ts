@@ -50,8 +50,15 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    interface ItemParaCriar {
+      produtoId: number;
+      quantidade: number;
+      valorUnitario: number;
+      subtotal: number;
+    }
+
     // Processa os produtos e calcula subtotais e valorTotal da venda
-    const itensParaCriar = [];
+    const itensParaCriar: ItemParaCriar[] = [];
     let valorTotalCalculado = 0;
 
     for (const item of listaItensInput) {

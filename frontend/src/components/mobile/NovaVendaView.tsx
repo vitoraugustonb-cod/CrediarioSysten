@@ -62,7 +62,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = ({ onNavigate }) => {
       }
     }
     carregarDados();
-  }, []);
+  }, [token]);
 
   const handleAdicionarItem = () => {
     if (!produtoIdAdd) return;

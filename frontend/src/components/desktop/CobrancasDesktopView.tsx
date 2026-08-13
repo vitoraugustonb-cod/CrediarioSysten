@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Search, 
   Filter, 
@@ -29,22 +29,22 @@ export const CobrancasDesktopView: React.FC = () => {
   const [motivoAjuste, setMotivoAjuste] = useState<string>('');
   const [salvandoAjuste, setSalvandoAjuste] = useState<boolean>(false);
 
-  const carregarParcelas = async () => {
+  const carregarParcelas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const p = await getParcelas(token);
       setParcelas(p);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar lista de cobranças.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     carregarParcelas();
-  }, []);
+  }, [carregarParcelas]);
 
   const abrirAjuste = (p: Parcela) => {
     setParcelaAjuste(p);

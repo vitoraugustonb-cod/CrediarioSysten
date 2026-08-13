@@ -39,14 +39,14 @@ export const DashboardView: React.FC = () => {
         setRelatorio(r);
         setClientes(c);
         setParcelas(p);
-      } catch (err: any) {
+      } catch {
         setError('Erro ao carregar os dados do dashboard.');
       } finally {
         setLoading(false);
       }
     }
     carregarDados();
-  }, []);
+  }, [mesAtual, anoAtual, token]);
 
   const totalVendidoMes = relatorio.reduce((acc, item) => acc + item.totalVendido, 0);
   const totalCobradoMes = relatorio.reduce((acc, item) => acc + item.totalCobrado, 0);

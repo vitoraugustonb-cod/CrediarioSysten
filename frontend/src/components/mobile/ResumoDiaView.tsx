@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   ShoppingBag, 
   Wallet, 
@@ -21,22 +21,22 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const carregarResumo = async () => {
+  const carregarResumo = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getPrestacaoContasDia(token, dataSel);
       setResumo(dados);
-    } catch (err: any) {
+    } catch {
       setError('Não foi possível carregar a prestação de contas do dia.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, dataSel]);
 
   useEffect(() => {
     carregarResumo();
-  }, [dataSel]);
+  }, [carregarResumo]);
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Search 
 } from 'lucide-react';
@@ -24,22 +24,22 @@ export const ClientesDesktopView: React.FC = () => {
   const [saldo, setSaldo] = useState<SaldoDevedorCliente | null>(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState<boolean>(false);
 
-  const carregarClientes = async () => {
+  const carregarClientes = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getClientes(token);
       setClientes(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar clientes.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     carregarClientes();
-  }, []);
+  }, [carregarClientes]);
 
   const [historicoVendas, setHistoricoVendas] = useState<any[]>([]);
 

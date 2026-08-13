@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Calendar 
 } from 'lucide-react';
@@ -25,22 +25,22 @@ export const VendasDesktopView: React.FC = () => {
   const [vendaSelecionada, setVendaSelecionada] = useState<VendaItem | null>(null);
   const [loadingCarnes, setLoadingCarnes] = useState<boolean>(false);
 
-  const carregarVendas = async () => {
+  const carregarVendas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const dados = await getVendas(dataInicio, dataFim, token);
       setVendas(dados);
-    } catch (err: any) {
+    } catch {
       setError('Erro ao carregar lista de vendas.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [dataInicio, dataFim, token]);
 
   useEffect(() => {
     carregarVendas();
-  }, [dataInicio, dataFim]);
+  }, [carregarVendas]);
 
   const abrirCarneVenda = async (venda: VendaItem) => {
     setVendaSelecionada(venda);
