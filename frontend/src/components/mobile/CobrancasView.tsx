@@ -160,7 +160,6 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   });
 
   // Contadores
-  const qtdTotal = cobrancasFiltradasPorData.length;
   const qtdHoje = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'COBRAR_HOJE').length;
   const qtdAtrasados = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'ATRASADO').length;
 
@@ -193,45 +192,25 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         />
       </div>
 
-      {/* Filter Tabs: Todos, Cobrar Hoje, Atrasados */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+      {/* Filter Tabs: Cobrar Hoje & Atrasados */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <button
           type="button"
-          onClick={() => setFiltroStatus('TODOS')}
-          style={{
-            padding: '10px 4px',
-            borderRadius: 'var(--radius-md)',
-            border: filtroStatus === 'TODOS' ? '2px solid var(--accent-600)' : '1px solid var(--border-color)',
-            backgroundColor: filtroStatus === 'TODOS' ? 'var(--accent-50)' : '#FFFFFF',
-            color: filtroStatus === 'TODOS' ? 'var(--accent-700)' : 'var(--primary-800)',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px'
-          }}
-        >
-          <span>Todos ({qtdTotal})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setFiltroStatus('COBRAR_HOJE')}
+          onClick={() => setFiltroStatus(filtroStatus === 'COBRAR_HOJE' ? 'TODOS' : 'COBRAR_HOJE')}
           style={{
             padding: '10px 4px',
             borderRadius: 'var(--radius-md)',
             border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #EA580C' : '1px solid var(--border-color)',
             backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#FFEDD5' : '#FFFFFF',
-            color: filtroStatus === 'COBRAR_HOJE' ? '#C2410C' : '#C2410C',
+            color: '#C2410C',
             fontWeight: 800,
-            fontSize: '0.8rem',
+            fontSize: '0.84rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px'
+            gap: '6px',
+            boxShadow: filtroStatus === 'COBRAR_HOJE' ? 'var(--shadow-sm)' : 'none'
           }}
         >
           <span>🟠 Cobrar Hoje ({qtdHoje})</span>
@@ -239,20 +218,21 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
 
         <button
           type="button"
-          onClick={() => setFiltroStatus('ATRASADO')}
+          onClick={() => setFiltroStatus(filtroStatus === 'ATRASADO' ? 'TODOS' : 'ATRASADO')}
           style={{
             padding: '10px 4px',
             borderRadius: 'var(--radius-md)',
             border: filtroStatus === 'ATRASADO' ? '2px solid #DC2626' : '1px solid var(--border-color)',
             backgroundColor: filtroStatus === 'ATRASADO' ? '#FEE2E2' : '#FFFFFF',
-            color: filtroStatus === 'ATRASADO' ? '#B91C1C' : '#B91C1C',
+            color: '#B91C1C',
             fontWeight: 800,
-            fontSize: '0.8rem',
+            fontSize: '0.84rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px'
+            gap: '6px',
+            boxShadow: filtroStatus === 'ATRASADO' ? 'var(--shadow-sm)' : 'none'
           }}
         >
           <span>🔴 Atrasados ({qtdAtrasados})</span>
