@@ -5,7 +5,9 @@ import {
   MapPin, 
   DollarSign, 
   FileText, 
-  X
+  X,
+  ArrowRight,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -15,17 +17,22 @@ import {
   type Parcela 
 } from '../../services/api';
 
-export const CobrancasView: React.FC = () => {
+interface CobrancasViewProps {
+  onNavigate?: (tab: string) => void;
+}
+
+export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const { token } = useAuth();
   const [parcelas, setParcelas] = useState<Parcela[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
+  const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'COBRAR_HOJE' | 'ATRASADO'>('TODOS');
 
   // Selected Parcela for Detail Modal
   const [parcelaSelecionada, setParcelaSelecionada] = useState<Parcela | null>(null);
 
-  // Sub-modals for Action
+  // Action Sub-modals
   const [modalPagamento, setModalPagamento] = useState<boolean>(false);
   const [modalObservacao, setModalObservacao] = useState<boolean>(false);
 
@@ -107,16 +114,59 @@ export const CobrancasView: React.FC = () => {
     }
   };
 
-  // Filtered and Sorted (ATRASADAS top)
-  const parcelasFiltradas = parcelas.filter(p => {
-    const nome = p.venda?.cliente?.nome?.toLowerCase() || '';
-    const end = p.venda?.cliente?.endereco?.toLowerCase() || '';
-    const q = busca.toLowerCase();
-    return nome.includes(q) || end.includes(q);
+  // Funcao para calcular o status exato da cobranca: COBRAR_HOJE ou ATRASADO
+  const getStatusCobranca = (dataVencimentoStr: string, statusOriginal: string): 'COBRAR_HOJE' | 'ATRASADO' | 'EM_DIA' | 'PAGA' => {
+    if (statusOriginal === 'PAGA') return 'PAGA';
+
+    const hoje = new Date();
+    const yyyy = hoje.getFullYear();
+    const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoje.getDate()).padStart(2, '0');
+    const hojeIso = `${yyyy}-${mm}-${dd}`;
+
+    const vencIso = dataVencimentoStr.substring(0, 10);
+
+    if (vencIso === hojeIso) {
+      return 'COBRAR_HOJE';
+    } else if (vencIso < hojeIso) {
+      return 'ATRASADO';
+    } else {
+      return 'EM_DIA';
+    }
+  };
+
+  // 1. Filtrar APENAS parcelas com vencimento HOJE ou ATRASADAS (exclui em dia e pagas)
+  const cobrancasFiltradasPorData = parcelas.filter(p => {
+    const statusC = getStatusCobranca(p.dataVencimento, p.status);
+    return statusC === 'COBRAR_HOJE' || statusC === 'ATRASADO';
   });
 
+  // 2. Filtro pelas abas (Todos / Cobrar Hoje / Atrasados)
+  const cobrancasPorStatus = cobrancasFiltradasPorData.filter(p => {
+    const statusC = getStatusCobranca(p.dataVencimento, p.status);
+    if (filtroStatus === 'COBRAR_HOJE') return statusC === 'COBRAR_HOJE';
+    if (filtroStatus === 'ATRASADO') return statusC === 'ATRASADO';
+    return true;
+  });
+
+  // 3. Filtro por Busca de texto
+  const parcelasExibidas = cobrancasPorStatus.filter(p => {
+    const q = busca.toLowerCase().trim();
+    if (!q) return true;
+    const nome = p.venda?.cliente?.nome?.toLowerCase() || '';
+    const end = p.venda?.cliente?.endereco?.toLowerCase() || '';
+    const tel = p.venda?.cliente?.telefone || '';
+    return nome.includes(q) || end.includes(q) || tel.includes(q);
+  });
+
+  // Contadores
+  const qtdTotal = cobrancasFiltradasPorData.length;
+  const qtdHoje = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'COBRAR_HOJE').length;
+  const qtdAtrasados = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'ATRASADO').length;
+
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '20px' }}>
+      
       {/* Search Input */}
       <div style={{ position: 'relative' }}>
         <Search
@@ -126,7 +176,7 @@ export const CobrancasView: React.FC = () => {
         />
         <input
           type="text"
-          placeholder="Buscar cliente na rota de hoje..."
+          placeholder="Buscar cliente na rota (Cobrar Hoje / Atrasados)..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           style={{
@@ -143,9 +193,75 @@ export const CobrancasView: React.FC = () => {
         />
       </div>
 
+      {/* Filter Tabs: Todos, Cobrar Hoje, Atrasados */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+        <button
+          type="button"
+          onClick={() => setFiltroStatus('TODOS')}
+          style={{
+            padding: '10px 4px',
+            borderRadius: 'var(--radius-md)',
+            border: filtroStatus === 'TODOS' ? '2px solid var(--accent-600)' : '1px solid var(--border-color)',
+            backgroundColor: filtroStatus === 'TODOS' ? 'var(--accent-50)' : '#FFFFFF',
+            color: filtroStatus === 'TODOS' ? 'var(--accent-700)' : 'var(--primary-800)',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}
+        >
+          <span>Todos ({qtdTotal})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFiltroStatus('COBRAR_HOJE')}
+          style={{
+            padding: '10px 4px',
+            borderRadius: 'var(--radius-md)',
+            border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #EA580C' : '1px solid var(--border-color)',
+            backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#FFEDD5' : '#FFFFFF',
+            color: filtroStatus === 'COBRAR_HOJE' ? '#C2410C' : '#C2410C',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px'
+          }}
+        >
+          <span>🟠 Cobrar Hoje ({qtdHoje})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFiltroStatus('ATRASADO')}
+          style={{
+            padding: '10px 4px',
+            borderRadius: 'var(--radius-md)',
+            border: filtroStatus === 'ATRASADO' ? '2px solid #DC2626' : '1px solid var(--border-color)',
+            backgroundColor: filtroStatus === 'ATRASADO' ? '#FEE2E2' : '#FFFFFF',
+            color: filtroStatus === 'ATRASADO' ? '#B91C1C' : '#B91C1C',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px'
+          }}
+        >
+          <span>🔴 Atrasados ({qtdAtrasados})</span>
+        </button>
+      </div>
+
       {loading && (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Carregando lista de cobranças...
+          Carregando rota de cobrança de hoje...
         </div>
       )}
 
@@ -163,18 +279,67 @@ export const CobrancasView: React.FC = () => {
         </div>
       )}
 
-      {/* Parcelas List */}
+      {/* Parcelas Cards List */}
       {!loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {parcelasFiltradas.length === 0 ? (
-            <div style={{ padding: '30px 16px', textAlign: 'center', color: 'var(--text-muted)', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)' }}>
-              Nenhuma cobrança pendente encontrada.
+          {parcelasExibidas.length === 0 ? (
+            <div 
+              style={{ 
+                padding: '24px 16px', 
+                textAlign: 'center', 
+                backgroundColor: '#FFFFFF', 
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px'
+              }}
+            >
+              <div style={{ fontSize: '0.92rem', color: 'var(--text-muted)' }}>
+                {busca 
+                  ? `Nenhum cliente em cobrança hoje ou em atraso encontrado com "${busca}".` 
+                  : 'Nenhuma cobrança pendente para hoje ou em atraso!'}
+              </div>
+
+              {onNavigate && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate('clientes')}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--accent-600)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Users size={18} />
+                  <span>Ver Todos os Clientes na Aba Clientes</span>
+                  <ArrowRight size={16} />
+                </button>
+              )}
             </div>
           ) : (
-            parcelasFiltradas.map((p) => {
-              const isAtrasada = p.status === 'ATRASADA';
+            parcelasExibidas.map((p) => {
+              const statusC = getStatusCobranca(p.dataVencimento, p.status);
+              const isHoje = statusC === 'COBRAR_HOJE';
               const cliente = p.venda?.cliente;
-              const dataVenc = new Date(p.dataVencimento).toLocaleDateString('pt-BR');
+
+              const [yyyy, mm, dd] = p.dataVencimento.substring(0, 10).split('-');
+              const dataVencFormatada = `${dd}/${mm}/${yyyy}`;
+
+              // Visual styles based on status (Cobrar Hoje = Orange, Atrasado = Red)
+              const cardBorderLeft = isHoje ? '6px solid #F97316' : '6px solid #DC2626';
+              const badgeBg = isHoje ? '#FFEDD5' : '#FEE2E2';
+              const badgeText = isHoje ? '#C2410C' : '#B91C1C';
+              const statusLabel = isHoje ? '🟠 Cobrar Hoje' : '🔴 Atrasado';
 
               return (
                 <div
@@ -185,57 +350,125 @@ export const CobrancasView: React.FC = () => {
                     borderRadius: 'var(--radius-lg)',
                     padding: '16px',
                     border: '1px solid var(--border-color)',
-                    borderLeft: `5px solid var(--status-${p.status.toLowerCase()}-dot, var(--accent-600))`,
+                    borderLeft: cardBorderLeft,
                     boxShadow: 'var(--shadow-sm)',
                     cursor: 'pointer',
-                    transition: 'transform 0.15s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+                  {/* Top Header Row: Customer Name & Status Badge */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1, paddingRight: '8px' }}>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
                         {cliente?.nome || 'Cliente não identificado'}
                       </h4>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                        <MapPin size={14} color="var(--accent-600)" /> {cliente?.endereco || 'Sem endereço'}
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                        <MapPin size={14} color="var(--accent-600)" /> {cliente?.endereco || 'Endereço não cadastrado'}
                       </p>
                     </div>
 
-                    <span className={`badge badge-${p.status}`}>
-                      <span className="badge-dot" /> {p.status}
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 'var(--radius-full)',
+                        backgroundColor: badgeBg,
+                        color: badgeText,
+                        fontWeight: 800,
+                        fontSize: '0.76rem',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {statusLabel}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--bg-subtle)' }}>
+                  {/* Contact Row */}
+                  {cliente?.telefone && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <a
+                        href={`tel:${cliente.telefone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          color: 'var(--accent-700)',
+                          backgroundColor: 'var(--accent-50)',
+                          padding: '4px 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          textDecoration: 'none',
+                          border: '1px solid var(--accent-600)'
+                        }}
+                      >
+                        <Phone size={13} />
+                        <span>{cliente.telefone}</span>
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Footer Row: Parcela Info & Action Button */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', paddingTop: '10px', borderTop: '1px solid var(--bg-subtle)' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Parcela {p.numero}/{p.venda?.numParcelas || 1} • Venc: {dataVenc}
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                        Parcela {p.numero}/{p.venda?.numParcelas || 1} • Venc: {dataVencFormatada}
                       </span>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isAtrasada ? '#B91C1C' : 'var(--primary-800)' }}>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isHoje ? '#C2410C' : '#B91C1C' }}>
                         R$ {Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
 
-                    {/* Touch Action Button */}
                     <button
                       className="touch-target"
                       style={{
-                        height: '44px',
-                        padding: '0 16px',
+                        height: '42px',
+                        padding: '0 14px',
                         borderRadius: 'var(--radius-md)',
-                        backgroundColor: isAtrasada ? '#FEE2E2' : 'var(--accent-50)',
-                        color: isAtrasada ? '#B91C1C' : 'var(--accent-700)',
-                        border: `1px solid ${isAtrasada ? '#FCA5A5' : 'var(--accent-600)'}`,
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
+                        backgroundColor: isHoje ? '#FFEDD5' : '#FEE2E2',
+                        color: isHoje ? '#C2410C' : '#B91C1C',
+                        border: `1px solid ${isHoje ? '#FDBA74' : '#FCA5A5'}`,
+                        fontWeight: 800,
+                        fontSize: '0.84rem',
                       }}
                     >
-                      Ver Detalhes
+                      Cobrar R$ {Number(p.valor).toFixed(2)}
                     </button>
                   </div>
                 </div>
               );
             })
+          )}
+
+          {/* Prompt to navigate to Clientes tab */}
+          {onNavigate && cobrancasFiltradasPorData.length > 0 && (
+            <div style={{ marginTop: '10px', padding: '12px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Precisa consultar um cliente que não está em cobrança hoje?
+              </span>
+              <button
+                type="button"
+                onClick={() => onNavigate('clientes')}
+                style={{
+                  marginTop: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'transparent',
+                  color: 'var(--accent-700)',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <span>Ir para a Aba Clientes (Ver Todos)</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -277,10 +510,19 @@ export const CobrancasView: React.FC = () => {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className={`badge badge-${parcelaSelecionada.status}`}>
-                  <span className="badge-dot" /> {parcelaSelecionada.status}
+                <span
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#FFEDD5' : '#FEE2E2',
+                    color: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#C2410C' : '#B91C1C',
+                    fontWeight: 800,
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  {getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '🟠 Cobrar Hoje' : '🔴 Atrasado'}
                 </span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                   Parcela #{parcelaSelecionada.numero}
                 </span>
               </div>
@@ -381,7 +623,7 @@ export const CobrancasView: React.FC = () => {
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
-                  fontWeight: 700,
+                  fontWeight: 800,
                   fontSize: '0.98rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -422,9 +664,9 @@ export const CobrancasView: React.FC = () => {
         </div>
       )}
 
-      {/* Sub-modal: Form de Registrar Pagamento (PATCH /parcelas/:id/pagamento) */}
+      {/* Sub-modal: Form de Registrar Pagamento */}
       {modalPagamento && parcelaSelecionada && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 250, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', marginBottom: '14px' }}>
               Registrar Pagamento
@@ -478,9 +720,9 @@ export const CobrancasView: React.FC = () => {
         </div>
       )}
 
-      {/* Sub-modal: Form de Registrar Observação (PATCH /parcelas/:id/observacao) */}
+      {/* Sub-modal: Form de Registrar Observação */}
       {modalObservacao && parcelaSelecionada && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 250, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', marginBottom: '14px' }}>
               Registrar Observação

@@ -114,7 +114,7 @@ export const MobileLayout: React.FC = () => {
       {/* Dynamic Content Views */}
       <main style={{ padding: '16px', flex: 1 }}>
         {activeTab === 'resumo' && <ResumoDiaView onNavigate={(t) => setActiveTab(t)} />}
-        {activeTab === 'cobrancas' && <CobrancasView />}
+        {activeTab === 'cobrancas' && <CobrancasView onNavigate={(t) => setActiveTab(t)} />}
         {activeTab === 'venda' && <NovaVendaView onNavigate={(t) => setActiveTab(t)} />}
         {activeTab === 'clientes' && <ClientesView />}
       </main>
