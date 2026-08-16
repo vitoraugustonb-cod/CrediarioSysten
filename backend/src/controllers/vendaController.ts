@@ -6,34 +6,18 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
   try {
     const vendedorId = req.usuario!.id;
 
-    const { clienteId, itens, produtoId, quantidade, valorEntrada, numParcelas, dataVenda } = req.body;
-
-    if (!clienteId || !numParcelas) {
-      res.status(400).json({
-        erro: 'clienteId e numParcelas são obrigatórios.'
-      });
-      return;
-    }
-
-    // Suporte tanto para o formato novo (itens array) quanto para o formato legado (produtoId único)
-    let listaItensInput: Array<{ produtoId: number; quantidade: number }> = [];
-
-    if (Array.isArray(itens) && itens.length > 0) {
-      listaItensInput = itens.map((item: any) => ({
-        produtoId: parseInt(item.produtoId, 10),
-        quantidade: item.quantidade ? parseInt(item.quantidade, 10) : 1
-      }));
-    } else if (produtoId) {
-      listaItensInput = [{
-        produtoId: parseInt(produtoId, 10),
-        quantidade: quantidade ? parseInt(quantidade, 10) : 1
-      }];
-    } else {
-      res.status(400).json({
-        erro: 'É necessário informar ao menos um produto no campo "itens".'
-      });
-      return;
-    }
+    const { 
+      clienteId, 
+      novoCliente, 
+      itens, 
+      produtoId, 
+      quantidade, 
+      valorEntrada, 
+      numParcelas, 
+      periodicidade, 
+      primeiroVencimento, 
+      dataVenda 
+    } = req.body;
 
     const numParcelasInt = parseInt(numParcelas, 10);
     if (isNaN(numParcelasInt) || numParcelasInt <= 0) {
@@ -41,12 +25,64 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Valida existência do cliente
-    const clienteExistente = await prisma.cliente.findUnique({
-      where: { id: parseInt(clienteId, 10) }
-    });
-    if (!clienteExistente) {
-      res.status(404).json({ erro: 'Cliente não encontrado.' });
+    // 1. Resolve Cliente (existente ou cria novo instantaneamente)
+    let finalClienteId: number;
+
+    if (clienteId && clienteId !== 'novo') {
+      finalClienteId = parseInt(clienteId, 10);
+      const clienteExistente = await prisma.cliente.findUnique({
+        where: { id: finalClienteId }
+      });
+      if (!clienteExistente) {
+        res.status(404).json({ erro: 'Cliente não encontrado.' });
+        return;
+      }
+    } else {
+      const nome = novoCliente?.nome || req.body.clienteNome || req.body.nome;
+      const rua = novoCliente?.rua || req.body.rua || '';
+      const numero = novoCliente?.numero || req.body.numero || '';
+      const bairro = novoCliente?.bairro || req.body.bairro || '';
+      const telefone = novoCliente?.telefone || req.body.telefone || 'S/N';
+      const referencias = novoCliente?.referencias || req.body.referencias || '';
+
+      if (!nome || typeof nome !== 'string' || !nome.trim()) {
+        res.status(400).json({ erro: 'Selecione um cliente existente ou preencha o Nome do Cliente.' });
+        return;
+      }
+
+      const partesEndereco = [rua.trim(), numero ? `Nº ${numero.trim()}` : '', bairro ? `Bairro ${bairro.trim()}` : ''].filter(Boolean);
+      const enderecoCompleto = partesEndereco.length > 0 ? partesEndereco.join(', ') : 'Endereço não informado';
+
+      const novoClienteCriado = await prisma.cliente.create({
+        data: {
+          nome: nome.trim(),
+          telefone: telefone.trim() || 'S/N',
+          endereco: enderecoCompleto,
+          referencias: referencias ? referencias.trim() : null
+        }
+      });
+      finalClienteId = novoClienteCriado.id;
+    }
+
+    // 2. Suporte para lista de itens ou produto unico
+    let listaItensInput: Array<{ produtoId: number; quantidade: number; valorUnitario?: number }> = [];
+
+    if (Array.isArray(itens) && itens.length > 0) {
+      listaItensInput = itens.map((item: any) => ({
+        produtoId: parseInt(item.produtoId, 10),
+        quantidade: item.quantidade ? parseInt(item.quantidade, 10) : 1,
+        valorUnitario: item.valorUnitario ? parseFloat(item.valorUnitario) : undefined
+      }));
+    } else if (produtoId) {
+      listaItensInput = [{
+        produtoId: parseInt(produtoId, 10),
+        quantidade: quantidade ? parseInt(quantidade, 10) : 1,
+        valorUnitario: req.body.valorUnitario ? parseFloat(req.body.valorUnitario) : undefined
+      }];
+    } else {
+      res.status(400).json({
+        erro: 'É necessário informar ao menos um produto no campo "itens".'
+      });
       return;
     }
 
@@ -76,7 +112,10 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         return;
       }
 
-      const valorUnitarioNum = Number(produto.preco);
+      const valorUnitarioNum = item.valorUnitario && !isNaN(item.valorUnitario) && item.valorUnitario > 0
+        ? item.valorUnitario
+        : Number(produto.preco);
+
       const subtotalNum = Math.round((valorUnitarioNum * item.quantidade) * 100) / 100;
       valorTotalCalculado += subtotalNum;
 
@@ -108,7 +147,7 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       // 1. Criar Venda
       const venda = await tx.venda.create({
         data: {
-          clienteId: parseInt(clienteId, 10),
+          clienteId: finalClienteId,
           vendedorId: vendedorId,
           valorTotal: valorTotalNum,
           valorEntrada: valorEntradaNum > 0 ? valorEntradaNum : null,
@@ -130,11 +169,37 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         });
       }
 
-      // 3. Gerar o carnê de parcelas
+      // 3. Gerar o carnê de parcelas (MENSAL, QUINZENAL ou SEMANAL)
       const parcelasParaCriar = [];
+      const periodicidadeNormalizada = (periodicidade || 'MENSAL').toString().toUpperCase();
+
+      let baseVencimentoDate: Date;
+      if (primeiroVencimento && typeof primeiroVencimento === 'string' && primeiroVencimento.includes('-')) {
+        const [yyyy, mm, dd] = primeiroVencimento.split('-').map(Number);
+        baseVencimentoDate = new Date(yyyy, mm - 1, dd);
+      } else {
+        baseVencimentoDate = new Date(dataVendaBase);
+        if (periodicidadeNormalizada === 'SEMANAL') {
+          baseVencimentoDate.setDate(baseVencimentoDate.getDate() + 7);
+        } else if (periodicidadeNormalizada === 'QUINZENAL') {
+          baseVencimentoDate.setDate(baseVencimentoDate.getDate() + 15);
+        } else {
+          baseVencimentoDate.setMonth(baseVencimentoDate.getMonth() + 1);
+        }
+      }
+
       for (let i = 1; i <= numParcelasInt; i++) {
-        const dataVencimento = new Date(dataVendaBase);
-        dataVencimento.setMonth(dataVencimento.getMonth() + i);
+        const dataVencimento = new Date(baseVencimentoDate);
+        if (i > 1) {
+          if (periodicidadeNormalizada === 'SEMANAL') {
+            dataVencimento.setDate(dataVencimento.getDate() + (i - 1) * 7);
+          } else if (periodicidadeNormalizada === 'QUINZENAL') {
+            dataVencimento.setDate(dataVencimento.getDate() + (i - 1) * 15);
+          } else {
+            // MENSAL
+            dataVencimento.setMonth(dataVencimento.getMonth() + (i - 1));
+          }
+        }
 
         const valorParcela = i === numParcelasInt ? baseParcela + restoCentavos : baseParcela;
 

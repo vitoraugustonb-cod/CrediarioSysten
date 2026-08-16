@@ -200,10 +200,20 @@ export async function getProdutos(token: string | null): Promise<Produto[]> {
 // 8. POST /vendas
 export async function criarVendaAPI(
   vendaData: {
-    clienteId: number;
-    itens: Array<{ produtoId: number; quantidade: number }>;
+    clienteId?: number | string;
+    novoCliente?: {
+      nome: string;
+      rua?: string;
+      numero?: string;
+      bairro?: string;
+      telefone?: string;
+      referencias?: string;
+    };
+    itens: Array<{ produtoId: number; quantidade: number; valorUnitario?: number }>;
     valorEntrada?: number;
     numParcelas: number;
+    periodicidade?: 'MENSAL' | 'QUINZENAL' | 'SEMANAL';
+    primeiroVencimento?: string;
     dataVenda?: string;
   },
   token: string | null = null
