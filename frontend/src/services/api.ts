@@ -209,7 +209,9 @@ export async function criarVendaAPI(
       telefone?: string;
       referencias?: string;
     };
-    itens: Array<{ produtoId: number; quantidade: number; valorUnitario?: number }>;
+    itens?: Array<{ produtoId?: number; nome?: string; quantidade: number; valorUnitario?: number }>;
+    nomeProduto?: string;
+    valorProduto?: number;
     valorEntrada?: number;
     numParcelas: number;
     periodicidade?: 'MENSAL' | 'QUINZENAL' | 'SEMANAL';

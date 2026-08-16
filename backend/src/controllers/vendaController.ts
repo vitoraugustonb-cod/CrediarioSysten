@@ -64,15 +64,22 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       finalClienteId = novoClienteCriado.id;
     }
 
-    // 2. Suporte para lista de itens ou produto unico
-    let listaItensInput: Array<{ produtoId: number; quantidade: number; valorUnitario?: number }> = [];
+    // 2. Suporte para lista de itens (com nome ou id) ou produto único avulso
+    let listaItensInput: Array<{ produtoId?: number; nome?: string; quantidade: number; valorUnitario?: number }> = [];
 
     if (Array.isArray(itens) && itens.length > 0) {
       listaItensInput = itens.map((item: any) => ({
-        produtoId: parseInt(item.produtoId, 10),
+        produtoId: item.produtoId ? parseInt(item.produtoId, 10) : undefined,
+        nome: item.nome || item.nomeProduto || undefined,
         quantidade: item.quantidade ? parseInt(item.quantidade, 10) : 1,
-        valorUnitario: item.valorUnitario ? parseFloat(item.valorUnitario) : undefined
+        valorUnitario: item.valorUnitario ? parseFloat(item.valorUnitario) : (item.valor ? parseFloat(item.valor) : undefined)
       }));
+    } else if (req.body.nomeProduto || req.body.nome) {
+      listaItensInput = [{
+        nome: req.body.nomeProduto || req.body.nome,
+        quantidade: quantidade ? parseInt(quantidade, 10) : 1,
+        valorUnitario: req.body.valorProduto ? parseFloat(req.body.valorProduto) : (req.body.valorUnitario ? parseFloat(req.body.valorUnitario) : 0)
+      }];
     } else if (produtoId) {
       listaItensInput = [{
         produtoId: parseInt(produtoId, 10),
@@ -81,7 +88,7 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       }];
     } else {
       res.status(400).json({
-        erro: 'É necessário informar ao menos um produto no campo "itens".'
+        erro: 'Informe o Nome e Valor do Produto vendido.'
       });
       return;
     }
@@ -98,31 +105,43 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
     let valorTotalCalculado = 0;
 
     for (const item of listaItensInput) {
-      if (isNaN(item.produtoId) || item.quantidade <= 0) {
-        res.status(400).json({ erro: 'Item de venda inválido: produtoId e quantidade devem ser válidos.' });
-        return;
+      let prodId = item.produtoId;
+      let unitPrice = item.valorUnitario || 0;
+
+      if (prodId && !isNaN(prodId)) {
+        const prodExistente = await prisma.produto.findUnique({ where: { id: prodId } });
+        if (prodExistente) {
+          if (!unitPrice || unitPrice <= 0) unitPrice = Number(prodExistente.preco);
+        } else {
+          prodId = undefined;
+        }
       }
 
-      const produto = await prisma.produto.findUnique({
-        where: { id: item.produtoId }
-      });
+      if (!prodId) {
+        const nomeProd = item.nome && item.nome.trim() ? item.nome.trim() : 'Produto Diversos';
+        let prodEncontrado = await prisma.produto.findFirst({ where: { nome: nomeProd } });
 
-      if (!produto) {
-        res.status(404).json({ erro: `Produto com ID ${item.produtoId} não encontrado.` });
-        return;
+        if (!prodEncontrado) {
+          prodEncontrado = await prisma.produto.create({
+            data: {
+              nome: nomeProd,
+              preco: unitPrice > 0 ? unitPrice : 100,
+              categoria: 'MOVEIS'
+            }
+          });
+        }
+        prodId = prodEncontrado.id;
+        if (!unitPrice || unitPrice <= 0) unitPrice = Number(prodEncontrado.preco);
       }
 
-      const valorUnitarioNum = item.valorUnitario && !isNaN(item.valorUnitario) && item.valorUnitario > 0
-        ? item.valorUnitario
-        : Number(produto.preco);
-
-      const subtotalNum = Math.round((valorUnitarioNum * item.quantidade) * 100) / 100;
+      const qtd = item.quantidade > 0 ? item.quantidade : 1;
+      const subtotalNum = Math.round((unitPrice * qtd) * 100) / 100;
       valorTotalCalculado += subtotalNum;
 
       itensParaCriar.push({
-        produtoId: produto.id,
-        quantidade: item.quantidade,
-        valorUnitario: valorUnitarioNum,
+        produtoId: prodId,
+        quantidade: qtd,
+        valorUnitario: unitPrice,
         subtotal: subtotalNum
       });
     }

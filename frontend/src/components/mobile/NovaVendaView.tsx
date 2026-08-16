@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   User, 
   MapPin, 
-  ShoppingCart, 
+  Package, 
   Plus, 
   Trash2, 
   Calendar, 
@@ -16,10 +16,8 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { 
   getClientes, 
-  getProdutos, 
   criarVendaAPI, 
-  type Cliente, 
-  type Produto 
+  type Cliente 
 } from '../../services/api';
 
 interface NovaVendaViewProps {
@@ -27,9 +25,7 @@ interface NovaVendaViewProps {
 }
 
 interface ItemCarrinho {
-  produtoId: number;
   nome: string;
-  categoria: string;
   quantidade: number;
   valorUnitario: number;
   subtotal: number;
@@ -38,11 +34,10 @@ interface ItemCarrinho {
 export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   const { token } = useAuth();
   
-  // Catalog states loaded from backend
+  // Existing clients list for optional selector
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
 
-  // Selection mode: 'novo' (default for quick input) or 'existente'
+  // Selection mode: 'novo' (default) or 'existente'
   const [modoCliente, setModoCliente] = useState<'novo' | 'existente'>('novo');
 
   // Input fields for New Customer
@@ -55,9 +50,9 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   // Selected Existing Customer
   const [clienteIdSel, setClienteIdSel] = useState<string>('');
 
-  // Selected Product & Add Item inputs
-  const [produtoIdAdd, setProdutoIdAdd] = useState<string>('');
-  const [valorUnitarioAdd, setValorUnitarioAdd] = useState<string>('');
+  // Direct Product Inputs (freeform name and value)
+  const [nomeProdutoAdd, setNomeProdutoAdd] = useState<string>('');
+  const [valorProdutoAdd, setValorProdutoAdd] = useState<string>('');
   const [quantidadeAdd, setQuantidadeAdd] = useState<number>(1);
 
   // Cart / Items List
@@ -85,34 +80,20 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
   useEffect(() => {
-    async function carregarDados() {
+    async function carregarClientes() {
       setLoading(true);
       try {
-        const [c, p] = await Promise.all([getClientes(token), getProdutos(token)]);
+        const c = await getClientes(token);
         setClientes(c);
-        setProdutos(p);
         if (c.length > 0) setClienteIdSel(String(c[0].id));
-        if (p.length > 0) {
-          setProdutoIdAdd(String(p[0].id));
-          setValorUnitarioAdd(Number(p[0].preco).toFixed(2));
-        }
       } catch (err) {
-        console.error('Erro ao carregar dados para formulário de venda:', err);
+        console.error('Erro ao carregar clientes:', err);
       } finally {
         setLoading(false);
       }
     }
-    carregarDados();
+    carregarClientes();
   }, [token]);
-
-  // When selected product changes in selector, prefill default price
-  const handleProdutoSelect = (prodId: string) => {
-    setProdutoIdAdd(prodId);
-    const prod = produtos.find(p => String(p.id) === prodId);
-    if (prod) {
-      setValorUnitarioAdd(Number(prod.preco).toFixed(2));
-    }
-  };
 
   // Change periodicity and automatically adjust recommended first payment date
   const handlePeriodicidadeChange = (novoPeriodo: 'MENSAL' | 'QUINZENAL' | 'SEMANAL') => {
@@ -121,23 +102,30 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   };
 
   const handleAdicionarItem = () => {
-    if (!produtoIdAdd) return;
-    const prod = produtos.find(p => String(p.id) === produtoIdAdd);
-    if (!prod) return;
+    const nome = nomeProdutoAdd.trim();
+    const preco = parseFloat(valorProdutoAdd);
 
-    const precoUnitario = parseFloat(valorUnitarioAdd) || Number(prod.preco);
-    const subtotal = precoUnitario * quantidadeAdd;
+    if (!nome) {
+      alert('Por favor, digite o Nome do Produto.');
+      return;
+    }
+    if (isNaN(preco) || preco <= 0) {
+      alert('Por favor, informe o Valor do Produto.');
+      return;
+    }
+
+    const subtotal = preco * quantidadeAdd;
 
     const novoItem: ItemCarrinho = {
-      produtoId: prod.id,
-      nome: prod.nome,
-      categoria: prod.categoria || 'MOVEIS',
+      nome,
       quantidade: quantidadeAdd,
-      valorUnitario: precoUnitario,
+      valorUnitario: preco,
       subtotal
     };
 
     setCarrinho(prev => [...prev, novoItem]);
+    setNomeProdutoAdd('');
+    setValorProdutoAdd('');
     setQuantidadeAdd(1);
   };
 
@@ -145,7 +133,14 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
     setCarrinho(prev => prev.filter((_, i) => i !== index));
   };
 
-  const valorTotalCalculado = carrinho.reduce((acc, item) => acc + item.subtotal, 0);
+  // Compute overall total from cart OR direct single product inputs if not added to cart yet
+  const totalCart = carrinho.reduce((acc, item) => acc + item.subtotal, 0);
+  const tempPrice = parseFloat(valorProdutoAdd) || 0;
+  const tempQtd = quantidadeAdd || 1;
+  const tempTotal = tempPrice * tempQtd;
+
+  const valorTotalCalculado = carrinho.length > 0 ? totalCart : tempTotal;
+
   const entradaNum = parseFloat(valorEntrada) || 0;
   const financiado = Math.max(0, valorTotalCalculado - entradaNum);
   const valorParcela = numParcelas > 0 ? (financiado / numParcelas).toFixed(2) : '0.00';
@@ -163,8 +158,21 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
       return;
     }
 
-    if (carrinho.length === 0) {
-      alert('Adicione pelo menos 1 produto à venda antes de finalizar.');
+    // Auto include current product fields if cart is empty
+    let itensParaEnviar = [...carrinho];
+
+    if (itensParaEnviar.length === 0 && nomeProdutoAdd.trim() && parseFloat(valorProdutoAdd) > 0) {
+      const preco = parseFloat(valorProdutoAdd);
+      itensParaEnviar = [{
+        nome: nomeProdutoAdd.trim(),
+        quantidade: quantidadeAdd,
+        valorUnitario: preco,
+        subtotal: preco * quantidadeAdd
+      }];
+    }
+
+    if (itensParaEnviar.length === 0) {
+      alert('Por favor, preencha o Nome e o Valor do Produto vendido.');
       return;
     }
 
@@ -182,8 +190,8 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             bairro: bairroCliente,
             telefone: telefoneCliente
           } : undefined,
-          itens: carrinho.map(item => ({
-            produtoId: item.produtoId,
+          itens: itensParaEnviar.map(item => ({
+            nome: item.nome,
             quantidade: item.quantidade,
             valorUnitario: item.valorUnitario
           })),
@@ -203,9 +211,12 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
       setNumeroCliente('');
       setBairroCliente('');
       setTelefoneCliente('');
+      setNomeProdutoAdd('');
+      setValorProdutoAdd('');
+      setQuantidadeAdd(1);
       setValorEntrada('0');
       
-      // Refresh clients list in background
+      // Refresh clients list
       getClientes(token).then(setClientes).catch(() => {});
     } catch (err: any) {
       alert(`❌ Erro ao registrar venda: ${err.message}`);
@@ -217,7 +228,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '30px' }}>
       
-      {/* Page Title Card */}
+      {/* Page Header */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
@@ -234,7 +245,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
               Lançar Nova Venda
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Preencha os dados do cliente, produtos e condições de parcelamento
+              Insira os dados da venda para cálculo automático do carnê
             </p>
           </div>
         </div>
@@ -475,7 +486,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             )}
           </div>
 
-          {/* SECTION 2: SEÇÃO DE PRODUTOS */}
+          {/* SECTION 2: PRODUTO(S) DA VENDA */}
           <div
             style={{
               backgroundColor: '#FFFFFF',
@@ -489,61 +500,58 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary-800)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-              <ShoppingCart size={18} color="var(--accent-600)" />
-              <span>2. Produtos da Venda</span>
+              <Package size={18} color="var(--accent-600)" />
+              <span>2. Produto(s) Vendido(s) e Valor</span>
             </div>
 
-            {/* Inclusão de Produto */}
-            <div style={{ backgroundColor: 'var(--bg-subtle)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '6px' }}>
-                Selecione o Produto do Catálogo
-              </label>
-
-              <select
-                value={produtoIdAdd}
-                onChange={(e) => handleProdutoSelect(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: '44px',
-                  padding: '0 10px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-subtle)',
-                  fontSize: '0.9rem',
-                  backgroundColor: '#FFFFFF',
-                  marginBottom: '10px'
-                }}
-              >
-                {produtos.map(p => (
-                  <option key={p.id} value={p.id}>
-                    [{p.categoria || 'MOVEIS'}] {p.nome} - R$ {Number(p.preco).toFixed(2)}
-                  </option>
-                ))}
-              </select>
+            {/* Inputs para digitação direta do produto */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: 'var(--bg-subtle)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '4px' }}>
+                  Nome do Produto / Descrição da Mercadoria *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: Sofá Retrátil 3 Lugares / Armário de Cozinha"
+                  value={nomeProdutoAdd}
+                  onChange={(e) => setNomeProdutoAdd(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    fontSize: '0.95rem',
+                  }}
+                />
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px', alignItems: 'flex-end' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '3px' }}>
-                    Valor Unit. (R$)
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '4px' }}>
+                    Valor Total (R$) *
                   </label>
                   <input
                     type="number"
                     step="0.01"
-                    value={valorUnitarioAdd}
-                    onChange={(e) => setValorUnitarioAdd(e.target.value)}
+                    placeholder="0.00"
+                    value={valorProdutoAdd}
+                    onChange={(e) => setValorProdutoAdd(e.target.value)}
                     style={{
                       width: '100%',
-                      height: '42px',
-                      padding: '0 8px',
+                      height: '44px',
+                      padding: '0 10px',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-subtle)',
-                      fontSize: '0.92rem',
+                      fontSize: '1rem',
                       fontWeight: 700,
+                      color: 'var(--accent-700)'
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '3px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '4px' }}>
                     Qtd
                   </label>
                   <input
@@ -553,13 +561,13 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                     onChange={(e) => setQuantidadeAdd(parseInt(e.target.value, 10) || 1)}
                     style={{
                       width: '100%',
-                      height: '42px',
+                      height: '44px',
                       padding: '0 8px',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-subtle)',
                       fontSize: '0.95rem',
                       textAlign: 'center',
-                      fontWeight: 700,
+                      fontWeight: 700
                     }}
                   />
                 </div>
@@ -568,7 +576,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                   type="button"
                   onClick={handleAdicionarItem}
                   style={{
-                    height: '42px',
+                    height: '44px',
                     padding: '0 14px',
                     borderRadius: 'var(--radius-md)',
                     backgroundColor: 'var(--accent-600)',
@@ -583,22 +591,18 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                   }}
                 >
                   <Plus size={16} />
-                  <span>Incluir</span>
+                  <span>+ Incluir Outro</span>
                 </button>
               </div>
             </div>
 
-            {/* Lista de Itens no Carrinho */}
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
-                ITENS INCLUÍDOS ({carrinho.length})
-              </div>
-
-              {carrinho.length === 0 ? (
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '12px', textAlign: 'center', backgroundColor: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }}>
-                  Nenhum produto incluído. Escolha o produto acima e clique em "+ Incluir".
+            {/* ITENS INCLUÍDOS (Se houver múltiplos) */}
+            {carrinho.length > 0 && (
+              <div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                  LISTA DE PRODUTOS NESTA VENDA ({carrinho.length})
                 </div>
-              ) : (
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {carrinho.map((item, index) => (
                     <div
@@ -637,13 +641,13 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Totalizador da Venda */}
             <div style={{ padding: '12px 16px', backgroundColor: 'var(--accent-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--accent-600)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-700)' }}>
-                VALOR TOTAL GERAL
+                VALOR TOTAL DA VENDA
               </span>
               <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-700)' }}>
                 R$ {valorTotalCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -802,7 +806,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             >
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--primary-800)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Layers size={14} color="var(--accent-600)" />
-                Resumo das Parcelas do Carnê
+                Cálculo Automático das Parcelas
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
@@ -820,7 +824,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
               </div>
             </div>
 
-            {/* Data da Venda (oculta ou ajustável) */}
+            {/* Data da Venda */}
             <div style={{ marginTop: '2px' }}>
               <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '3px' }}>
                 Data do Registro da Venda
@@ -845,12 +849,12 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
           {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            disabled={salvando || carrinho.length === 0}
+            disabled={salvando || valorTotalCalculado <= 0}
             className="touch-target"
             style={{
               width: '100%',
               height: 'var(--touch-target-large)',
-              backgroundColor: carrinho.length === 0 ? 'var(--border-subtle)' : 'var(--accent-600)',
+              backgroundColor: valorTotalCalculado <= 0 ? 'var(--border-subtle)' : 'var(--accent-600)',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: 'var(--radius-md)',
@@ -860,8 +864,8 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              cursor: (salvando || carrinho.length === 0) ? 'not-allowed' : 'pointer',
-              boxShadow: carrinho.length > 0 ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none',
+              cursor: (salvando || valorTotalCalculado <= 0) ? 'not-allowed' : 'pointer',
+              boxShadow: valorTotalCalculado > 0 ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none',
               transition: 'all 0.2s ease'
             }}
           >
