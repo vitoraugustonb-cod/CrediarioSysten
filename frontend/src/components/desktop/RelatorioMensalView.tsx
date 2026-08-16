@@ -3,7 +3,7 @@ import {
   Calendar, 
   RefreshCw
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { getRelatorioMensal, type RelatorioMensalItem } from '../../services/api';
 
 export const RelatorioMensalView: React.FC = () => {

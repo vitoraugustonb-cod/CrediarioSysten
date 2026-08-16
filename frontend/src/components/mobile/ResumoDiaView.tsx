@@ -7,7 +7,7 @@ import {
   PlusCircle,
   ArrowUpRight
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { getPrestacaoContasDia, type PrestacaoContasDia } from '../../services/api';
 
 interface ResumoDiaViewProps {

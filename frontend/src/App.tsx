@@ -1,5 +1,6 @@
 import React from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { DesktopLayout } from './components/layout/DesktopLayout';
 import { MobileLayout } from './components/layout/MobileLayout';

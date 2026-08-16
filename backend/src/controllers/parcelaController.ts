@@ -42,7 +42,7 @@ export const listarParcelas = async (req: Request, res: Response): Promise<void>
         venda: {
           include: {
             cliente: true,
-            produto: true
+            itens: { include: { produto: true } }
           }
         }
       },
@@ -87,7 +87,7 @@ export const listarHistoricoParcelas = async (req: Request, res: Response): Prom
         venda: {
           include: {
             cliente: true,
-            produto: true
+            itens: { include: { produto: true } }
           }
         }
       },
@@ -162,7 +162,7 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
         },
         include: {
           cobrador: { select: { id: true, nome: true, email: true } },
-          venda: { include: { cliente: true, produto: true } }
+          venda: { include: { cliente: true, itens: { include: { produto: true } } } }
         }
       });
 
@@ -231,7 +231,7 @@ export const registrarObservacao = async (req: Request, res: Response): Promise<
         },
         include: {
           cobrador: { select: { id: true, nome: true, email: true } },
-          venda: { include: { cliente: true, produto: true } }
+          venda: { include: { cliente: true, itens: { include: { produto: true } } } }
         }
       });
 
@@ -325,7 +325,7 @@ export const ajustarParcela = async (req: Request, res: Response): Promise<void>
         data: dadosAtualizacao,
         include: {
           cobrador: { select: { id: true, nome: true, email: true } },
-          venda: { include: { cliente: true, produto: true } }
+          venda: { include: { cliente: true, itens: { include: { produto: true } } } }
         }
       });
 

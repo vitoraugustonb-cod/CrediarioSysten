@@ -11,7 +11,7 @@ import {
   Package,
   LayoutDashboard
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 import { DashboardView } from '../desktop/DashboardView';
 import { FuncionariosView } from '../desktop/FuncionariosView';

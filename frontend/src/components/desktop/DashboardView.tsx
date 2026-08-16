@@ -6,7 +6,7 @@ import {
   Users, 
   TrendingUp
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { 
   getRelatorioMensal, 
   getClientes, 

@@ -55,7 +55,7 @@ export const obterClientePorId = async (req: Request, res: Response): Promise<vo
       include: {
         vendas: {
           include: {
-            produto: true,
+            itens: { include: { produto: true } },
             parcelas: true
           },
           orderBy: { dataVenda: 'desc' }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Wallet, Eye, EyeOff, LogIn, ShieldCheck, Smartphone, Monitor } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import type { PerfilUsuario } from '../../types/auth';
 
 export const LoginScreen: React.FC = () => {
