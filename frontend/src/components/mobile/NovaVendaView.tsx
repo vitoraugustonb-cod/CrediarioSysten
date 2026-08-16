@@ -61,7 +61,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   // Payment terms
   const [valorEntrada, setValorEntrada] = useState<string>('0');
   const [periodicidade, setPeriodicidade] = useState<'MENSAL' | 'QUINZENAL' | 'SEMANAL'>('MENSAL');
-  const [numParcelas, setNumParcelas] = useState<number>(3);
+  const [numParcelas, setNumParcelas] = useState<number>(10); // Base em Meses
   
   // Calculate initial first payment date based on periodicity
   const getInitialFirstPayment = (period: 'MENSAL' | 'QUINZENAL' | 'SEMANAL') => {
@@ -133,7 +133,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
     setCarrinho(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Compute overall total from cart OR direct single product inputs if not added to cart yet
+  // Compute overall total from cart OR direct single product inputs
   const totalCart = carrinho.reduce((acc, item) => acc + item.subtotal, 0);
   const tempPrice = parseFloat(valorProdutoAdd) || 0;
   const tempQtd = quantidadeAdd || 1;
@@ -141,9 +141,16 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
 
   const valorTotalCalculado = carrinho.length > 0 ? totalCart : tempTotal;
 
+  // Multiplicadores por tipo de parcelamento:
+  // MENSAL = 1 parcela/mês
+  // QUINZENAL = 2 parcelas/mês
+  // SEMANAL = 4 parcelas/mês
+  const multiplicador = periodicidade === 'SEMANAL' ? 4 : periodicidade === 'QUINZENAL' ? 2 : 1;
+  const numParcelasEfetivas = numParcelas * multiplicador;
+
   const entradaNum = parseFloat(valorEntrada) || 0;
   const financiado = Math.max(0, valorTotalCalculado - entradaNum);
-  const valorParcela = numParcelas > 0 ? (financiado / numParcelas).toFixed(2) : '0.00';
+  const valorParcela = numParcelasEfetivas > 0 ? (financiado / numParcelasEfetivas).toFixed(2) : '0.00';
 
   const handleSalvarVenda = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +203,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             valorUnitario: item.valorUnitario
           })),
           valorEntrada: entradaNum,
-          numParcelas,
+          numParcelas, // O backend aplica o multiplicador da periodicidade
           periodicidade,
           primeiroVencimento,
           dataVenda,
@@ -204,7 +211,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
         token
       );
 
-      setMensagemSucesso('✅ Venda registrada com sucesso e carnê de parcelas gerado!');
+      setMensagemSucesso(`✅ Venda registrada com sucesso! Carnê com ${numParcelasEfetivas}x parcelas de R$ ${valorParcela} gerado!`);
       setCarrinho([]);
       setNomeCliente('');
       setRuaCliente('');
@@ -709,9 +716,9 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                     SEMANAL: 'Semanal'
                   };
                   const subMap = {
-                    MENSAL: 'A cada 30 dias',
-                    QUINZENAL: 'A cada 15 dias',
-                    SEMANAL: 'A cada 7 dias'
+                    MENSAL: '1x por mês',
+                    QUINZENAL: '2x por mês',
+                    SEMANAL: '4x por mês'
                   };
 
                   return (
@@ -741,11 +748,11 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
               </div>
             </div>
 
-            {/* Número de Parcelas e Data do Primeiro Pagamento */}
+            {/* Número de Parcelas Base (em meses) e Data do Primeiro Pagamento */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '4px' }}>
-                  Quantas Parcelas *
+                  Prazo (Meses) *
                 </label>
                 <select
                   value={numParcelas}
@@ -761,8 +768,8 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                     fontWeight: 700
                   }}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 18, 24].map(n => (
-                    <option key={n} value={n}>{n}x parcelas</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 18, 24].map(n => (
+                    <option key={n} value={n}>{n} {n === 1 ? 'Mês' : 'Meses'}</option>
                   ))}
                 </select>
               </div>
@@ -792,7 +799,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
               </div>
             </div>
 
-            {/* Resumo do Carnê Box */}
+            {/* Resumo do Carnê Box com cálculo correto da conversão */}
             <div
               style={{
                 padding: '14px',
@@ -806,20 +813,20 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             >
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--primary-800)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Layers size={14} color="var(--accent-600)" />
-                Cálculo Automático das Parcelas
+                Cálculo Automático das Parcelas ({numParcelas} meses no plano {periodicidade.toLowerCase()})
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                <span style={{ fontSize: '0.92rem', color: 'var(--primary-800)' }}>
-                  {numParcelas}x ({periodicidade.toLowerCase()}) de:
+                <span style={{ fontSize: '0.95rem', color: 'var(--primary-800)' }}>
+                  Total no carnê: <strong style={{ color: 'var(--primary-800)', fontSize: '1.05rem' }}>{numParcelasEfetivas}x</strong> de:
                 </span>
-                <strong style={{ color: 'var(--accent-700)', fontSize: '1.25rem' }}>
+                <strong style={{ color: 'var(--accent-700)', fontSize: '1.3rem' }}>
                   R$ {valorParcela}
                 </strong>
               </div>
 
-              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                <span>Total financiado: R$ {financiado.toFixed(2)}</span>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
+                <span>Financiado: R$ {financiado.toFixed(2)}</span>
                 <span>1ª Parcela: {primeiroVencimento ? new Date(primeiroVencimento + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</span>
               </div>
             </div>
@@ -870,7 +877,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             }}
           >
             <CheckCircle2 size={22} />
-            <span>{salvando ? 'Registrando Venda...' : 'Finalizar Venda & Gerar Carnê'}</span>
+            <span>{salvando ? 'Registrando Venda...' : `Finalizar Venda & Gerar ${numParcelasEfetivas}x Parcelas`}</span>
           </button>
         </form>
       )}

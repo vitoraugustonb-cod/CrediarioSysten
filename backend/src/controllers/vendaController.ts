@@ -156,10 +156,15 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
 
     const dataVendaBase = dataVenda ? new Date(dataVenda) : new Date();
 
-    // Valor financiado que será dividido nas parcelas
+    // 3. Definir multiplicador de frequência (Mensal = 1x, Quinzenal = 2x/mês, Semanal = 4x/mês)
+    const periodicidadeNormalizada = (periodicidade || 'MENSAL').toString().toUpperCase();
+    const multiplicador = periodicidadeNormalizada === 'SEMANAL' ? 4 : periodicidadeNormalizada === 'QUINZENAL' ? 2 : 1;
+    const numParcelasEfetivas = numParcelasInt * multiplicador;
+
+    // Valor financiado que será dividido nas parcelas efetivas
     const valorFinanciado = valorTotalNum - valorEntradaNum;
-    const baseParcela = Math.floor((valorFinanciado / numParcelasInt) * 100) / 100;
-    const restoCentavos = Math.round((valorFinanciado - (baseParcela * numParcelasInt)) * 100) / 100;
+    const baseParcela = Math.floor((valorFinanciado / numParcelasEfetivas) * 100) / 100;
+    const restoCentavos = Math.round((valorFinanciado - (baseParcela * numParcelasEfetivas)) * 100) / 100;
 
     // Transação atômica de criação de Venda, ItemVenda e Parcelas
     const resultado = await prisma.$transaction(async (tx) => {
@@ -170,7 +175,7 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
           vendedorId: vendedorId,
           valorTotal: valorTotalNum,
           valorEntrada: valorEntradaNum > 0 ? valorEntradaNum : null,
-          numParcelas: numParcelasInt,
+          numParcelas: numParcelasEfetivas,
           dataVenda: dataVendaBase
         }
       });
@@ -190,7 +195,6 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
 
       // 3. Gerar o carnê de parcelas (MENSAL, QUINZENAL ou SEMANAL)
       const parcelasParaCriar = [];
-      const periodicidadeNormalizada = (periodicidade || 'MENSAL').toString().toUpperCase();
 
       let baseVencimentoDate: Date;
       if (primeiroVencimento && typeof primeiroVencimento === 'string' && primeiroVencimento.includes('-')) {
@@ -207,7 +211,7 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         }
       }
 
-      for (let i = 1; i <= numParcelasInt; i++) {
+      for (let i = 1; i <= numParcelasEfetivas; i++) {
         const dataVencimento = new Date(baseVencimentoDate);
         if (i > 1) {
           if (periodicidadeNormalizada === 'SEMANAL') {
@@ -220,7 +224,7 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
           }
         }
 
-        const valorParcela = i === numParcelasInt ? baseParcela + restoCentavos : baseParcela;
+        const valorParcela = i === numParcelasEfetivas ? baseParcela + restoCentavos : baseParcela;
 
         parcelasParaCriar.push({
           vendaId: venda.id,
