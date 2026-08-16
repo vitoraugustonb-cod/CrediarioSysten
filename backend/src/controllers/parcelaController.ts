@@ -145,20 +145,36 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const valorParcelaNum = Number(parcela.valor);
-    const novoStatus: StatusParcela = valorPagoNum >= valorParcelaNum
-      ? StatusParcela.PAGA
-      : StatusParcela.PARCIAL;
-
     const dataPagamentoFinal = dataPagamento ? new Date(dataPagamento) : new Date();
 
     const resultado = await prisma.$transaction(async (tx) => {
+      // Valor da parcela atual e o que ja havia sido pago nela
+      const valorParcelaNum = Number(parcela.valor);
+      const valorJaPago = parcela.valorPago ? Number(parcela.valorPago) : 0;
+      const faltaQuitarAtual = Math.max(0, valorParcelaNum - valorJaPago);
+
+      let valorParaEstaParcela = 0;
+      let excedente = 0;
+
+      if (valorPagoNum >= faltaQuitarAtual) {
+        valorParaEstaParcela = valorParcelaNum; // completa a parcela
+        excedente = valorPagoNum - faltaQuitarAtual;
+      } else {
+        valorParaEstaParcela = valorJaPago + valorPagoNum;
+        excedente = 0;
+      }
+
+      const novoStatusAtual: StatusParcela = valorParaEstaParcela >= valorParcelaNum
+        ? StatusParcela.PAGA
+        : StatusParcela.PARCIAL;
+
+      // 1. Atualizar a parcela principal clicada
       const parcelaAtualizada = await tx.parcela.update({
         where: { id: parcelaId },
         data: {
-          valorPago: valorPagoNum,
+          valorPago: valorParaEstaParcela,
           dataPagamento: dataPagamentoFinal,
-          status: novoStatus
+          status: novoStatusAtual
         },
         include: {
           cobrador: { select: { id: true, nome: true, email: true } },
@@ -166,12 +182,54 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
         }
       });
 
+      // 2. Se houver excedente (pagamento maior que a parcela), abater das proximas parcelas
+      if (excedente > 0) {
+        const proximasParcelas = await tx.parcela.findMany({
+          where: {
+            vendaId: parcela.vendaId,
+            numero: { gt: parcela.numero },
+            status: { in: [StatusParcela.PENDENTE, StatusParcela.PARCIAL, StatusParcela.ATRASADA] }
+          },
+          orderBy: { numero: 'asc' }
+        });
+
+        for (const pNext of proximasParcelas) {
+          if (excedente <= 0) break;
+
+          const vNextValor = Number(pNext.valor);
+          const vNextJaPago = pNext.valorPago ? Number(pNext.valorPago) : 0;
+          const faltaNext = Math.max(0, vNextValor - vNextJaPago);
+
+          let abatimentoNext = 0;
+          let statusNext: StatusParcela = pNext.status;
+
+          if (excedente >= faltaNext) {
+            abatimentoNext = vNextValor;
+            statusNext = StatusParcela.PAGA;
+            excedente -= faltaNext;
+          } else {
+            abatimentoNext = vNextJaPago + excedente;
+            statusNext = StatusParcela.PARCIAL;
+            excedente = 0;
+          }
+
+          await tx.parcela.update({
+            where: { id: pNext.id },
+            data: {
+              valorPago: abatimentoNext,
+              dataPagamento: dataPagamentoFinal,
+              status: statusNext
+            }
+          });
+        }
+      }
+
       await tx.auditoria.create({
         data: {
           parcelaId: parcelaId,
           usuarioId: usuario.id,
           acao: 'PAGAMENTO_REGISTRADO',
-          detalhes: `Pagamento de R$ ${valorPagoNum} registrado. Status alterado para ${novoStatus}.`
+          detalhes: `Pagamento de R$ ${valorPagoNum} registrado.`
         }
       });
 

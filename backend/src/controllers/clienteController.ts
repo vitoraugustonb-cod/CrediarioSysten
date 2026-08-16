@@ -98,30 +98,45 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
       return;
     }
 
-    // Busca parcelas em aberto (PENDENTE, ATRASADA, PARCIAL) das vendas deste cliente
-    const parcelasEmAberto = await prisma.parcela.findMany({
+    // Busca TODAS as parcelas de TODAS as vendas deste cliente para calculo de saldo exato
+    const todasParcelas = await prisma.parcela.findMany({
       where: {
-        venda: { clienteId: clienteId },
-        status: { in: [StatusParcela.PENDENTE, StatusParcela.ATRASADA, StatusParcela.PARCIAL] }
+        venda: { clienteId: clienteId }
       }
     });
 
-    let saldoDevedorTotal = 0;
+    let totalOriginal = 0;
+    let totalPago = 0;
+    let parcelasAbertoCount = 0;
+    let parcelasAtrasoCount = 0;
+    const agora = new Date();
 
-    for (const p of parcelasEmAberto) {
-      const valorParcela = Number(p.valor);
-      const valorPago = p.valorPago ? Number(p.valorPago) : 0;
-      const remanescente = valorParcela - valorPago;
-      if (remanescente > 0) {
-        saldoDevedorTotal += remanescente;
+    for (const p of todasParcelas) {
+      const vOriginal = Number(p.valor);
+      const vPago = p.valorPago ? Number(p.valorPago) : 0;
+      
+      totalOriginal += vOriginal;
+      totalPago += vPago;
+
+      if (p.status !== StatusParcela.PAGA) {
+        parcelasAbertoCount++;
+        if (p.dataVencimento < agora || p.status === StatusParcela.ATRASADA) {
+          parcelasAtrasoCount++;
+        }
       }
     }
 
+    const saldoDevedorCalculado = Math.max(0, totalOriginal - totalPago);
+    const saldoFinal = Math.round(saldoDevedorCalculado * 100) / 100;
+
     res.json({
+      cliente,
       clienteId: cliente.id,
       nome: cliente.nome,
-      saldoDevedor: Math.round(saldoDevedorTotal * 100) / 100,
-      totalParcelasEmAberto: parcelasEmAberto.length
+      saldoDevedor: saldoFinal,
+      saldoDevedorTotal: saldoFinal,
+      totalParcelasEmAberto: parcelasAbertoCount,
+      parcelasEmAtraso: parcelasAtrasoCount
     });
   } catch (error) {
     console.error('Erro ao obter saldo devedor:', error);

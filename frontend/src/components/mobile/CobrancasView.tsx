@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Search, 
   Phone, 
@@ -7,7 +8,8 @@ import {
   FileText, 
   X,
   ArrowRight,
-  Users
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -28,6 +30,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
   const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'COBRAR_HOJE' | 'ATRASADO'>('TODOS');
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
   // Selected Parcela for Detail Modal
   const [parcelaSelecionada, setParcelaSelecionada] = useState<Parcela | null>(null);
@@ -70,20 +73,30 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     e.preventDefault();
     if (!parcelaSelecionada || !valorPagoInput) return;
 
+    const nomeCliente = parcelaSelecionada.venda?.cliente?.nome || 'Cliente';
+    const valorNum = parseFloat(valorPagoInput);
+
     setSalvando(true);
     try {
-      const valorNum = parseFloat(valorPagoInput);
-      const atualizada = await registrarPagamentoAPI(
+      await registrarPagamentoAPI(
         parcelaSelecionada.id,
         valorNum,
         dataPagamentoInput,
         token
       );
       
-      setParcelaSelecionada(atualizada);
+      // Fecha os modais limpos ANTES de recarregar a lista
       setModalPagamento(false);
+      setParcelaSelecionada(null);
+      
+      // Recarrega lista de cobrancas ativas
       await carregarParcelas();
-      alert(`✅ Pagamento de R$ ${valorNum.toFixed(2)} registrado com sucesso!`);
+
+      // Exibe mensagem de sucesso visual na tela
+      setMensagemSucesso(`✅ Pagamento de R$ ${valorNum.toFixed(2)} registrado para ${nomeCliente}! O valor foi abatido do saldo devedor.`);
+      
+      // Oculta a mensagem apos 5 segundos
+      setTimeout(() => setMensagemSucesso(null), 5000);
     } catch (err: any) {
       alert(`❌ Erro ao registrar pagamento: ${err.message}`);
     } finally {
@@ -95,18 +108,22 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     e.preventDefault();
     if (!parcelaSelecionada) return;
 
+    const nomeCliente = parcelaSelecionada.venda?.cliente?.nome || 'Cliente';
+
     setSalvando(true);
     try {
-      const atualizada = await registrarObservacaoAPI(
+      await registrarObservacaoAPI(
         parcelaSelecionada.id,
         observacaoInput,
         token
       );
       
-      setParcelaSelecionada(atualizada);
       setModalObservacao(false);
+      setParcelaSelecionada(null);
       await carregarParcelas();
-      alert('✅ Observação registrada com sucesso!');
+      
+      setMensagemSucesso(`✅ Observação registrada para ${nomeCliente}!`);
+      setTimeout(() => setMensagemSucesso(null), 4000);
     } catch (err: any) {
       alert(`❌ Erro ao salvar observação: ${err.message}`);
     } finally {
@@ -141,7 +158,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     return statusC === 'COBRAR_HOJE' || statusC === 'ATRASADO';
   });
 
-  // 2. Filtro pelas abas (Todos / Cobrar Hoje / Atrasados)
+  // 2. Filtro pelas abas (Cobrar Hoje / Atrasados)
   const cobrancasPorStatus = cobrancasFiltradasPorData.filter(p => {
     const statusC = getStatusCobranca(p.dataVencimento, p.status);
     if (filtroStatus === 'COBRAR_HOJE') return statusC === 'COBRAR_HOJE';
@@ -166,6 +183,28 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '20px' }}>
       
+      {/* Banner de Mensagem de Sucesso (Não-bloqueante) */}
+      {mensagemSucesso && (
+        <div
+          style={{
+            padding: '14px 16px',
+            backgroundColor: '#DCFCE7',
+            color: '#15803D',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            border: '1px solid #86EFAC',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <CheckCircle2 size={20} color="#16A34A" />
+          <span>{mensagemSucesso}</span>
+        </div>
+      )}
+
       {/* Search Input */}
       <div style={{ position: 'relative' }}>
         <Search
@@ -259,9 +298,9 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Parcelas Cards List */}
+      {/* Parcelas Grid of Vertical Rectangular Cards */}
       {!loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <>
           {parcelasExibidas.length === 0 ? (
             <div 
               style={{ 
@@ -307,120 +346,130 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               )}
             </div>
           ) : (
-            parcelasExibidas.map((p) => {
-              const statusC = getStatusCobranca(p.dataVencimento, p.status);
-              const isHoje = statusC === 'COBRAR_HOJE';
-              const cliente = p.venda?.cliente;
+            <div className="cobrancas-grid">
+              {parcelasExibidas.map((p) => {
+                const statusC = getStatusCobranca(p.dataVencimento, p.status);
+                const isHoje = statusC === 'COBRAR_HOJE';
+                const cliente = p.venda?.cliente;
 
-              const [yyyy, mm, dd] = p.dataVencimento.substring(0, 10).split('-');
-              const dataVencFormatada = `${dd}/${mm}/${yyyy}`;
+                const [yyyy, mm, dd] = p.dataVencimento.substring(0, 10).split('-');
+                const dataVencFormatada = `${dd}/${mm}/${yyyy}`;
 
-              // Visual styles based on status (Cobrar Hoje = Orange, Atrasado = Red)
-              const cardBorderLeft = isHoje ? '6px solid #F97316' : '6px solid #DC2626';
-              const badgeBg = isHoje ? '#FFEDD5' : '#FEE2E2';
-              const badgeText = isHoje ? '#C2410C' : '#B91C1C';
-              const statusLabel = isHoje ? '🟠 Cobrar Hoje' : '🔴 Atrasado';
+                // Card styles (Vertical rectangular card)
+                const cardBorderTop = isHoje ? '5px solid #F97316' : '5px solid #DC2626';
+                const badgeBg = isHoje ? '#FFEDD5' : '#FEE2E2';
+                const badgeText = isHoje ? '#C2410C' : '#B91C1C';
+                const statusLabel = isHoje ? '🟠 Cobrar Hoje' : '🔴 Atrasado';
 
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => abrirDetalhe(p)}
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '16px',
-                    border: '1px solid var(--border-color)',
-                    borderLeft: cardBorderLeft,
-                    boxShadow: 'var(--shadow-sm)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {/* Top Header Row: Customer Name & Status Badge */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1, paddingRight: '8px' }}>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
-                        {cliente?.nome || 'Cliente não identificado'}
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => abrirDetalhe(p)}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '14px 12px',
+                      border: '1px solid var(--border-color)',
+                      borderTop: cardBorderTop,
+                      boxShadow: 'var(--shadow-sm)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      minHeight: '210px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {/* Top Status Badge */}
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <span
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: 'var(--radius-full)',
+                          backgroundColor: badgeBg,
+                          color: badgeText,
+                          fontWeight: 800,
+                          fontSize: '0.72rem',
+                          textAlign: 'center',
+                          display: 'inline-block',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'center' }}>
+                      <h4
+                        style={{
+                          fontSize: '0.92rem',
+                          fontWeight: 800,
+                          color: 'var(--primary-800)',
+                          margin: 0,
+                          lineHeight: 1.2,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}
+                        title={cliente?.nome}
+                      >
+                        {cliente?.nome || 'Cliente'}
                       </h4>
-                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                        <MapPin size={14} color="var(--accent-600)" /> {cliente?.endereco || 'Endereço não cadastrado'}
+
+                      <p
+                        style={{
+                          fontSize: '0.74rem',
+                          color: 'var(--text-muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '3px',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={cliente?.endereco}
+                      >
+                        <MapPin size={12} color="var(--accent-600)" />
+                        <span>{cliente?.endereco || 'Sem endereço'}</span>
                       </p>
                     </div>
 
-                    <span
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: 'var(--radius-full)',
-                        backgroundColor: badgeBg,
-                        color: badgeText,
-                        fontWeight: 800,
-                        fontSize: '0.76rem',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {statusLabel}
-                    </span>
-                  </div>
-
-                  {/* Contact Row */}
-                  {cliente?.telefone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <a
-                        href={`tel:${cliente.telefone}`}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                          color: 'var(--accent-700)',
-                          backgroundColor: 'var(--accent-50)',
-                          padding: '4px 10px',
-                          borderRadius: 'var(--radius-sm)',
-                          textDecoration: 'none',
-                          border: '1px solid var(--accent-600)'
-                        }}
-                      >
-                        <Phone size={13} />
-                        <span>{cliente.telefone}</span>
-                      </a>
-                    </div>
-                  )}
-
-                  {/* Footer Row: Parcela Info & Action Button */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', paddingTop: '10px', borderTop: '1px solid var(--bg-subtle)' }}>
-                    <div>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                        Parcela {p.numero}/{p.venda?.numParcelas || 1} • Venc: {dataVencFormatada}
+                    {/* Installment Info & Amount */}
+                    <div style={{ padding: '8px 4px', backgroundColor: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block' }}>
+                        P. {p.numero}/{p.venda?.numParcelas || 1} • {dataVencFormatada}
                       </span>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isHoje ? '#C2410C' : '#B91C1C' }}>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: isHoje ? '#C2410C' : '#B91C1C', marginTop: '2px' }}>
                         R$ {Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
 
+                    {/* Action Button */}
                     <button
                       className="touch-target"
                       style={{
-                        height: '42px',
-                        padding: '0 14px',
+                        width: '100%',
+                        height: '38px',
                         borderRadius: 'var(--radius-md)',
                         backgroundColor: isHoje ? '#FFEDD5' : '#FEE2E2',
                         color: isHoje ? '#C2410C' : '#B91C1C',
                         border: `1px solid ${isHoje ? '#FDBA74' : '#FCA5A5'}`,
                         fontWeight: 800,
-                        fontSize: '0.84rem',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
                       }}
                     >
-                      Cobrar R$ {Number(p.valor).toFixed(2)}
+                      Cobrar
                     </button>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
 
           {/* Prompt to navigate to Clientes tab */}
@@ -450,41 +499,45 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* -------------------------------------------------------------------------- */}
-      {/* MODAL DETALHE DA PARCELA */}
+      {/* MODAL DETALHE DA PARCELA (CENTRALIZADO NA TELA COM PORTAL E BLUR) */}
       {/* -------------------------------------------------------------------------- */}
-      {parcelaSelecionada && (
+      {parcelaSelecionada && createPortal(
         <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setParcelaSelecionada(null);
+          }}
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            zIndex: 300,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            zIndex: 9999,
             display: 'flex',
-            alignItems: 'flex-end',
+            alignItems: 'center',
             justifyContent: 'center',
+            padding: '16px',
           }}
         >
           <div
             className="animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '500px',
+              maxWidth: '480px',
               backgroundColor: '#FFFFFF',
-              borderTopLeftRadius: 'var(--radius-lg)',
-              borderTopRightRadius: 'var(--radius-lg)',
-              padding: '24px 20px',
-              maxHeight: '90vh',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              maxHeight: '88vh',
               overflowY: 'auto',
-              boxShadow: 'var(--shadow-lg)',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
+              position: 'relative',
             }}
           >
             {/* Header */}
@@ -524,7 +577,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 marginBottom: '16px',
               }}
             >
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-800)' }}>
                 {parcelaSelecionada.venda?.cliente?.nome}
               </h3>
               
@@ -548,7 +601,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   justifyContent: 'center',
                   gap: '8px',
                   width: '100%',
-                  height: '46px',
+                  height: '44px',
                   marginTop: '12px',
                   backgroundColor: '#FFFFFF',
                   color: 'var(--accent-700)',
@@ -565,27 +618,27 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* Sale & Installment Details */}
-            <div style={{ marginBottom: '20px', padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
-                PRODUTO & VALOR
+            <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: '#FFFFFF' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                Produto & Valor
               </div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-800)' }}>
                 {parcelaSelecionada.venda?.itens?.[0]?.produto?.nome || 'Venda de Crediário'}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '0.9rem' }}>
                 <span>Valor da Parcela:</span>
-                <strong style={{ color: 'var(--primary-800)' }}>
+                <strong style={{ color: 'var(--primary-800)', fontSize: '1.05rem' }}>
                   R$ {Number(parcelaSelecionada.valor).toFixed(2)}
                 </strong>
               </div>
               {parcelaSelecionada.valorPago && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.85rem', color: '#15803D' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.88rem', color: '#15803D' }}>
                   <span>Valor já pago:</span>
                   <strong>R$ {Number(parcelaSelecionada.valorPago).toFixed(2)}</strong>
                 </div>
               )}
               {parcelaSelecionada.observacao && (
-                <div style={{ marginTop: '10px', padding: '8px', backgroundColor: '#FEF3C7', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: '#B45309' }}>
+                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#FEF3C7', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: '#B45309' }}>
                   💬 <strong>Observação:</strong> {parcelaSelecionada.observacao}
                 </div>
               )}
@@ -604,13 +657,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
                   fontWeight: 800,
-                  fontSize: '0.98rem',
+                  fontSize: '1rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   cursor: 'pointer',
-                  boxShadow: '0 3px 10px rgba(22, 163, 74, 0.3)',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)',
                 }}
               >
                 <DollarSign size={20} />
@@ -627,7 +680,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   color: 'var(--primary-800)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: '0.9rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -641,21 +694,59 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Sub-modal: Form de Registrar Pagamento */}
-      {modalPagamento && parcelaSelecionada && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-          <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', marginBottom: '14px' }}>
-              Registrar Pagamento
-            </h3>
-            
-            <form onSubmit={handleSalvarPagamento}>
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Valor Pago (R$)
+      {modalPagamento && parcelaSelecionada && createPortal(
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalPagamento(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            zIndex: 10010,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                Registrar Pagamento
+              </h3>
+              <button
+                onClick={() => setModalPagamento(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSalvarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--primary-800)' }}>
+                  Valor Pago (R$) *
                 </label>
                 <input
                   type="number"
@@ -663,55 +754,126 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   value={valorPagoInput}
                   onChange={(e) => setValorPagoInput(e.target.value)}
                   required
-                  style={{ width: '100%', height: '48px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', fontSize: '1.1rem', fontWeight: 700 }}
+                  style={{
+                    width: '100%',
+                    height: '48px',
+                    padding: '0 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    fontSize: '1.2rem',
+                    fontWeight: 800,
+                    color: 'var(--accent-700)',
+                  }}
                 />
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Data do Pagamento
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--primary-800)' }}>
+                  Data do Pagamento *
                 </label>
                 <input
                   type="date"
                   value={dataPagamentoInput}
                   onChange={(e) => setDataPagamentoInput(e.target.value)}
-                  style={{ width: '100%', height: '48px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', fontSize: '0.95rem' }}
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    fontSize: '0.95rem',
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => setModalPagamento(false)}
-                  style={{ flex: 1, height: '44px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-subtle)' }}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-subtle)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  style={{ flex: 1, height: '44px', borderRadius: 'var(--radius-md)', border: 'none', backgroundColor: '#16A34A', color: '#FFFFFF', fontWeight: 700 }}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    backgroundColor: '#16A34A',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
                 >
                   {salvando ? 'Salvando...' : 'Confirmar'}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Sub-modal: Form de Registrar Observação */}
-      {modalObservacao && parcelaSelecionada && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-          <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', marginBottom: '14px' }}>
-              Registrar Observação
-            </h3>
-            
-            <form onSubmit={handleSalvarObservacao}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Observação de Campo
+      {modalObservacao && parcelaSelecionada && createPortal(
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalObservacao(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            zIndex: 10010,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                Registrar Observação
+              </h3>
+              <button
+                onClick={() => setModalObservacao(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSalvarObservacao} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--primary-800)' }}>
+                  Observação de Campo *
                 </label>
                 <textarea
                   rows={4}
@@ -719,29 +881,53 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   onChange={(e) => setObservacaoInput(e.target.value)}
                   placeholder="Ex: Cliente viajou e retorna na quinta-feira..."
                   required
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', fontSize: '0.95rem' }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    fontSize: '0.95rem',
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => setModalObservacao(false)}
-                  style={{ flex: 1, height: '44px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-subtle)' }}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-subtle)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={salvando}
-                  style={{ flex: 1, height: '44px', borderRadius: 'var(--radius-md)', border: 'none', backgroundColor: 'var(--accent-600)', color: '#FFFFFF', fontWeight: 700 }}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    backgroundColor: 'var(--accent-600)',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
                 >
                   {salvando ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -213,3 +213,18 @@ button, input, select, textarea {
   z-index: 10000;
 }
 
+/* Grid de Cards de Cobrança (2 por fileira no mobile, 4 no desktop) */
+.cobrancas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .cobrancas-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+
