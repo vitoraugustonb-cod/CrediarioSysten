@@ -138,13 +138,6 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    if (usuario.perfil !== 'GERENTE' && parcela.cobradorId !== usuario.id) {
-      res.status(403).json({
-        erro: 'Acesso negado: Apenas o cobrador responsável por esta parcela ou um Gerente podem registrar pagamentos.'
-      });
-      return;
-    }
-
     const dataPagamentoFinal = dataPagamento ? new Date(dataPagamento) : new Date();
 
     const resultado = await prisma.$transaction(async (tx) => {
@@ -168,10 +161,11 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
         ? StatusParcela.PAGA
         : StatusParcela.PARCIAL;
 
-      // 1. Atualizar a parcela principal clicada
+      // 1. Atualizar a parcela principal clicada (atribuindo cobradorId ao usuario que recebeu o pagamento)
       const parcelaAtualizada = await tx.parcela.update({
         where: { id: parcelaId },
         data: {
+          cobradorId: usuario.id,
           valorPago: valorParaEstaParcela,
           dataPagamento: dataPagamentoFinal,
           status: novoStatusAtual
@@ -216,6 +210,7 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
           await tx.parcela.update({
             where: { id: pNext.id },
             data: {
+              cobradorId: usuario.id,
               valorPago: abatimentoNext,
               dataPagamento: dataPagamentoFinal,
               status: statusNext

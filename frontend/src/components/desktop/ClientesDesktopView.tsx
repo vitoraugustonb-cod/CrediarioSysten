@@ -1,12 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { 
-  Search 
+  Search,
+  DollarSign,
+  CheckCircle2,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
   getClientes, 
   getSaldoCliente, 
   getClientePorId,
+  registrarPagamentoAPI,
   type Cliente, 
   type SaldoDevedorCliente 
 } from '../../services/api';
@@ -23,6 +27,14 @@ export const ClientesDesktopView: React.FC = () => {
   const [clienteDetalhe, setClienteDetalhe] = useState<Cliente | null>(null);
   const [saldo, setSaldo] = useState<SaldoDevedorCliente | null>(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState<boolean>(false);
+  const [historicoVendas, setHistoricoVendas] = useState<any[]>([]);
+
+  // Advance Payment Modal / Form State
+  const [parcelaParaPagamento, setParcelaParaPagamento] = useState<any | null>(null);
+  const [valorPagoInput, setValorPagoInput] = useState<string>('');
+  const [dataPagamentoInput, setDataPagamentoInput] = useState<string>('');
+  const [salvandoPagamento, setSalvandoPagamento] = useState<boolean>(false);
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
   const carregarClientes = useCallback(async () => {
     setLoading(true);
@@ -41,11 +53,10 @@ export const ClientesDesktopView: React.FC = () => {
     carregarClientes();
   }, [carregarClientes]);
 
-  const [historicoVendas, setHistoricoVendas] = useState<any[]>([]);
-
   const abrirDetalheCliente = async (c: Cliente) => {
     setClienteDetalhe(c);
     setLoadingDetalhe(true);
+    setMensagemSucesso(null);
     try {
       const [s, fullData] = await Promise.all([
         getSaldoCliente(c.id, token),
@@ -60,11 +71,55 @@ export const ClientesDesktopView: React.FC = () => {
     }
   };
 
+  const iniciarPagamentoAdiantado = (p: any) => {
+    const valorRestante = Number(p.valor) - (p.valorPago ? Number(p.valorPago) : 0);
+    setParcelaParaPagamento(p);
+    setValorPagoInput(valorRestante.toFixed(2));
+    setDataPagamentoInput(new Date().toISOString().substring(0, 10));
+  };
+
+  const handleConfirmarPagamento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!parcelaParaPagamento || !valorPagoInput || !clienteDetalhe) return;
+
+    const val = parseFloat(valorPagoInput);
+    if (isNaN(val) || val <= 0) {
+      alert('Informe um valor válido maior que zero.');
+      return;
+    }
+
+    setSalvandoPagamento(true);
+    try {
+      await registrarPagamentoAPI(
+        parcelaParaPagamento.id,
+        val,
+        dataPagamentoInput,
+        token
+      );
+
+      setMensagemSucesso(`✅ Pagamento adiantado de R$ ${val.toFixed(2)} registrado com sucesso!`);
+      setParcelaParaPagamento(null);
+
+      // Recarrega os dados do cliente para atualizar o saldo e status
+      await abrirDetalheCliente(clienteDetalhe);
+    } catch (err: any) {
+      alert(`❌ Erro ao registrar pagamento: ${err.message}`);
+    } finally {
+      setSalvandoPagamento(false);
+    }
+  };
+
   const clientesFiltrados = clientes.filter(c => 
     c.nome.toLowerCase().includes(busca.toLowerCase()) ||
     c.telefone.includes(busca) ||
     c.endereco.toLowerCase().includes(busca.toLowerCase())
   );
+
+  // Extrair parcelas em aberto
+  const parcelasEmAberto = historicoVendas
+    .flatMap((v: any) => (v.parcelas || []).map((p: any) => ({ ...p, venda: v })))
+    .filter((p: any) => ['PENDENTE', 'ATRASADA', 'PARCIAL'].includes(p.status))
+    .sort((a: any, b: any) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime());
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -74,7 +129,7 @@ export const ClientesDesktopView: React.FC = () => {
             Base Geral de Clientes
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Consulte dados cadastrais, histórico de dívidas e saldo devedor de cada cliente.
+            Consulte dados cadastrais, histórico de dívidas e registre pagamentos adiantados.
           </p>
         </div>
       </div>
@@ -162,12 +217,12 @@ export const ClientesDesktopView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal / Drawer: Detalhes do Cliente (GET /clientes/:id & GET /clientes/:id/saldo) */}
+      {/* Modal / Drawer: Detalhes do Cliente */}
       <Modal
         isOpen={!!clienteDetalhe}
-        onClose={() => setClienteDetalhe(null)}
+        onClose={() => { setClienteDetalhe(null); setParcelaParaPagamento(null); }}
         title={`Ficha do Cliente: ${clienteDetalhe?.nome || ''}`}
-        maxWidth="600px"
+        maxWidth="650px"
       >
         {clienteDetalhe && (
           <>
@@ -180,6 +235,12 @@ export const ClientesDesktopView: React.FC = () => {
                 </p>
               )}
             </div>
+
+            {mensagemSucesso && (
+              <div style={{ backgroundColor: '#DCFCE7', border: '1px solid #86EFAC', color: '#166534', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '0.88rem', fontWeight: 600 }}>
+                {mensagemSucesso}
+              </div>
+            )}
 
             {loadingDetalhe ? (
               <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -212,6 +273,130 @@ export const ClientesDesktopView: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Form de Pagamento Adiantado em Exibição */}
+                {parcelaParaPagamento ? (
+                  <form onSubmit={handleConfirmarPagamento} style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#166534', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <DollarSign size={18} />
+                        Pagamento Adiantado - Parcela #{parcelaParaPagamento.numero}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setParcelaParaPagamento(null)}
+                        style={{ background: 'none', border: 'none', color: '#166534', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+
+                    <p style={{ fontSize: '0.82rem', color: '#15803D' }}>
+                      Valor total da parcela: <strong>R$ {Number(parcelaParaPagamento.valor).toFixed(2)}</strong> | Vencimento: {new Date(parcelaParaPagamento.dataVencimento).toLocaleDateString('pt-BR')}
+                    </p>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>
+                          Valor Pago (R$)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          required
+                          value={valorPagoInput}
+                          onChange={(e) => setValorPagoInput(e.target.value)}
+                          style={{ width: '100%', height: '38px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid #86EFAC', fontSize: '0.9rem' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>
+                          Data do Pagamento
+                        </label>
+                        <input
+                          type="date"
+                          required
+                          value={dataPagamentoInput}
+                          onChange={(e) => setDataPagamentoInput(e.target.value)}
+                          style={{ width: '100%', height: '38px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid #86EFAC', fontSize: '0.9rem' }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={salvandoPagamento}
+                      style={{
+                        height: '40px',
+                        backgroundColor: '#166534',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: 'var(--radius-md)',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        marginTop: '4px'
+                      }}
+                    >
+                      {salvandoPagamento ? 'Registrando...' : 'Confirmar Recebimento'}
+                    </button>
+                  </form>
+                ) : (
+                  /* Lista de Parcelas em Aberto para Pagamento Adiantado */
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '8px' }}>
+                      Parcelas em Aberto (Prontas para Quitar/Abater)
+                    </h4>
+                    {parcelasEmAberto.length === 0 ? (
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Este cliente não possui nenhuma parcela em aberto.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {parcelasEmAberto.map((p: any) => {
+                          const vPago = p.valorPago ? Number(p.valorPago) : 0;
+                          const resta = Number(p.valor) - vPago;
+                          return (
+                            <div key={p.id} style={{ padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+                                  Parcela #{p.numero} (Venda #{p.vendaId})
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                  Vencimento: {new Date(p.dataVencimento).toLocaleDateString('pt-BR')} • Status: <strong style={{ color: p.status === 'ATRASADA' ? '#B91C1C' : '#D97706' }}>{p.status}</strong>
+                                </div>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--accent-600)', marginTop: '2px' }}>
+                                  Restante: R$ {resta.toFixed(2)} (de R$ {Number(p.valor).toFixed(2)})
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => iniciarPagamentoAdiantado(p)}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: 'var(--radius-md)',
+                                  backgroundColor: '#166534',
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <DollarSign size={14} />
+                                Pagar
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Histórico de Vendas do Cliente */}
                 <div style={{ marginTop: '8px' }}>
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '8px' }}>
@@ -243,3 +428,4 @@ export const ClientesDesktopView: React.FC = () => {
     </div>
   );
 };
+

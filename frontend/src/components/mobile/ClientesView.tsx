@@ -6,13 +6,18 @@ import {
   Phone, 
   MapPin, 
   X,
-  CreditCard
+  CreditCard,
+  DollarSign,
+  CheckCircle2,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
   getClientes, 
   criarClienteAPI, 
   getSaldoCliente, 
+  getClientePorId,
+  registrarPagamentoAPI,
   type Cliente, 
   type SaldoDevedorCliente 
 } from '../../services/api';
@@ -29,6 +34,14 @@ export const ClientesView: React.FC = () => {
   const [clienteSelObj, setClienteSelObj] = useState<Cliente | null>(null);
   const [clienteSaldoSel, setClienteSaldoSel] = useState<SaldoDevedorCliente | null>(null);
   const [loadingSaldo, setLoadingSaldo] = useState<boolean>(false);
+  const [historicoVendas, setHistoricoVendas] = useState<any[]>([]);
+
+  // Advance Payment State
+  const [parcelaParaPagamento, setParcelaParaPagamento] = useState<any | null>(null);
+  const [valorPagoInput, setValorPagoInput] = useState<string>('');
+  const [dataPagamentoInput, setDataPagamentoInput] = useState<string>('');
+  const [salvandoPagamento, setSalvandoPagamento] = useState<boolean>(false);
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
   // New Client Form
   const [nome, setNome] = useState<string>('');
@@ -79,9 +92,15 @@ export const ClientesView: React.FC = () => {
     setClienteSelObj(cliente);
     setLoadingSaldo(true);
     setClienteSaldoSel(null);
+    setParcelaParaPagamento(null);
+    setMensagemSucesso(null);
     try {
-      const saldo = await getSaldoCliente(cliente.id, token);
+      const [saldo, fullData] = await Promise.all([
+        getSaldoCliente(cliente.id, token),
+        getClientePorId(cliente.id, token)
+      ]);
       setClienteSaldoSel(saldo);
+      setHistoricoVendas(fullData?.vendas || []);
     } catch (err: any) {
       alert(`Erro ao consultar saldo do cliente: ${err.message}`);
     } finally {
@@ -92,6 +111,46 @@ export const ClientesView: React.FC = () => {
   const fecharModalSaldo = () => {
     setClienteSelObj(null);
     setClienteSaldoSel(null);
+    setParcelaParaPagamento(null);
+    setMensagemSucesso(null);
+  };
+
+  const iniciarPagamentoAdiantado = (p: any) => {
+    const valorRestante = Number(p.valor) - (p.valorPago ? Number(p.valorPago) : 0);
+    setParcelaParaPagamento(p);
+    setValorPagoInput(valorRestante.toFixed(2));
+    setDataPagamentoInput(new Date().toISOString().substring(0, 10));
+  };
+
+  const handleConfirmarPagamento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!parcelaParaPagamento || !valorPagoInput || !clienteSelObj) return;
+
+    const val = parseFloat(valorPagoInput);
+    if (isNaN(val) || val <= 0) {
+      alert('Informe um valor válido maior que zero.');
+      return;
+    }
+
+    setSalvandoPagamento(true);
+    try {
+      await registrarPagamentoAPI(
+        parcelaParaPagamento.id,
+        val,
+        dataPagamentoInput,
+        token
+      );
+
+      setMensagemSucesso(`✅ Pagamento de R$ ${val.toFixed(2)} registrado com sucesso!`);
+      setParcelaParaPagamento(null);
+
+      // Recarrega informações do cliente
+      await abrirSaldoCliente(clienteSelObj);
+    } catch (err: any) {
+      alert(`❌ Erro ao registrar pagamento: ${err.message}`);
+    } finally {
+      setSalvandoPagamento(false);
+    }
   };
 
   const clientesFiltrados = clientes.filter(c => 
@@ -289,12 +348,18 @@ export const ClientesView: React.FC = () => {
               </button>
             </div>
 
+            {mensagemSucesso && (
+              <div style={{ backgroundColor: '#DCFCE7', border: '1px solid #86EFAC', color: '#166534', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '0.88rem', fontWeight: 600 }}>
+                {mensagemSucesso}
+              </div>
+            )}
+
             {loadingSaldo ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                 Consultando saldo devedor no banco de dados...
               </div>
             ) : (
-              <div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Saldo Devedor Card */}
                 {(() => {
                   const saldoTotalNum = Number(clienteSaldoSel?.saldoDevedorTotal ?? clienteSaldoSel?.saldoDevedor ?? 0);
@@ -302,9 +367,14 @@ export const ClientesView: React.FC = () => {
                   const parcelasAtrasoCount = clienteSaldoSel?.parcelasEmAtraso ?? 0;
                   const telefoneCliente = clienteSaldoSel?.cliente?.telefone || clienteSelObj?.telefone || '';
 
+                  const parcelasEmAberto = historicoVendas
+                    .flatMap((v: any) => (v.parcelas || []).map((p: any) => ({ ...p, venda: v })))
+                    .filter((p: any) => ['PENDENTE', 'ATRASADA', 'PARCIAL'].includes(p.status))
+                    .sort((a: any, b: any) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime());
+
                   return (
                     <>
-                      <div style={{ backgroundColor: 'var(--bg-subtle)', padding: '18px', borderRadius: 'var(--radius-md)', marginBottom: '16px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
+                      <div style={{ backgroundColor: 'var(--bg-subtle)', padding: '18px', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-color)' }}>
                         <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                           Saldo Devedor Total
                         </span>
@@ -313,7 +383,7 @@ export const ClientesView: React.FC = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <div style={{ padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: '#FFFFFF', textAlign: 'center' }}>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Parcelas em Aberto</span>
                           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-800)', marginTop: '2px' }}>
@@ -328,6 +398,128 @@ export const ClientesView: React.FC = () => {
                           </div>
                         </div>
                       </div>
+
+                      {/* Form de Pagamento Adiantado em Exibição */}
+                      {parcelaParaPagamento ? (
+                        <form onSubmit={handleConfirmarPagamento} style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#166534', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <DollarSign size={18} />
+                              Pagamento Adiantado - Parcela #{parcelaParaPagamento.numero}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => setParcelaParaPagamento(null)}
+                              style={{ background: 'none', border: 'none', color: '#166534', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+
+                          <p style={{ fontSize: '0.82rem', color: '#15803D' }}>
+                            Valor total: <strong>R$ {Number(parcelaParaPagamento.valor).toFixed(2)}</strong> | Venc: {new Date(parcelaParaPagamento.dataVencimento).toLocaleDateString('pt-BR')}
+                          </p>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>
+                              Valor Pago (R$)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              required
+                              value={valorPagoInput}
+                              onChange={(e) => setValorPagoInput(e.target.value)}
+                              style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid #86EFAC', fontSize: '0.92rem' }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>
+                              Data do Pagamento
+                            </label>
+                            <input
+                              type="date"
+                              required
+                              value={dataPagamentoInput}
+                              onChange={(e) => setDataPagamentoInput(e.target.value)}
+                              style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid #86EFAC', fontSize: '0.92rem' }}
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={salvandoPagamento}
+                            style={{
+                              height: '44px',
+                              backgroundColor: '#166534',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: 'var(--radius-md)',
+                              fontWeight: 700,
+                              fontSize: '0.9rem',
+                              cursor: 'pointer',
+                              marginTop: '4px'
+                            }}
+                          >
+                            {salvandoPagamento ? 'Registrando...' : 'Confirmar Recebimento'}
+                          </button>
+                        </form>
+                      ) : (
+                        /* Lista de Parcelas em Aberto para Pagamento Adiantado */
+                        <div>
+                          <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '8px' }}>
+                            Parcelas em Aberto (Cobrar / Adiantar)
+                          </h4>
+                          {parcelasEmAberto.length === 0 ? (
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhuma parcela em aberto para este cliente.</p>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {parcelasEmAberto.map((p: any) => {
+                                const vPago = p.valorPago ? Number(p.valorPago) : 0;
+                                const resta = Number(p.valor) - vPago;
+                                return (
+                                  <div key={p.id} style={{ padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+                                        Parcela #{p.numero} (Venda #{p.vendaId})
+                                      </div>
+                                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                        Venc: {new Date(p.dataVencimento).toLocaleDateString('pt-BR')} • <strong style={{ color: p.status === 'ATRASADA' ? '#B91C1C' : '#D97706' }}>{p.status}</strong>
+                                      </div>
+                                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--accent-600)', marginTop: '2px' }}>
+                                        Resta: R$ {resta.toFixed(2)}
+                                      </div>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => iniciarPagamentoAdiantado(p)}
+                                      style={{
+                                        padding: '8px 14px',
+                                        borderRadius: 'var(--radius-md)',
+                                        backgroundColor: '#166534',
+                                        color: '#FFFFFF',
+                                        border: 'none',
+                                        fontWeight: 700,
+                                        fontSize: '0.82rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                    >
+                                      <DollarSign size={14} />
+                                      Pagar
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {telefoneCliente && (
                         <a
