@@ -591,30 +591,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 </p>
               )}
 
-              {/* Call Button (link tel:) */}
-              <a
-                href={`tel:${parcelaSelecionada.venda?.cliente?.telefone}`}
-                className="touch-target"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  width: '100%',
-                  height: '44px',
-                  marginTop: '12px',
-                  backgroundColor: '#FFFFFF',
-                  color: 'var(--accent-700)',
-                  border: '1px solid var(--accent-600)',
-                  borderRadius: 'var(--radius-md)',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  textDecoration: 'none',
-                }}
-              >
-                <Phone size={18} />
-                <span>Ligar para {parcelaSelecionada.venda?.cliente?.telefone}</span>
-              </a>
+
             </div>
 
             {/* Sale & Installment Details */}

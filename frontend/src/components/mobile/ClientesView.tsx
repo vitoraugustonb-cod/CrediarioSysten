@@ -521,29 +521,7 @@ export const ClientesView: React.FC = () => {
                         </div>
                       )}
 
-                      {telefoneCliente && (
-                        <a
-                          href={`tel:${telefoneCliente}`}
-                          className="touch-target"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            width: '100%',
-                            height: '48px',
-                            backgroundColor: 'var(--accent-600)',
-                            color: '#FFFFFF',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 700,
-                            fontSize: '0.95rem',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <Phone size={18} />
-                          <span>Ligar para {telefoneCliente}</span>
-                        </a>
-                      )}
+
                     </>
                   );
                 })()}
