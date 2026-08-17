@@ -43,6 +43,11 @@ export const ClientesView: React.FC = () => {
   const [salvandoPagamento, setSalvandoPagamento] = useState<boolean>(false);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
+  // Validation Sub-modal
+  const [modalValidacaoValor, setModalValidacaoValor] = useState<boolean>(false);
+  const [valorConfirmacaoInput, setValorConfirmacaoInput] = useState<string>('');
+  const [erroConfirmacao, setErroConfirmacao] = useState<string | null>(null);
+
   // New Client Form
   const [nome, setNome] = useState<string>('');
   const [telefone, setTelefone] = useState<string>('');
@@ -122,9 +127,9 @@ export const ClientesView: React.FC = () => {
     setDataPagamentoInput(new Date().toISOString().substring(0, 10));
   };
 
-  const handleConfirmarPagamento = async (e: React.FormEvent) => {
+  const handleIniciarValidacaoPagamento = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!parcelaParaPagamento || !valorPagoInput || !clienteSelObj) return;
+    if (!parcelaParaPagamento || !valorPagoInput) return;
 
     const val = parseFloat(valorPagoInput);
     if (isNaN(val) || val <= 0) {
@@ -132,16 +137,34 @@ export const ClientesView: React.FC = () => {
       return;
     }
 
+    setValorConfirmacaoInput('');
+    setErroConfirmacao(null);
+    setModalValidacaoValor(true);
+  };
+
+  const handleConfirmarEExecutarPagamento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!parcelaParaPagamento || !valorPagoInput || !clienteSelObj) return;
+
+    const valOriginal = parseFloat(valorPagoInput);
+    const valConfirma = parseFloat(valorConfirmacaoInput);
+
+    if (isNaN(valConfirma) || Math.abs(valOriginal - valConfirma) > 0.001) {
+      setErroConfirmacao(`O valor digitado (R$ ${isNaN(valConfirma) ? '0,00' : valConfirma.toFixed(2)}) não coincide com R$ ${valOriginal.toFixed(2)}. Re-digite exatamente o mesmo valor.`);
+      return;
+    }
+
     setSalvandoPagamento(true);
     try {
       await registrarPagamentoAPI(
         parcelaParaPagamento.id,
-        val,
+        valOriginal,
         dataPagamentoInput,
         token
       );
 
-      setMensagemSucesso(`✅ Pagamento de R$ ${val.toFixed(2)} registrado com sucesso!`);
+      setMensagemSucesso(`✅ Pagamento de R$ ${valOriginal.toFixed(2)} registrado com sucesso!`);
+      setModalValidacaoValor(false);
       setParcelaParaPagamento(null);
 
       // Recarrega informações do cliente
@@ -401,7 +424,7 @@ export const ClientesView: React.FC = () => {
 
                       {/* Form de Pagamento Adiantado em Exibição */}
                       {parcelaParaPagamento ? (
-                        <form onSubmit={handleConfirmarPagamento} style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <form onSubmit={handleIniciarValidacaoPagamento} style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#166534', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <DollarSign size={18} />
@@ -450,7 +473,6 @@ export const ClientesView: React.FC = () => {
 
                           <button
                             type="submit"
-                            disabled={salvandoPagamento}
                             style={{
                               height: '44px',
                               backgroundColor: '#166534',
@@ -463,7 +485,7 @@ export const ClientesView: React.FC = () => {
                               marginTop: '4px'
                             }}
                           >
-                            {salvandoPagamento ? 'Registrando...' : 'Confirmar Recebimento'}
+                            Avançar
                           </button>
                         </form>
                       ) : (
@@ -649,6 +671,135 @@ export const ClientesView: React.FC = () => {
                   style={{ flex: 1, height: '44px', borderRadius: 'var(--radius-md)', border: 'none', backgroundColor: 'var(--accent-600)', color: '#FFFFFF', fontWeight: 800 }}
                 >
                   {salvando ? 'Salvando...' : 'Cadastrar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal de Validação de Segurança (Confirmação Dupla de Valor) */}
+      {modalValidacaoValor && parcelaParaPagamento && createPortal(
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalValidacaoValor(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            zIndex: 10020,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              border: '2px solid #16A34A'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={22} color="#16A34A" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
+                  Confirmação de Segurança
+                </h3>
+              </div>
+              <button
+                onClick={() => setModalValidacaoValor(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', padding: '14px', borderRadius: 'var(--radius-md)', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.85rem', color: '#166534', margin: 0, lineHeight: 1.4 }}>
+                Para evitar pagamentos acidentais com valor incorreto, <strong>digite novamente o valor a ser registrado</strong> (R$ <strong>{parseFloat(valorPagoInput || '0').toFixed(2)}</strong>):
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmarEExecutarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, display: 'block', marginBottom: '6px', color: 'var(--primary-800)' }}>
+                  Re-digite o Valor Pago (R$) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  autoFocus
+                  required
+                  placeholder={`Ex: ${parseFloat(valorPagoInput || '0').toFixed(2)}`}
+                  value={valorConfirmacaoInput}
+                  onChange={(e) => {
+                    setValorConfirmacaoInput(e.target.value);
+                    setErroConfirmacao(null);
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '48px',
+                    padding: '0 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: erroConfirmacao ? '2px solid #B91C1C' : '2px solid #16A34A',
+                    fontSize: '1.2rem',
+                    fontWeight: 800,
+                    color: '#166534',
+                    outline: 'none'
+                  }}
+                />
+                {erroConfirmacao && (
+                  <p style={{ color: '#B91C1C', fontSize: '0.8rem', fontWeight: 700, marginTop: '6px' }}>
+                    {erroConfirmacao}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setModalValidacaoValor(false)}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: 'var(--bg-subtle)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Voltar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvandoPagamento}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    backgroundColor: '#16A34A',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {salvandoPagamento ? 'Registrando...' : 'Finalizar Pagamento'}
                 </button>
               </div>
             </form>
