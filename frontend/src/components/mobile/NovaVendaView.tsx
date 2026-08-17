@@ -11,7 +11,8 @@ import {
   Phone,
   UserPlus,
   Layers,
-  Sparkles
+  Sparkles,
+  Search
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -47,8 +48,10 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
   const [bairroCliente, setBairroCliente] = useState<string>('');
   const [telefoneCliente, setTelefoneCliente] = useState<string>('');
 
-  // Selected Existing Customer
+  // Selected Existing Customer & Search Autocomplete
   const [clienteIdSel, setClienteIdSel] = useState<string>('');
+  const [buscaClienteExistente, setBuscaClienteExistente] = useState<string>('');
+  const [mostrandoSugestoes, setMostrandoSugestoes] = useState<boolean>(false);
 
   // Direct Product Inputs (freeform name and value)
   const [nomeProdutoAdd, setNomeProdutoAdd] = useState<string>('');
@@ -85,7 +88,6 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
       try {
         const c = await getClientes(token);
         setClientes(c);
-        if (c.length > 0) setClienteIdSel(String(c[0].id));
       } catch (err) {
         console.error('Erro ao carregar clientes:', err);
       } finally {
@@ -218,6 +220,8 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
       setNumeroCliente('');
       setBairroCliente('');
       setTelefoneCliente('');
+      setClienteIdSel('');
+      setBuscaClienteExistente('');
       setNomeProdutoAdd('');
       setValorProdutoAdd('');
       setQuantidadeAdd(1);
@@ -325,7 +329,11 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setModoCliente('existente')}
+                  onClick={() => {
+                    setModoCliente('existente');
+                    setMostrandoSugestoes(true);
+                    getClientes(token).then(setClientes).catch(() => {});
+                  }}
                   style={{
                     padding: '5px 12px',
                     fontSize: '0.78rem',
@@ -344,31 +352,147 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
             </div>
 
             {modoCliente === 'existente' ? (
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '6px' }}>
-                  Selecionar Cliente Existente *
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', margin: 0 }}>
+                  Pesquisar Cliente Existente *
                 </label>
-                <select
-                  value={clienteIdSel}
-                  onChange={(e) => setClienteIdSel(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    height: '46px',
-                    padding: '0 12px',
+
+                {clienteIdSel && (
+                  (() => {
+                    const selObj = clientes.find(c => String(c.id) === clienteIdSel);
+                    if (!selObj) return null;
+                    return (
+                      <div
+                        style={{
+                          backgroundColor: '#F0FDF4',
+                          border: '1px solid #86EFAC',
+                          padding: '12px 14px',
+                          borderRadius: 'var(--radius-md)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: '4px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CheckCircle2 size={20} color="#16A34A" />
+                          <div>
+                            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#166534' }}>
+                              {selObj.nome}
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: '#15803D' }}>
+                              📞 {selObj.telefone || 'S/N'} • 📍 {selObj.endereco}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setClienteIdSel('');
+                            setBuscaClienteExistente('');
+                            setMostrandoSugestoes(true);
+                          }}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid #86EFAC',
+                            backgroundColor: '#FFFFFF',
+                            color: '#166534',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Trocar
+                        </button>
+                      </div>
+                    );
+                  })()
+                )}
+
+                {/* Input de Pesquisa Autocomplete */}
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    placeholder="Digitar nome, telefone ou endereço..."
+                    value={buscaClienteExistente}
+                    onFocus={() => setMostrandoSugestoes(true)}
+                    onChange={(e) => {
+                      setBuscaClienteExistente(e.target.value);
+                      setMostrandoSugestoes(true);
+                      if (clienteIdSel) setClienteIdSel('');
+                    }}
+                    style={{
+                      width: '100%',
+                      height: '46px',
+                      padding: '0 12px 0 38px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: '0.95rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '14px' }} />
+                </div>
+
+                {/* Sugestões em tempo real */}
+                {mostrandoSugestoes && !clienteIdSel && (
+                  <div style={{
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--border-color)',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-subtle)',
-                    fontSize: '0.95rem',
                     backgroundColor: '#FFFFFF',
-                  }}
-                >
-                  <option value="">-- Escolha um cliente --</option>
-                  {clientes.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome} ({c.telefone || 'Sem Tel'}) - {c.endereco}
-                    </option>
-                  ))}
-                </select>
+                    boxShadow: 'var(--shadow-sm)',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    {(() => {
+                      const q = buscaClienteExistente.toLowerCase().trim();
+                      const filtrados = clientes.filter(c => {
+                        if (!q) return true;
+                        const n = (c.nome || '').toLowerCase();
+                        const t = (c.telefone || '').toLowerCase();
+                        const e = (c.endereco || '').toLowerCase();
+                        return n.includes(q) || t.includes(q) || e.includes(q);
+                      });
+
+                      if (filtrados.length === 0) {
+                        return (
+                          <div style={{ padding: '12px', fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            Nenhum cliente encontrado para "{buscaClienteExistente}".
+                          </div>
+                        );
+                      }
+
+                      return filtrados.map(c => (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setClienteIdSel(String(c.id));
+                            setBuscaClienteExistente(c.nome);
+                            setMostrandoSugestoes(false);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            borderBottom: '1px solid var(--border-color)',
+                            cursor: 'pointer',
+                            backgroundColor: String(c.id) === clienteIdSel ? 'var(--bg-subtle)' : '#FFFFFF'
+                          }}
+                          className="card-interactive"
+                        >
+                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+                            {c.nome}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            📞 {c.telefone || 'S/N'} • 📍 {c.endereco}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
