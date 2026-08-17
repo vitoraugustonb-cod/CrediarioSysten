@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Search,
-  DollarSign,
-  CheckCircle2,
-  Calendar
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 

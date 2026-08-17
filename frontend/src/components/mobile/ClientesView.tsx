@@ -3,13 +3,12 @@ import { createPortal } from 'react-dom';
 import { 
   Search, 
   UserPlus, 
-  Phone, 
+  Phone,
   MapPin, 
   X,
   CreditCard,
   DollarSign,
-  CheckCircle2,
-  Calendar
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -359,7 +358,7 @@ export const ClientesView: React.FC = () => {
                   Ficha do Cliente
                 </span>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-800)', marginTop: '2px' }}>
-                  {clienteSaldoSel?.cliente?.nome || clienteSaldoSel?.nome || clienteSelObj?.nome || 'Consultando Cliente...'}
+                  {clienteSaldoSel?.cliente?.nome || clienteSelObj?.nome || 'Consultando Cliente...'}
                 </h3>
               </div>
 
@@ -385,10 +384,9 @@ export const ClientesView: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Saldo Devedor Card */}
                 {(() => {
-                  const saldoTotalNum = Number(clienteSaldoSel?.saldoDevedorTotal ?? clienteSaldoSel?.saldoDevedor ?? 0);
+                  const saldoTotalNum = Number(clienteSaldoSel?.saldoDevedorTotal ?? 0);
                   const parcelasAbertoCount = clienteSaldoSel?.totalParcelasEmAberto ?? 0;
                   const parcelasAtrasoCount = clienteSaldoSel?.parcelasEmAtraso ?? 0;
-                  const telefoneCliente = clienteSaldoSel?.cliente?.telefone || clienteSelObj?.telefone || '';
 
                   const parcelasEmAberto = historicoVendas
                     .flatMap((v: any) => (v.parcelas || []).map((p: any) => ({ ...p, venda: v })))
