@@ -57,6 +57,30 @@ export interface Parcela {
   };
 }
 
+export interface CobrancaDetalheItem {
+  id: number;
+  clienteId: number;
+  clienteNome: string;
+  clienteTelefone: string;
+  valorPago: number;
+  produtoNome: string;
+  detalhes: string;
+  dataPagamento: string;
+  criadoEm: string;
+}
+
+export interface VendaDetalheItem {
+  id: number;
+  clienteId: number;
+  clienteNome: string;
+  clienteTelefone: string;
+  nomeProduto: string;
+  itensDesc: string;
+  condicao: string;
+  valorTotal: number;
+  dataVenda: string;
+}
+
 export interface PrestacaoContasDia {
   totalVendido: number;
   totalVendidoMoveis: number;
@@ -64,6 +88,8 @@ export interface PrestacaoContasDia {
   totalCobrado: number;
   qtdVendas: number;
   qtdCobrancas: number;
+  cobrancasDetalhes?: CobrancaDetalheItem[];
+  vendasDetalhes?: VendaDetalheItem[];
 }
 
 export interface SaldoDevedorCliente {
