@@ -41,6 +41,7 @@ export const ClientesView: React.FC = () => {
   const [clienteSaldoSel, setClienteSaldoSel] = useState<SaldoDevedorCliente | null>(null);
   const [loadingSaldo, setLoadingSaldo] = useState<boolean>(false);
   const [historicoVendas, setHistoricoVendas] = useState<any[]>([]);
+  const [historicoPagamentos, setHistoricoPagamentos] = useState<any[]>([]);
   const [abaModalCliente, setAbaModalCliente] = useState<'debitos' | 'historico'>('debitos');
 
   // Advance Payment State
@@ -114,6 +115,7 @@ export const ClientesView: React.FC = () => {
       ]);
       setClienteSaldoSel(saldo);
       setHistoricoVendas(fullData?.vendas || []);
+      setHistoricoPagamentos(fullData?.pagamentos || []);
     } catch (err: any) {
       alert(`Erro ao consultar dados do cliente: ${err.message}`);
     } finally {
@@ -126,6 +128,7 @@ export const ClientesView: React.FC = () => {
     setClienteSaldoSel(null);
     setParcelaParaPagamento(null);
     setMensagemSucesso(null);
+    setHistoricoPagamentos([]);
     setAbaModalCliente('debitos');
   };
 
@@ -191,28 +194,143 @@ export const ClientesView: React.FC = () => {
     c.endereco.toLowerCase().includes(busca.toLowerCase())
   );
 
-  // Extrai lista cronológica de todos os pagamentos individuais já realizados pelo cliente
-  const pagamentosRealizados = historicoVendas
-    .flatMap((v: any) => 
-      (v.parcelas || []).map((p: any) => {
-        const nomesItens = v.itens?.map((i: any) => i.produto?.nome || i.nomeProduto).filter(Boolean).join(', ');
+  interface GrupoPagamento {
+    id: string;
+    dataPagamento: string;
+    vendaId: number;
+    nomeProduto: string;
+    valorTotalPago: number;
+    parcelas: Array<{
+      numero: number;
+      valor: number;
+      valorPago: number;
+      status: string;
+    }>;
+    observacoes: string[];
+    statusBadge: 'Pago' | 'Parcial';
+    titulo: string;
+    detalhes?: string;
+  }
+
+  // Lista dos pagamentos reais efetuados pelo cliente
+  const pagamentosRealizados = (historicoPagamentos && historicoPagamentos.length > 0)
+    ? historicoPagamentos.map((p: any) => {
+        const nomesItens = p.venda?.itens?.map((i: any) => i.produto?.nome || i.nomeProduto).filter(Boolean).join(', ');
+        const nomeProduto = nomesItens || p.venda?.nomeProduto || `Venda #${p.vendaId}`;
+
+        let titulo = p.detalhes || `Pagamento Venda #${p.vendaId}`;
+        if (p.parcelaId) {
+          const parc = historicoVendas.flatMap((v: any) => v.parcelas || []).find((x: any) => x.id === p.parcelaId);
+          if (parc) {
+            titulo = `Parcela #${parc.numero}`;
+          }
+        }
+
         return {
-          ...p,
-          venda: v,
-          nomeProduto: nomesItens || v.nomeProduto || `Venda #${v.id}`
+          id: String(p.id),
+          dataPagamento: p.dataPagamento,
+          vendaId: p.vendaId,
+          nomeProduto,
+          valorTotalPago: Number(p.valorPago),
+          statusBadge: 'Pago' as const,
+          titulo,
+          detalhes: p.detalhes && !p.detalhes.startsWith('Parcela #') ? p.detalhes : undefined,
+          observacoes: []
         };
+      }).sort((a: any, b: any) => {
+        const timeA = new Date(a.dataPagamento).getTime();
+        const timeB = new Date(b.dataPagamento).getTime();
+        if (timeB !== timeA) {
+          return timeB - timeA;
+        }
+        const idA = Number(a.id) || 0;
+        const idB = Number(b.id) || 0;
+        return idB - idA;
       })
-    )
-    .filter((p: any) => Number(p.valorPago || 0) > 0 || p.status === 'PAGA' || p.dataPagamento)
-    .sort((a: any, b: any) => {
-      const timeA = a.dataPagamento ? new Date(a.dataPagamento).getTime() : new Date(a.dataVencimento).getTime();
-      const timeB = b.dataPagamento ? new Date(b.dataPagamento).getTime() : new Date(b.dataVencimento).getTime();
-      return timeB - timeA; // Mais recente primeiro
-    });
+    : (() => {
+        const mapa = new Map<string, GrupoPagamento>();
+
+        historicoVendas.forEach((v: any) => {
+          const nomesItens = v.itens?.map((i: any) => i.produto?.nome || i.nomeProduto).filter(Boolean).join(', ');
+          const nomeProduto = nomesItens || v.nomeProduto || `Venda #${v.id}`;
+
+          (v.parcelas || []).forEach((p: any) => {
+            const valPago = Number(p.valorPago || 0);
+            const isPago = p.status === 'PAGA' || valPago > 0;
+            if (!isPago || !p.dataPagamento) return;
+
+            const dataStr = typeof p.dataPagamento === 'string' 
+              ? p.dataPagamento.split('T')[0] 
+              : new Date(p.dataPagamento).toISOString().split('T')[0];
+
+            const chave = `venda_${v.id}_data_${dataStr}`;
+            const valorEfetivo = valPago > 0 ? valPago : Number(p.valor);
+
+            if (!mapa.has(chave)) {
+              mapa.set(chave, {
+                id: `${chave}_${p.id}`,
+                dataPagamento: p.dataPagamento,
+                vendaId: v.id,
+                nomeProduto,
+                valorTotalPago: valorEfetivo,
+                parcelas: [{
+                  numero: p.numero,
+                  valor: Number(p.valor),
+                  valorPago: valorEfetivo,
+                  status: p.status
+                }],
+                observacoes: p.observacao ? [p.observacao] : [],
+                statusBadge: p.status === 'PAGA' ? 'Pago' : 'Parcial',
+                titulo: `Parcela #${p.numero}`
+              });
+            } else {
+              const grupo = mapa.get(chave)!;
+              grupo.valorTotalPago += valorEfetivo;
+              grupo.parcelas.push({
+                numero: p.numero,
+                valor: Number(p.valor),
+                valorPago: valorEfetivo,
+                status: p.status
+              });
+              if (p.observacao && !grupo.observacoes.includes(p.observacao)) {
+                grupo.observacoes.push(p.observacao);
+              }
+            }
+          });
+        });
+
+        return Array.from(mapa.values()).map((grupo: GrupoPagamento) => {
+          grupo.parcelas.sort((a: any, b: any) => a.numero - b.numero);
+
+          if (grupo.parcelas.length === 1) {
+            const p = grupo.parcelas[0];
+            grupo.titulo = `Parcela #${p.numero}`;
+            grupo.statusBadge = p.status === 'PAGA' ? 'Pago' : 'Parcial';
+          } else {
+            const numeros = grupo.parcelas.map((p: any) => `#${p.numero}`).join(' e ');
+            grupo.titulo = `Parcelas ${numeros}`;
+            const temPaga = grupo.parcelas.some((p: any) => p.status === 'PAGA');
+            grupo.statusBadge = temPaga ? 'Pago' : 'Parcial';
+
+            grupo.detalhes = grupo.parcelas.map((p: any) => {
+              if (p.status === 'PAGA') {
+                return `R$ ${p.valorPago.toFixed(2)} (P#${p.numero} quitada)`;
+              } else {
+                return `R$ ${p.valorPago.toFixed(2)} (P#${p.numero} adiantado)`;
+              }
+            }).join(' • ');
+          }
+
+          return grupo;
+        }).sort((a: any, b: any) => {
+          const timeA = new Date(a.dataPagamento).getTime();
+          const timeB = new Date(b.dataPagamento).getTime();
+          return timeB - timeA;
+        });
+      })();
 
   const totalJaPagoCliente = pagamentosRealizados.reduce((acc: number, p: any) => {
-    const val = p.valorPago ? Number(p.valorPago) : (p.status === 'PAGA' ? Number(p.valor) : 0);
-    return acc + val;
+    return acc + p.valorTotalPago;
   }, 0);
 
   return (
@@ -799,10 +917,9 @@ export const ClientesView: React.FC = () => {
                         </div>
                       ) : (
                         pagamentosRealizados.map((p: any) => {
-                          const valPagoNum = p.valorPago ? Number(p.valorPago) : (p.status === 'PAGA' ? Number(p.valor) : 0);
                           const dataFormatada = p.dataPagamento 
                             ? new Date(p.dataPagamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                            : (p.dataVencimento ? new Date(p.dataVencimento).toLocaleDateString('pt-BR') : 'Data não informada');
+                            : 'Data não informada';
 
                           return (
                             <div
@@ -820,8 +937,8 @@ export const ClientesView: React.FC = () => {
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
-                                  <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                                    Parcela #{p.numero}
+                                  <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                                    {p.titulo}
                                   </div>
                                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                                     {p.nomeProduto}
@@ -829,8 +946,8 @@ export const ClientesView: React.FC = () => {
                                 </div>
 
                                 <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#166534' }}>
-                                    + R$ {valPagoNum.toFixed(2)}
+                                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#166534' }}>
+                                    + R$ {p.valorTotalPago.toFixed(2)}
                                   </div>
                                   <span style={{
                                     display: 'inline-block',
@@ -838,14 +955,20 @@ export const ClientesView: React.FC = () => {
                                     fontWeight: 700,
                                     padding: '2px 8px',
                                     borderRadius: '9999px',
-                                    backgroundColor: p.status === 'PAGA' ? '#DCFCE7' : '#FEF3C7',
-                                    color: p.status === 'PAGA' ? '#166534' : '#92400E',
+                                    backgroundColor: p.statusBadge === 'Pago' ? '#DCFCE7' : '#FEF3C7',
+                                    color: p.statusBadge === 'Pago' ? '#166534' : '#92400E',
                                     marginTop: '2px'
                                   }}>
-                                    {p.status === 'PAGA' ? 'Pago' : (p.status === 'PARCIAL' ? 'Parcial' : p.status)}
+                                    {p.statusBadge}
                                   </span>
                                 </div>
                               </div>
+
+                              {p.detalhes && (
+                                <div style={{ fontSize: '0.75rem', color: 'var(--accent-800, #166534)', backgroundColor: 'var(--accent-50, #F0FDF4)', padding: '5px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--accent-200, #BBF7D0)' }}>
+                                  ℹ️ {p.detalhes}
+                                </div>
+                              )}
 
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed var(--border-subtle, #F1F5F9)', paddingTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -856,9 +979,9 @@ export const ClientesView: React.FC = () => {
                                 <span>Venda #{p.vendaId}</span>
                               </div>
 
-                              {p.observacao && (
+                              {p.observacoes && p.observacoes.length > 0 && (
                                 <div style={{ fontSize: '0.75rem', backgroundColor: 'var(--bg-subtle, #F8FAFC)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)' }}>
-                                  💬 <em>{p.observacao}</em>
+                                  💬 <em>{p.observacoes.join(' | ')}</em>
                                 </div>
                               )}
                             </div>

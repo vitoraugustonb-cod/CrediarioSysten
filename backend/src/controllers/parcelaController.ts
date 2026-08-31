@@ -130,7 +130,8 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
     }
 
     const parcela = await prisma.parcela.findUnique({
-      where: { id: parcelaId }
+      where: { id: parcelaId },
+      include: { venda: true }
     });
 
     if (!parcela) {
@@ -218,6 +219,21 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
           });
         }
       }
+
+      // 3. Registrar a transação histórica real e imutável de pagamento
+      await tx.pagamento.create({
+        data: {
+          vendaId: parcela.vendaId,
+          clienteId: parcela.venda.clienteId,
+          cobradorId: usuario.id,
+          parcelaId: parcela.id,
+          valorPago: valorPagoNum,
+          dataPagamento: dataPagamentoFinal,
+          detalhes: excedente > 0
+            ? `Quitou Parcela #${parcela.numero} e adiantou excedente de R$ ${excedente.toFixed(2)}`
+            : `Pagamento de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero}`
+        }
+      });
 
       await tx.auditoria.create({
         data: {

@@ -53,6 +53,20 @@ export const obterClientePorId = async (req: Request, res: Response): Promise<vo
     const cliente = await prisma.cliente.findUnique({
       where: { id: clienteId },
       include: {
+        pagamentos: {
+          include: {
+            cobrador: { select: { id: true, nome: true, email: true } },
+            venda: {
+              include: {
+                itens: { include: { produto: true } }
+              }
+            }
+          },
+          orderBy: [
+            { dataPagamento: 'desc' },
+            { id: 'desc' }
+          ]
+        },
         vendas: {
           include: {
             itens: { include: { produto: true } },

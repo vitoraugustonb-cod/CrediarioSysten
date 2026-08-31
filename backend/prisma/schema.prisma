@@ -35,6 +35,7 @@ model Usuario {
 
   vendas    Venda[]   @relation("VendedorVendas")
   cobrancas Parcela[] @relation("CobradorParcelas")
+  pagamentosRecebidos Pagamento[] @relation("CobradorPagamentos")
 }
 
 model Cliente {
@@ -45,7 +46,8 @@ model Cliente {
   referencias String?
   criadoEm    DateTime @default(now())
 
-  vendas Venda[]
+  vendas      Venda[]
+  pagamentos  Pagamento[]
 }
 
 model Produto {
@@ -69,8 +71,9 @@ model Venda {
   numParcelas  Int
   dataVenda    DateTime @default(now())
 
-  itens    ItemVenda[]
-  parcelas Parcela[]
+  itens      ItemVenda[]
+  parcelas   Parcela[]
+  pagamentos Pagamento[]
 }
 
 model ItemVenda {
@@ -99,6 +102,21 @@ model Parcela {
   observacao     String?
 
   auditorias Auditoria[]
+}
+
+model Pagamento {
+  id            Int      @id @default(autoincrement())
+  venda         Venda    @relation(fields: [vendaId], references: [id])
+  vendaId       Int
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  clienteId     Int
+  cobrador      Usuario  @relation("CobradorPagamentos", fields: [cobradorId], references: [id])
+  cobradorId    Int
+  parcelaId     Int?
+  valorPago     Decimal  @db.Decimal(10, 2)
+  dataPagamento DateTime
+  detalhes      String?
+  criadoEm      DateTime @default(now())
 }
 
 model Auditoria {
