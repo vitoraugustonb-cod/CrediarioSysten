@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Usuario, PerfilUsuario } from '../types/auth';
 import { AuthContext } from './AuthContextDefinition';
 
-const API_BASE_URL = 'http://localhost:3300';
+const API_BASE_URL = '';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Token stored in React memory context as requested

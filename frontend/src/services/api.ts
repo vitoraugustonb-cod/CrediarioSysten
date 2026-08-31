@@ -1,6 +1,6 @@
 // API Service Module for Crediário System
-// Base URL points to backend port 3300
-export const API_BASE_URL = 'http://localhost:3300';
+// Base URL uses relative path so Vite dev proxy handles it seamlessly (LAN, localhost, and tunnels)
+export const API_BASE_URL = '';
 
 export interface Cliente {
   id: number;
