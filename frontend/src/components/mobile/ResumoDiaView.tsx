@@ -421,9 +421,9 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              <div style={{ padding: '10px 12px', backgroundColor: '#F3E8FF', borderRadius: 'var(--radius-md)', border: '1px solid #D8B4FE' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6B21A8' }}>🛍️ VARIEDADES</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6B21A8', marginTop: '2px' }}>
+              <div style={{ padding: '10px 12px', backgroundColor: '#ECFDF5', borderRadius: 'var(--radius-md)', border: '1px solid #A7F3D0' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857' }}>🛍️ VARIEDADES</span>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#065F46', marginTop: '2px' }}>
                   R$ {(resumo.totalVendidoVariedades || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
               </div>
