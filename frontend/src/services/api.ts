@@ -357,3 +357,42 @@ export async function getExtratoDia(dataIso: string, token: string | null): Prom
   return await fetchWithAuth(`/pagamentos/extrato-dia?data=${dataIso}`, token);
 }
 
+// 19. Histórico de Vendas Dias Fechados & Extrato Diário de Vendas
+export interface DiaFechadoVendasItem {
+  data: string; // YYYY-MM-DD
+  totalVendido: number;
+  qtdVendas: number;
+}
+
+export interface ExtratoDiaVendasItem {
+  ordem: number;
+  id: number;
+  clienteId: number;
+  clienteNome: string;
+  clienteTelefone: string;
+  clienteEndereco: string;
+  itens: string;
+  condicao: string;
+  valorEntrada: number;
+  numParcelas: number;
+  valorTotal: number;
+  dataVenda: string;
+  criadoEm: string;
+}
+
+export interface ExtratoDiaVendasResponse {
+  data: string;
+  totalVendido: number;
+  qtdVendas: number;
+  itens: ExtratoDiaVendasItem[];
+}
+
+export async function getHistoricoVendasDiasFechados(token: string | null): Promise<DiaFechadoVendasItem[]> {
+  return await fetchWithAuth('/vendas/dias-fechados', token);
+}
+
+export async function getExtratoVendasDia(dataIso: string, token: string | null): Promise<ExtratoDiaVendasResponse> {
+  return await fetchWithAuth(`/vendas/extrato-dia?data=${dataIso}`, token);
+}
+
+

@@ -6,7 +6,8 @@ import {
   LogOut, 
   Sun,
   TrendingUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -15,17 +16,19 @@ import { CobrancasView } from '../mobile/CobrancasView';
 import { NovaVendaView } from '../mobile/NovaVendaView';
 import { ClientesView } from '../mobile/ClientesView';
 import { HistoricoExtratoView } from '../mobile/HistoricoExtratoView';
+import { HistoricoVendasExtratoView } from '../mobile/HistoricoVendasExtratoView';
 
 export const MobileLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('resumo');
 
   const bottomNavItems = [
-    { id: 'resumo', label: 'Resumo Dia', icon: TrendingUp },
+    { id: 'resumo', label: 'Resumo', icon: TrendingUp },
     { id: 'cobrancas', label: 'Cobranças', icon: Wallet },
     { id: 'venda', label: 'Nova Venda', icon: PlusCircle },
     { id: 'clientes', label: 'Clientes', icon: Users },
-    { id: 'historico', label: 'Histórico', icon: FileSpreadsheet },
+    { id: 'historico', label: 'Hist. Cobr.', icon: FileSpreadsheet },
+    { id: 'historico_vendas', label: 'Hist. Vendas', icon: ShoppingBag },
   ];
 
   return (
@@ -121,6 +124,7 @@ export const MobileLayout: React.FC = () => {
         {activeTab === 'venda' && <NovaVendaView onNavigate={(t) => setActiveTab(t)} />}
         {activeTab === 'clientes' && <ClientesView />}
         {activeTab === 'historico' && <HistoricoExtratoView />}
+        {activeTab === 'historico_vendas' && <HistoricoVendasExtratoView />}
       </main>
 
       {/* Navegação Inferior Fixa (Bottom Navigation for Mobile) */}

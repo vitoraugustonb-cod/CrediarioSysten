@@ -346,3 +346,178 @@ export const obterVendaPorId = async (req: Request, res: Response): Promise<void
     res.status(500).json({ erro: 'Erro interno ao obter detalhes da venda.' });
   }
 };
+
+// Retorna data de hoje no fuso local Brasil (YYYY-MM-DD)
+function getHojeLocalVendasStr(): string {
+  const agora = new Date();
+  const localOffsetMs = 3 * 60 * 60 * 1000;
+  const dataBR = new Date(agora.getTime() - localOffsetMs);
+  return dataBR.toISOString().substring(0, 10);
+}
+
+/**
+ * GET /vendas/dias-fechados
+ * Retorna as datas anteriores ao dia atual que possuem vendas fechadas
+ */
+export const listarDiasFechadosVendas = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const usuario = req.usuario!;
+    const hojeStr = getHojeLocalVendasStr();
+
+    const filtroVendedor = usuario.perfil === 'GERENTE' 
+      ? {} 
+      : { vendedorId: usuario.id };
+
+    const vendas = await prisma.venda.findMany({
+      where: filtroVendedor,
+      orderBy: { dataVenda: 'desc' }
+    });
+
+    const mapaDias = new Map<string, { data: string; totalVendido: number; qtdVendas: number }>();
+
+    for (const v of vendas) {
+      const dataIso = typeof v.dataVenda === 'string'
+        ? v.dataVenda.split('T')[0]
+        : v.dataVenda.toISOString().split('T')[0];
+
+      // Regra: Não exibe o dia atual (o extrato do dia só fecha após o dia finalizar)
+      if (dataIso >= hojeStr) {
+        continue;
+      }
+
+      const val = Number(v.valorTotal);
+
+      if (!mapaDias.has(dataIso)) {
+        mapaDias.set(dataIso, {
+          data: dataIso,
+          totalVendido: val,
+          qtdVendas: 1
+        });
+      } else {
+        const item = mapaDias.get(dataIso)!;
+        item.totalVendido += val;
+        item.qtdVendas += 1;
+      }
+    }
+
+    const listaDias = Array.from(mapaDias.values()).map(d => ({
+      ...d,
+      totalVendido: Math.round(d.totalVendido * 100) / 100
+    })).sort((a, b) => b.data.localeCompare(a.data));
+
+    res.json(listaDias);
+  } catch (error) {
+    console.error('Erro ao listar dias fechados de vendas:', error);
+    res.status(500).json({ erro: 'Erro interno ao consultar histórico de vendas fechadas.' });
+  }
+};
+
+/**
+ * GET /vendas/extrato-dia?data=YYYY-MM-DD
+ * Retorna o extrato detalhado de vendas de um dia específico para exibição em tabela estilo Excel
+ */
+export const obterExtratoDiaVendas = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const usuario = req.usuario!;
+    const { data } = req.query;
+
+    if (!data || typeof data !== 'string') {
+      res.status(400).json({ erro: 'A data do extrato é obrigatória no formato YYYY-MM-DD.' });
+      return;
+    }
+
+    const dataIso = data.trim().split('T')[0];
+    const hojeStr = getHojeLocalVendasStr();
+
+    if (dataIso >= hojeStr) {
+      res.status(400).json({ 
+        erro: 'O extrato de vendas do dia atual ainda está em andamento e só fica disponível após o fechamento do dia. Acompanhe o dia de hoje na aba Resumo Dia.' 
+      });
+      return;
+    }
+
+    const filtroVendedor = usuario.perfil === 'GERENTE' 
+      ? {} 
+      : { vendedorId: usuario.id };
+
+    const inicioDia = new Date(`${dataIso}T00:00:00.000Z`);
+    const fimDia = new Date(`${dataIso}T23:59:59.999Z`);
+
+    const vendas = await prisma.venda.findMany({
+      where: {
+        ...filtroVendedor,
+        dataVenda: {
+          gte: inicioDia,
+          lte: fimDia
+        }
+      },
+      include: {
+        cliente: {
+          select: {
+            id: true,
+            nome: true,
+            telefone: true,
+            endereco: true
+          }
+        },
+        itens: {
+          include: {
+            produto: true
+          }
+        },
+        parcelas: {
+          orderBy: { numero: 'asc' }
+        },
+        vendedor: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { id: 'asc' }
+    });
+
+    const itensExtrato = vendas.map((v, index) => {
+      const itensDesc = v.itens?.map(i => `${i.quantidade}x ${i.produto?.nome || 'Item'}`).join(', ') || 'Produtos';
+      
+      const valEntrada = Number(v.valorEntrada || 0);
+      const parcelasInfo = v.parcelas?.length 
+        ? `${v.parcelas.length}x R$ ${Number(v.parcelas[0].valor).toFixed(2)}`
+        : '';
+      const condicao = valEntrada > 0 
+        ? `Entrada R$ ${valEntrada.toFixed(2)}${parcelasInfo ? ` + ${parcelasInfo}` : ''}`
+        : parcelasInfo || 'À vista';
+
+      return {
+        ordem: index + 1,
+        id: v.id,
+        clienteId: v.clienteId,
+        clienteNome: v.cliente?.nome || 'Cliente não identificado',
+        clienteTelefone: v.cliente?.telefone || '',
+        clienteEndereco: v.cliente?.endereco || '',
+        itens: itensDesc,
+        condicao,
+        valorEntrada: valEntrada,
+        numParcelas: v.parcelas?.length || 0,
+        valorTotal: Number(v.valorTotal),
+        dataVenda: v.dataVenda,
+        criadoEm: v.criadoEm
+      };
+    });
+
+    const totalVendido = itensExtrato.reduce((acc, item) => acc + item.valorTotal, 0);
+
+    res.json({
+      data: dataIso,
+      totalVendido: Math.round(totalVendido * 100) / 100,
+      qtdVendas: itensExtrato.length,
+      itens: itensExtrato
+    });
+  } catch (error) {
+    console.error('Erro ao obter extrato de vendas do dia:', error);
+    res.status(500).json({ erro: 'Erro interno ao consultar extrato diário de vendas.' });
+  }
+};
+
