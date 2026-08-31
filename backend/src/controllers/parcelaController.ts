@@ -139,7 +139,9 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const dataPagamentoFinal = dataPagamento ? new Date(dataPagamento) : new Date();
+    const dataPagamentoFinal = dataPagamento
+      ? new Date(`${typeof dataPagamento === 'string' ? dataPagamento.split('T')[0] : dataPagamento.toISOString().split('T')[0]}T12:00:00.000Z`)
+      : new Date();
 
     const resultado = await prisma.$transaction(async (tx) => {
       // Valor da parcela atual e o que ja havia sido pago nela

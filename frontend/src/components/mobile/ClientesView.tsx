@@ -28,6 +28,30 @@ import {
   type SaldoDevedorCliente 
 } from '../../services/api';
 
+// Formata data YYYY-MM-DD ou ISO de forma imune a timezone
+function formatarDataBR(dataStr?: string | Date | null): string {
+  if (!dataStr) return 'Data não informada';
+  if (typeof dataStr === 'string') {
+    const match = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      const [, ano, mes, dia] = match;
+      return `${dia}/${mes}/${ano}`;
+    }
+  }
+  const d = new Date(dataStr);
+  if (isNaN(d.getTime())) return 'Data não informada';
+  return d.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// Retorna data de hoje no fuso local do usuário no formato YYYY-MM-DD
+function getDataHojeLocal(): string {
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
 export const ClientesView: React.FC = () => {
   const { token } = useAuth();
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -136,7 +160,7 @@ export const ClientesView: React.FC = () => {
     const valorRestante = Number(p.valor) - (p.valorPago ? Number(p.valorPago) : 0);
     setParcelaParaPagamento(p);
     setValorPagoInput(valorRestante.toFixed(2));
-    setDataPagamentoInput(new Date().toISOString().substring(0, 10));
+    setDataPagamentoInput(getDataHojeLocal());
   };
 
   const handleIniciarValidacaoPagamento = (e: React.FormEvent) => {
@@ -726,7 +750,7 @@ export const ClientesView: React.FC = () => {
                               </div>
 
                               <p style={{ fontSize: '0.82rem', color: '#15803D', margin: 0 }}>
-                                Valor da parcela: <strong>R$ {Number(parcelaParaPagamento.valor).toFixed(2)}</strong> | Venc: {new Date(parcelaParaPagamento.dataVencimento).toLocaleDateString('pt-BR')}
+                                Valor da parcela: <strong>R$ {Number(parcelaParaPagamento.valor).toFixed(2)}</strong> | Venc: {formatarDataBR(parcelaParaPagamento.dataVencimento)}
                               </p>
 
                               <div>
@@ -816,7 +840,7 @@ export const ClientesView: React.FC = () => {
                                             Parcela #{p.numero} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>(Venda #{p.vendaId})</span>
                                           </div>
                                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                            Venc: {new Date(p.dataVencimento).toLocaleDateString('pt-BR')} • <strong style={{ color: estaAtrasada ? '#B91C1C' : '#D97706' }}>{estaAtrasada ? 'ATRASADA' : p.status}</strong>
+                                            Venc: {formatarDataBR(p.dataVencimento)} • <strong style={{ color: estaAtrasada ? '#B91C1C' : '#D97706' }}>{estaAtrasada ? 'ATRASADA' : p.status}</strong>
                                           </div>
                                           <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--accent-700)', marginTop: '2px' }}>
                                             Resta: R$ {resta.toFixed(2)}
@@ -916,77 +940,71 @@ export const ClientesView: React.FC = () => {
                           </p>
                         </div>
                       ) : (
-                        pagamentosRealizados.map((p: any) => {
-                          const dataFormatada = p.dataPagamento 
-                            ? new Date(p.dataPagamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                            : 'Data não informada';
-
-                          return (
-                            <div
-                              key={p.id}
-                              style={{
-                                backgroundColor: '#FFFFFF',
-                                borderRadius: 'var(--radius-md)',
-                                padding: '14px',
-                                border: '1px solid var(--border-color, #E2E8F0)',
-                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '8px'
-                              }}
-                            >
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                  <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                                    {p.titulo}
-                                  </div>
-                                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                    {p.nomeProduto}
-                                  </div>
+                        pagamentosRealizados.map((p: any) => (
+                          <div
+                            key={p.id}
+                            style={{
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '14px',
+                              border: '1px solid var(--border-color, #E2E8F0)',
+                              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                                  {p.titulo}
                                 </div>
-
-                                <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#166534' }}>
-                                    + R$ {p.valorTotalPago.toFixed(2)}
-                                  </div>
-                                  <span style={{
-                                    display: 'inline-block',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 700,
-                                    padding: '2px 8px',
-                                    borderRadius: '9999px',
-                                    backgroundColor: p.statusBadge === 'Pago' ? '#DCFCE7' : '#FEF3C7',
-                                    color: p.statusBadge === 'Pago' ? '#166534' : '#92400E',
-                                    marginTop: '2px'
-                                  }}>
-                                    {p.statusBadge}
-                                  </span>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                  {p.nomeProduto}
                                 </div>
                               </div>
 
-                              {p.detalhes && (
-                                <div style={{ fontSize: '0.75rem', color: 'var(--accent-800, #166534)', backgroundColor: 'var(--accent-50, #F0FDF4)', padding: '5px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--accent-200, #BBF7D0)' }}>
-                                  ℹ️ {p.detalhes}
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#166534' }}>
+                                  + R$ {p.valorTotalPago.toFixed(2)}
                                 </div>
-                              )}
-
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed var(--border-subtle, #F1F5F9)', paddingTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <Calendar size={13} color="var(--accent-600)" />
-                                  <span>Pago em: <strong>{dataFormatada}</strong></span>
-                                </div>
-
-                                <span>Venda #{p.vendaId}</span>
+                                <span style={{
+                                  display: 'inline-block',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '9999px',
+                                  backgroundColor: p.statusBadge === 'Pago' ? '#DCFCE7' : '#FEF3C7',
+                                  color: p.statusBadge === 'Pago' ? '#166534' : '#92400E',
+                                  marginTop: '2px'
+                                }}>
+                                  {p.statusBadge}
+                                </span>
                               </div>
-
-                              {p.observacoes && p.observacoes.length > 0 && (
-                                <div style={{ fontSize: '0.75rem', backgroundColor: 'var(--bg-subtle, #F8FAFC)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)' }}>
-                                  💬 <em>{p.observacoes.join(' | ')}</em>
-                                </div>
-                              )}
                             </div>
-                          );
-                        })
+
+                            {p.detalhes && (
+                              <div style={{ fontSize: '0.75rem', color: 'var(--accent-800, #166534)', backgroundColor: 'var(--accent-50, #F0FDF4)', padding: '5px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--accent-200, #BBF7D0)' }}>
+                                ℹ️ {p.detalhes}
+                              </div>
+                            )}
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed var(--border-subtle, #F1F5F9)', paddingTop: '6px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Calendar size={13} color="var(--accent-600)" />
+                                <span>Pago em: <strong>{formatarDataBR(p.dataPagamento)}</strong></span>
+                              </div>
+
+                              <span>Venda #{p.vendaId}</span>
+                            </div>
+
+                            {p.observacoes && p.observacoes.length > 0 && (
+                              <div style={{ fontSize: '0.75rem', backgroundColor: 'var(--bg-subtle, #F8FAFC)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)' }}>
+                                💬 <em>{p.observacoes.join(' | ')}</em>
+                              </div>
+                            )}
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>
