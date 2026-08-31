@@ -318,3 +318,42 @@ export async function criarProdutoAPI(
     body: JSON.stringify(produtoData),
   });
 }
+
+// 18. Histórico de Dias Fechados & Extrato Diário
+export interface DiaFechadoItem {
+  data: string; // YYYY-MM-DD
+  totalCobrado: number;
+  qtdPagamentos: number;
+}
+
+export interface ExtratoDiaItem {
+  ordem: number;
+  id: number;
+  clienteId: number;
+  clienteNome: string;
+  clienteTelefone: string;
+  clienteEndereco: string;
+  vendaId: number;
+  parcelaId: number | null;
+  produto: string;
+  detalhes: string;
+  valorPago: number;
+  dataPagamento: string;
+  criadoEm: string;
+}
+
+export interface ExtratoDiaResponse {
+  data: string;
+  totalCobrado: number;
+  qtdPagamentos: number;
+  itens: ExtratoDiaItem[];
+}
+
+export async function getHistoricoDiasFechados(token: string | null): Promise<DiaFechadoItem[]> {
+  return await fetchWithAuth('/pagamentos/dias-fechados', token);
+}
+
+export async function getExtratoDia(dataIso: string, token: string | null): Promise<ExtratoDiaResponse> {
+  return await fetchWithAuth(`/pagamentos/extrato-dia?data=${dataIso}`, token);
+}
+

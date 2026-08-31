@@ -9,6 +9,7 @@ import vendaRoutes from './routes/vendaRoutes.js';
 import parcelaRoutes from './routes/parcelaRoutes.js';
 import prestacaoContasRoutes from './routes/prestacaoContasRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
+import pagamentoRoutes from './routes/pagamentoRoutes.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use(vendaRoutes);
 app.use(parcelaRoutes);
 app.use(prestacaoContasRoutes);
 app.use(relatorioRoutes);
+app.use(pagamentoRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
