@@ -491,3 +491,39 @@ export const alterarDataVencimentoParcela = async (req: Request, res: Response):
     res.status(500).json({ erro: 'Erro interno ao alterar data de vencimento.' });
   }
 };
+
+/**
+ * PATCH /parcelas/:id/contato
+ * Registra o timestamp do contato (WhatsApp) realizado com o cliente desta parcela.
+ */
+export const registrarContatoParcela = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const idStr = Array.isArray(id) ? id[0] : id;
+    const parcelaId = parseInt(idStr, 10);
+
+    if (isNaN(parcelaId)) {
+      res.status(400).json({ erro: 'ID de parcela inválido.' });
+      return;
+    }
+
+    const parcela = await prisma.parcela.findUnique({ where: { id: parcelaId } });
+    if (!parcela) {
+      res.status(404).json({ erro: 'Parcela não encontrada.' });
+      return;
+    }
+
+    const agora = new Date();
+    const parcelaAtualizada = await prisma.parcela.update({
+      where: { id: parcelaId },
+      data: {
+        ultimoContatoEm: agora
+      }
+    });
+
+    res.json(parcelaAtualizada);
+  } catch (error) {
+    console.error('Erro ao registrar contato da parcela:', error);
+    res.status(500).json({ erro: 'Erro interno ao registrar contato da parcela.' });
+  }
+};

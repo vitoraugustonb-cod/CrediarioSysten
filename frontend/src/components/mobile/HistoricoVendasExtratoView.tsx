@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { 
   Calendar, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   ArrowLeft, 
   Clock, 
   Search, 
   Copy, 
   Check, 
-  Receipt,
+  Receipt, 
   AlertCircle,
   Sofa,
   ShoppingBag
@@ -20,6 +22,20 @@ import {
   type ExtratoDiaVendasResponse 
 } from '../../services/api';
 
+const NOMES_MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+const NOMES_MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+
+function getMesAnoLabel(chaveAnoMes: string): string {
+  const [ano, mes] = chaveAnoMes.split('-').map(Number);
+  const nomeMes = NOMES_MESES[mes - 1] || '';
+  return `${nomeMes} de ${ano}`;
+}
+
 function formatarDataCompleta(dataIso: string): string {
   if (!dataIso) return 'Data não informada';
   const match = dataIso.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -27,12 +43,9 @@ function formatarDataCompleta(dataIso: string): string {
 
   const [, ano, mes, dia] = match;
   const d = new Date(Number(ano), Number(mes) - 1, Number(dia));
-  
-  const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-  const nomeDia = diasSemana[d.getDay()] || '';
-  const nomeMes = meses[d.getMonth()] || '';
+  const nomeDia = DIAS_SEMANA[d.getDay()] || '';
+  const nomeMes = NOMES_MESES_ABREV[d.getMonth()] || '';
 
   return `${nomeDia}, ${dia} de ${nomeMes} de ${ano}`;
 }
@@ -58,6 +71,9 @@ const ABA_CONFIG = {
     badgeBg: '#DBEAFE',
     badgeText: '#1E40AF',
     headerBg: '#1E3A8A',
+    bannerTotalBg: '#EFF6FF',
+    bannerTotalBorder: '#BFDBFE',
+    bannerTotalText: '#1E40AF',
     totalKey: 'totalVendidoMoveis' as keyof DiaFechadoVendasItem,
     qtdKey: 'qtdVendasMoveis' as keyof DiaFechadoVendasItem,
     tipoFiltro: 'MOVEIS' as const,
@@ -72,11 +88,22 @@ const ABA_CONFIG = {
     badgeBg: '#EDE9FE',
     badgeText: '#5B21B6',
     headerBg: '#4C1D95',
+    bannerTotalBg: '#F5F3FF',
+    bannerTotalBorder: '#DDD6FE',
+    bannerTotalText: '#5B21B6',
     totalKey: 'totalVendidoVariedades' as keyof DiaFechadoVendasItem,
     qtdKey: 'qtdVendasVariedades' as keyof DiaFechadoVendasItem,
     tipoFiltro: 'VARIEDADES' as const,
   },
 };
+
+interface GrupoMesVendas {
+  chave: string; // YYYY-MM
+  label: string; // "Setembro de 2026"
+  totalVendido: number;
+  qtdVendas: number;
+  dias: DiaFechadoVendasItem[];
+}
 
 export const HistoricoVendasExtratoView: React.FC = () => {
   const { token } = useAuth();
@@ -87,11 +114,15 @@ export const HistoricoVendasExtratoView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
 
+  // Meses expandidos por aba (chave YYYY-MM -> boolean)
+  const [mesesExpandidos, setMesesExpandidos] = useState<Record<string, boolean>>({});
+
   // Extrato selecionado
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
   const [extrato, setExtrato] = useState<ExtratoDiaVendasResponse | null>(null);
   const [loadingExtrato, setLoadingExtrato] = useState<boolean>(false);
-  const [copiado, setCopiado] = useState<boolean>(false);
+  const [copiadoDia, setCopiadoDia] = useState<boolean>(false);
+  const [copiadoMesChave, setCopiadoMesChave] = useState<string | null>(null);
 
   const carregarDias = useCallback(async () => {
     setLoading(true);
@@ -99,6 +130,14 @@ export const HistoricoVendasExtratoView: React.FC = () => {
     try {
       const dados = await getHistoricoVendasDiasFechados(token);
       setDiasFechados(dados);
+
+      // Abre todos os meses por padrão
+      const initialExpand: Record<string, boolean> = {};
+      dados.forEach(d => {
+        const chaveMes = d.data.substring(0, 7);
+        initialExpand[chaveMes] = true;
+      });
+      setMesesExpandidos(initialExpand);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar histórico de vendas fechadas.');
     } finally {
@@ -109,6 +148,13 @@ export const HistoricoVendasExtratoView: React.FC = () => {
   useEffect(() => {
     carregarDias();
   }, [carregarDias]);
+
+  const toggleMes = (chave: string) => {
+    setMesesExpandidos(prev => ({
+      ...prev,
+      [chave]: !prev[chave]
+    }));
+  };
 
   const abrirExtrato = async (dataIso: string) => {
     setDiaSelecionado(dataIso);
@@ -139,12 +185,12 @@ export const HistoricoVendasExtratoView: React.FC = () => {
 
   const cfg = ABA_CONFIG[abaAtiva];
 
-  const copiarResumoWhatsApp = () => {
+  const copiarResumoDiaWhatsApp = () => {
     if (!extrato) return;
     const itensFiltrados = extrato.itens.filter(i => i.tipoVenda === abaAtiva);
     const totalFiltrado = itensFiltrados.reduce((acc, i) => acc + i.valorTotal, 0);
     const dataStr = formatarDataCurta(extrato.data);
-    let texto = `${cfg.emoji} *EXTRATO DE VENDAS (${cfg.label}) - ${dataStr}*\n`;
+    let texto = `${cfg.emoji} *EXTRATO DE VENDAS (${cfg.label.toUpperCase()}) - ${dataStr}*\n`;
     texto += `----------------------------------------\n`;
     itensFiltrados.forEach((item, idx) => {
       texto += `${idx + 1}. *${item.clienteNome}*: R$ ${item.valorTotal.toFixed(2)} (${item.itens} - ${item.condicao})\n`;
@@ -154,32 +200,86 @@ export const HistoricoVendasExtratoView: React.FC = () => {
     texto += `📦 *Qtd. Vendas:* ${itensFiltrados.length}\n`;
 
     navigator.clipboard.writeText(texto);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2500);
+    setCopiadoDia(true);
+    setTimeout(() => setCopiadoDia(false), 2500);
   };
 
-  // Filtra dias que têm ao menos uma venda do tipo da aba ativa
-  const diasFiltradosPorTipo = diasFechados.filter(d => {
-    const qtd = Number(d[cfg.qtdKey] ?? 0);
-    return qtd > 0;
-  });
+  const copiarResumoMesWhatsApp = (grupo: GrupoMesVendas, e: React.MouseEvent) => {
+    e.stopPropagation();
+    let texto = `${cfg.emoji} *VENDAS (${cfg.label.toUpperCase()}) - ${grupo.label.toUpperCase()}*\n`;
+    texto += `----------------------------------------\n`;
+    grupo.dias.forEach(d => {
+      const totalDia = Number(d[cfg.totalKey] ?? 0);
+      const qtdDia = Number(d[cfg.qtdKey] ?? 0);
+      texto += `• ${formatarDataCurta(d.data)}: R$ ${totalDia.toFixed(2)} (${qtdDia} vendas)\n`;
+    });
+    texto += `----------------------------------------\n`;
+    texto += `💰 *TOTAL ${cfg.label.toUpperCase()} NO MÊS:* R$ ${grupo.totalVendido.toFixed(2)}\n`;
+    texto += `📦 *Total de Vendas:* ${grupo.qtdVendas}\n`;
+    texto += `📆 *Dias com Vendas:* ${grupo.dias.length}\n`;
 
-  const diasFiltrados = diasFiltradosPorTipo.filter(d => {
-    const dataFormatada = formatarDataCompleta(d.data).toLowerCase();
-    const dataCurta = formatarDataCurta(d.data);
-    const termo = busca.toLowerCase();
-    return dataFormatada.includes(termo) || dataCurta.includes(termo);
-  });
+    navigator.clipboard.writeText(texto);
+    setCopiadoMesChave(grupo.chave);
+    setTimeout(() => setCopiadoMesChave(null), 2500);
+  };
+
+  // Filtra apenas os dias que têm vendas da categoria ativa
+  const diasFiltradosPorTipo = useMemo(() => {
+    return diasFechados.filter(d => {
+      const qtd = Number(d[cfg.qtdKey] ?? 0);
+      return qtd > 0;
+    });
+  }, [diasFechados, cfg.qtdKey]);
+
+  // Filtra pelo termo de busca
+  const diasFiltrados = useMemo(() => {
+    return diasFiltradosPorTipo.filter(d => {
+      const dataFormatada = formatarDataCompleta(d.data).toLowerCase();
+      const dataCurta = formatarDataCurta(d.data);
+      const chaveMes = d.data.substring(0, 7);
+      const labelMes = getMesAnoLabel(chaveMes).toLowerCase();
+      const termo = busca.toLowerCase();
+      return dataFormatada.includes(termo) || dataCurta.includes(termo) || labelMes.includes(termo);
+    });
+  }, [diasFiltradosPorTipo, busca]);
+
+  // Agrupamento por mês para a categoria ativa
+  const gruposMeses = useMemo(() => {
+    const mapa = new Map<string, GrupoMesVendas>();
+
+    for (const d of diasFiltrados) {
+      const chave = d.data.substring(0, 7); // "YYYY-MM"
+      const valTotal = Number(d[cfg.totalKey] ?? 0);
+      const qtd = Number(d[cfg.qtdKey] ?? 0);
+
+      if (!mapa.has(chave)) {
+        mapa.set(chave, {
+          chave,
+          label: getMesAnoLabel(chave),
+          totalVendido: valTotal,
+          qtdVendas: qtd,
+          dias: [d]
+        });
+      } else {
+        const g = mapa.get(chave)!;
+        g.totalVendido += valTotal;
+        g.qtdVendas += qtd;
+        g.dias.push(d);
+      }
+    }
+
+    return Array.from(mapa.values()).sort((a, b) => b.chave.localeCompare(a.chave));
+  }, [diasFiltrados, cfg.totalKey, cfg.qtdKey]);
 
   // Itens do extrato filtrados pelo tipo da aba ativa
-  const itensFiltrados = extrato?.itens.filter(i => i.tipoVenda === abaAtiva) ?? [];
-  const totalFiltrado = itensFiltrados.reduce((acc, i) => acc + i.valorTotal, 0);
+  const itensFiltradosExtrato = extrato?.itens.filter(i => i.tipoVenda === abaAtiva) ?? [];
+  const totalFiltradoExtrato = itensFiltradosExtrato.reduce((acc, i) => acc + i.valorTotal, 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
       {/* ================================================================ */}
-      {/* SELETOR DE ABAS */}
+      {/* SELETOR DE ABAS: MÓVEIS / VARIEDADES                             */}
       {/* ================================================================ */}
       {!diaSelecionado && (
         <div
@@ -231,7 +331,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
       )}
 
       {/* ================================================================ */}
-      {/* MODO 1: EXTRATO DETALHADO DO DIA */}
+      {/* MODO 1: EXTRATO DETALHADO DO DIA                                 */}
       {/* ================================================================ */}
       {diaSelecionado ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -254,18 +354,18 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               }}
             >
               <ArrowLeft size={18} />
-              <span>Voltar para Datas</span>
+              <span>Voltar para Meses ({cfg.label})</span>
             </button>
 
             {extrato && (
               <button
-                onClick={copiarResumoWhatsApp}
+                onClick={copiarResumoDiaWhatsApp}
                 title="Copiar texto para WhatsApp"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  backgroundColor: copiado ? '#1E40AF' : cfg.headerBg,
+                  backgroundColor: copiadoDia ? '#1E40AF' : cfg.headerBg,
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
@@ -276,8 +376,8 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                   transition: 'background-color 0.2s ease'
                 }}
               >
-                {copiado ? <Check size={16} /> : <Copy size={16} />}
-                <span>{copiado ? 'Copiado!' : 'Copiar Resumo'}</span>
+                {copiadoDia ? <Check size={16} /> : <Copy size={16} />}
+                <span>{copiadoDia ? 'Copiado!' : 'Copiar Resumo'}</span>
               </button>
             )}
           </div>
@@ -314,7 +414,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 {cfg.emoji} Extrato — {cfg.label}
               </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                {extrato ? `${itensFiltrados.length} venda(s)` : ''}
+                {extrato ? `${itensFiltradosExtrato.length} venda(s)` : ''}
               </span>
             </div>
 
@@ -350,7 +450,6 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 overflow: 'hidden'
               }}
             >
-              {/* Top Banner da Planilha */}
               <div
                 style={{
                   backgroundColor: cfg.headerBg,
@@ -371,7 +470,6 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 </span>
               </div>
 
-              {/* Tabela */}
               <div style={{ overflowX: 'auto', width: '100%' }}>
                 <table
                   style={{
@@ -399,14 +497,14 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                   </thead>
 
                   <tbody>
-                    {itensFiltrados.length === 0 ? (
+                    {itensFiltradosExtrato.length === 0 ? (
                       <tr>
                         <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
                           Nenhuma venda de {cfg.label.toLowerCase()} registrada neste dia.
                         </td>
                       </tr>
                     ) : (
-                      itensFiltrados.map((item, idx) => {
+                      itensFiltradosExtrato.map((item, idx) => {
                         const isPar = idx % 2 === 0;
                         return (
                           <tr
@@ -481,7 +579,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                           fontSize: '1.15rem'
                         }}
                       >
-                        R$ {totalFiltrado.toFixed(2)}
+                        R$ {totalFiltradoExtrato.toFixed(2)}
                       </td>
                     </tr>
                   </tfoot>
@@ -492,7 +590,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
         </div>
       ) : (
         /* ================================================================ */
-        /* MODO 2: LISTA DE DATAS FECHADAS (filtrada por tipo da aba) */
+        /* MODO 2: LISTA DE DATAS AGRUPADAS POR MÊS                         */
         /* ================================================================ */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Header da Aba */}
@@ -503,7 +601,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 Histórico — {cfg.label}
               </h2>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                Extratos de vendas de {cfg.label.toLowerCase()} por dia
+                Extratos de vendas de {cfg.label.toLowerCase()} agrupados por mês
               </p>
             </div>
           </div>
@@ -522,7 +620,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
           >
             <AlertCircle size={20} color={cfg.cor} style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.8rem', color: cfg.badgeText, lineHeight: 1.4 }}>
-              <strong>Regra de Fechamento:</strong> Os extratos são fechados somente após o encerramento do dia. Acompanhe as vendas de hoje na aba <strong>Resumo Dia</strong>.
+              <strong>Prestação de Contas ({cfg.label}):</strong> Os totais mensais são calculados automaticamente para agilizar seu fechamento de mês. As vendas do dia de hoje fecham ao término do dia.
             </div>
           </div>
 
@@ -530,7 +628,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
           <div style={{ position: 'relative' }}>
             <input
               type="text"
-              placeholder="Buscar por data (ex: 30/08 ou agosto)..."
+              placeholder={`Buscar em ${cfg.label.toLowerCase()} por data ou mês (ex: 30/08 ou agosto)...`}
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               style={{
@@ -557,7 +655,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
                 <Clock size={28} />
               </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando extratos...</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando histórico de {cfg.label.toLowerCase()}...</p>
             </div>
           )}
 
@@ -568,10 +666,10 @@ export const HistoricoVendasExtratoView: React.FC = () => {
             </div>
           )}
 
-          {/* Lista de Datas */}
+          {/* LISTA DE MESES AGRUPADOS */}
           {!loading && !error && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {diasFiltrados.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {gruposMeses.length === 0 ? (
                 <div
                   style={{
                     padding: '36px 16px',
@@ -589,76 +687,191 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                   <p style={{ fontSize: '0.8rem', margin: 0 }}>
                     {busca
                       ? `Nenhum resultado para "${busca}".`
-                      : `Extratos de ${cfg.label.toLowerCase()} aparecerão aqui após finalizados.`
+                      : `Extratos de ${cfg.label.toLowerCase()} aparecerão aqui agrupados por mês.`
                     }
                   </p>
                 </div>
               ) : (
-                diasFiltrados.map((dia) => {
-                  const total = Number(dia[cfg.totalKey] ?? 0);
-                  const qtd = Number(dia[cfg.qtdKey] ?? 0);
+                gruposMeses.map((grupo) => {
+                  const expandido = mesesExpandidos[grupo.chave] ?? true;
+                  const copiadoEsteMes = copiadoMesChave === grupo.chave;
+
                   return (
-                    <button
-                      key={dia.data}
-                      type="button"
-                      onClick={() => abrirExtrato(dia.data)}
-                      className="touch-target"
+                    <div
+                      key={grupo.chave}
                       style={{
-                        width: '100%',
                         backgroundColor: '#FFFFFF',
-                        borderRadius: 'var(--radius-md)',
-                        padding: '14px 16px',
-                        border: '1px solid var(--border-color, #E2E8F0)',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.15s ease',
-                        gap: '12px'
+                        borderRadius: 'var(--radius-lg)',
+                        border: `1px solid ${cfg.borderCor}`,
+                        boxShadow: 'var(--shadow-sm)',
+                        overflow: 'hidden'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            width: '42px',
-                            height: '42px',
-                            borderRadius: 'var(--radius-md)',
-                            backgroundColor: cfg.bgCor,
-                            border: `1px solid ${cfg.borderCor}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                        >
-                          <Calendar size={20} color={cfg.cor} />
+                      {/* HEADER DO MÊS (CLICÁVEL PARA EXPANDIR/RECOLHER) */}
+                      <div
+                        onClick={() => toggleMes(grupo.chave)}
+                        style={{
+                          backgroundColor: cfg.headerBg,
+                          color: '#FFFFFF',
+                          padding: '14px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: 'var(--radius-md)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}
+                          >
+                            <Calendar size={18} color="#FFFFFF" />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                              {grupo.label}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#E0E7FF', marginTop: '1px' }}>
+                              {grupo.dias.length} {grupo.dias.length === 1 ? 'dia' : 'dias'} • {grupo.qtdVendas} {grupo.qtdVendas === 1 ? 'venda' : 'vendas'} de {cfg.label.toLowerCase()}
+                            </div>
+                          </div>
                         </div>
 
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                            {formatarDataCompleta(dia.data)}
-                          </div>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            {qtd} venda(s) de {cfg.label.toLowerCase()}
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                          {/* Botão Copiar Resumo do Mês */}
+                          <button
+                            type="button"
+                            title={`Copiar resumo de ${cfg.label.toLowerCase()} do mês para WhatsApp`}
+                            onClick={(e) => copiarResumoMesWhatsApp(grupo, e)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              backgroundColor: copiadoEsteMes ? '#166534' : 'rgba(255, 255, 255, 0.2)',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '6px 10px',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {copiadoEsteMes ? <Check size={14} /> : <Copy size={14} />}
+                            <span>{copiadoEsteMes ? 'Copiado!' : 'Copiar Mês'}</span>
+                          </button>
+
+                          {expandido ? <ChevronUp size={20} color="#E0E7FF" /> : <ChevronDown size={20} color="#E0E7FF" />}
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
-                            Total {cfg.label}
-                          </span>
-                          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: cfg.cor }}>
-                            R$ {total.toFixed(2)}
+                      {/* BANNER DO TOTAL DO MÊS */}
+                      <div
+                        style={{
+                          backgroundColor: cfg.bannerTotalBg,
+                          borderBottom: `1px solid ${cfg.bannerTotalBorder}`,
+                          padding: '12px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {React.createElement(cfg.icon, { size: 20, color: cfg.cor })}
+                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: cfg.bannerTotalText, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                            Total {cfg.label} em {grupo.label}:
                           </span>
                         </div>
-
-                        <ChevronRight size={20} color="var(--text-muted)" />
+                        <div style={{ fontSize: '1.25rem', fontWeight: 900, color: cfg.cor }}>
+                          R$ {grupo.totalVendido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
                       </div>
-                    </button>
+
+                      {/* LISTA DE DIAS DO MÊS (EXPANSÍVEL) */}
+                      {expandido && (
+                        <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#F8FAFC' }}>
+                          {grupo.dias.map((dia) => {
+                            const totalDia = Number(dia[cfg.totalKey] ?? 0);
+                            const qtdDia = Number(dia[cfg.qtdKey] ?? 0);
+
+                            return (
+                              <button
+                                key={dia.data}
+                                type="button"
+                                onClick={() => abrirExtrato(dia.data)}
+                                className="touch-target"
+                                style={{
+                                  width: '100%',
+                                  backgroundColor: '#FFFFFF',
+                                  borderRadius: 'var(--radius-md)',
+                                  padding: '12px 14px',
+                                  border: '1px solid var(--border-color, #E2E8F0)',
+                                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                  transition: 'all 0.15s ease',
+                                  gap: '10px'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                                  <div
+                                    style={{
+                                      width: '36px',
+                                      height: '36px',
+                                      borderRadius: 'var(--radius-md)',
+                                      backgroundColor: cfg.bgCor,
+                                      border: `1px solid ${cfg.borderCor}`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0
+                                    }}
+                                  >
+                                    <Calendar size={18} color={cfg.cor} />
+                                  </div>
+
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                                      {formatarDataCompleta(dia.data)}
+                                    </div>
+                                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '1px' }}>
+                                      {qtdDia} venda(s) de {cfg.label.toLowerCase()} no dia
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
+                                      Total {cfg.label}
+                                    </span>
+                                    <span style={{ fontSize: '1rem', fontWeight: 800, color: cfg.cor }}>
+                                      R$ {totalDia.toFixed(2)}
+                                    </span>
+                                  </div>
+
+                                  <ChevronRight size={18} color="var(--text-muted)" />
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   );
                 })
               )}

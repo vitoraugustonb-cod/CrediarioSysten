@@ -42,6 +42,7 @@ export interface Parcela {
   dataPagamento?: string | null;
   status: 'PENDENTE' | 'PAGA' | 'ATRASADA' | 'PARCIAL';
   observacao?: string | null;
+  ultimoContatoEm?: string | null;
   cobrador?: {
     id: number;
     nome: string;
@@ -452,3 +453,14 @@ export async function alterarDataVencimentoParcelaAPI(
     body: JSON.stringify({ dataVencimento }),
   });
 }
+
+// 22. PATCH /parcelas/:id/contato — Registrar data e hora de contato no WhatsApp
+export async function registrarContatoParcelaAPI(
+  id: number,
+  token: string | null = null
+): Promise<Parcela> {
+  return await fetchWithAuth(`/parcelas/${id}/contato`, token, {
+    method: 'PATCH',
+  });
+}
+

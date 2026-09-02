@@ -1,15 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { 
   FileSpreadsheet, 
   Calendar, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   ArrowLeft, 
   Clock, 
   Search, 
   Copy, 
   Check, 
   Receipt,
-  AlertCircle
+  AlertCircle,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -19,7 +22,21 @@ import {
   type ExtratoDiaResponse 
 } from '../../services/api';
 
-// Formata data YYYY-MM-DD para texto por extenso (ex: "Domingo, 30/08/2026")
+const NOMES_MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+const NOMES_MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+
+function getMesAnoLabel(chaveAnoMes: string): string {
+  const [ano, mes] = chaveAnoMes.split('-').map(Number);
+  const nomeMes = NOMES_MESES[mes - 1] || '';
+  return `${nomeMes} de ${ano}`;
+}
+
+// Formata data YYYY-MM-DD para texto por extenso (ex: "Domingo, 30 de Ago de 2026")
 function formatarDataCompleta(dataIso: string): string {
   if (!dataIso) return 'Data não informada';
   const match = dataIso.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -27,12 +44,9 @@ function formatarDataCompleta(dataIso: string): string {
 
   const [, ano, mes, dia] = match;
   const d = new Date(Number(ano), Number(mes) - 1, Number(dia));
-  
-  const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-  const nomeDia = diasSemana[d.getDay()] || '';
-  const nomeMes = meses[d.getMonth()] || '';
+  const nomeDia = DIAS_SEMANA[d.getDay()] || '';
+  const nomeMes = NOMES_MESES_ABREV[d.getMonth()] || '';
 
   return `${nomeDia}, ${dia} de ${nomeMes} de ${ano}`;
 }
@@ -45,6 +59,14 @@ function formatarDataCurta(dataIso: string): string {
   return `${dia}/${mes}/${ano}`;
 }
 
+interface GrupoMesCobranca {
+  chave: string; // YYYY-MM
+  label: string; // "Setembro de 2026"
+  totalCobrado: number;
+  qtdPagamentos: number;
+  dias: DiaFechadoItem[];
+}
+
 export const HistoricoExtratoView: React.FC = () => {
   const { token } = useAuth();
 
@@ -53,11 +75,15 @@ export const HistoricoExtratoView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
 
+  // Meses expandidos (chave YYYY-MM -> boolean)
+  const [mesesExpandidos, setMesesExpandidos] = useState<Record<string, boolean>>({});
+
   // Extrato selecionado
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
   const [extrato, setExtrato] = useState<ExtratoDiaResponse | null>(null);
   const [loadingExtrato, setLoadingExtrato] = useState<boolean>(false);
-  const [copiado, setCopiado] = useState<boolean>(false);
+  const [copiadoDia, setCopiadoDia] = useState<boolean>(false);
+  const [copiadoMesChave, setCopiadoMesChave] = useState<string | null>(null);
 
   const carregarDias = useCallback(async () => {
     setLoading(true);
@@ -65,6 +91,14 @@ export const HistoricoExtratoView: React.FC = () => {
     try {
       const dados = await getHistoricoDiasFechados(token);
       setDiasFechados(dados);
+      
+      // Abre todos os meses por padrão
+      const initialExpand: Record<string, boolean> = {};
+      dados.forEach(d => {
+        const chaveMes = d.data.substring(0, 7);
+        initialExpand[chaveMes] = true;
+      });
+      setMesesExpandidos(initialExpand);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar histórico de datas fechadas.');
     } finally {
@@ -75,6 +109,13 @@ export const HistoricoExtratoView: React.FC = () => {
   useEffect(() => {
     carregarDias();
   }, [carregarDias]);
+
+  const toggleMes = (chave: string) => {
+    setMesesExpandidos(prev => ({
+      ...prev,
+      [chave]: !prev[chave]
+    }));
+  };
 
   const abrirExtrato = async (dataIso: string) => {
     setDiaSelecionado(dataIso);
@@ -97,7 +138,7 @@ export const HistoricoExtratoView: React.FC = () => {
     setError(null);
   };
 
-  const copiarResumoWhatsApp = () => {
+  const copiarResumoDiaWhatsApp = () => {
     if (!extrato) return;
     const dataStr = formatarDataCurta(extrato.data);
     let texto = `📊 *EXTRATO DE COBRANÇA - ${dataStr}*\n`;
@@ -110,16 +151,68 @@ export const HistoricoExtratoView: React.FC = () => {
     texto += `📦 *Qtd. Pagamentos:* ${extrato.qtdPagamentos}\n`;
 
     navigator.clipboard.writeText(texto);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2500);
+    setCopiadoDia(true);
+    setTimeout(() => setCopiadoDia(false), 2500);
   };
 
-  const diasFiltrados = diasFechados.filter(d => {
-    const dataFormatada = formatarDataCompleta(d.data).toLowerCase();
-    const dataCurta = formatarDataCurta(d.data);
-    const termo = busca.toLowerCase();
-    return dataFormatada.includes(termo) || dataCurta.includes(termo);
-  });
+  const copiarResumoMesWhatsApp = (grupo: GrupoMesCobranca, e: React.MouseEvent) => {
+    e.stopPropagation();
+    let texto = `📅 *PRESTAÇÃO DE CONTAS - ${grupo.label.toUpperCase()}*\n`;
+    texto += `----------------------------------------\n`;
+    grupo.dias.forEach(d => {
+      texto += `• ${formatarDataCurta(d.data)}: R$ ${d.totalCobrado.toFixed(2)} (${d.qtdPagamentos} cobr.)\n`;
+    });
+    texto += `----------------------------------------\n`;
+    texto += `💰 *TOTAL DO MÊS:* R$ ${grupo.totalCobrado.toFixed(2)}\n`;
+    texto += `📦 *Total de Cobranças:* ${grupo.qtdPagamentos}\n`;
+    texto += `📆 *Dias Trabalhados:* ${grupo.dias.length}\n`;
+
+    navigator.clipboard.writeText(texto);
+    setCopiadoMesChave(grupo.chave);
+    setTimeout(() => setCopiadoMesChave(null), 2500);
+  };
+
+  // 1. Filtragem por termo de busca
+  const diasFiltrados = useMemo(() => {
+    return diasFechados.filter(d => {
+      const dataFormatada = formatarDataCompleta(d.data).toLowerCase();
+      const dataCurta = formatarDataCurta(d.data);
+      const chaveMes = d.data.substring(0, 7);
+      const labelMes = getMesAnoLabel(chaveMes).toLowerCase();
+      const termo = busca.toLowerCase();
+      return dataFormatada.includes(termo) || dataCurta.includes(termo) || labelMes.includes(termo);
+    });
+  }, [diasFechados, busca]);
+
+  // 2. Agrupamento por mês
+  const gruposMeses = useMemo(() => {
+    const mapa = new Map<string, GrupoMesCobranca>();
+
+    for (const d of diasFiltrados) {
+      const chave = d.data.substring(0, 7); // "YYYY-MM"
+      if (!mapa.has(chave)) {
+        mapa.set(chave, {
+          chave,
+          label: getMesAnoLabel(chave),
+          totalCobrado: Number(d.totalCobrado),
+          qtdPagamentos: Number(d.qtdPagamentos),
+          dias: [d]
+        });
+      } else {
+        const g = mapa.get(chave)!;
+        g.totalCobrado += Number(d.totalCobrado);
+        g.qtdPagamentos += Number(d.qtdPagamentos);
+        g.dias.push(d);
+      }
+    }
+
+    return Array.from(mapa.values()).sort((a, b) => b.chave.localeCompare(a.chave));
+  }, [diasFiltrados]);
+
+  // Total acumulado geral exibido
+  const totalGeralCobrado = useMemo(() => {
+    return gruposMeses.reduce((acc, g) => acc + g.totalCobrado, 0);
+  }, [gruposMeses]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -147,18 +240,18 @@ export const HistoricoExtratoView: React.FC = () => {
               }}
             >
               <ArrowLeft size={18} />
-              <span>Voltar para Datas</span>
+              <span>Voltar para Meses</span>
             </button>
 
             {extrato && (
               <button
-                onClick={copiarResumoWhatsApp}
+                onClick={copiarResumoDiaWhatsApp}
                 title="Copiar texto para WhatsApp"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  backgroundColor: copiado ? '#166534' : 'var(--primary-800)',
+                  backgroundColor: copiadoDia ? '#166534' : 'var(--primary-800)',
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
@@ -169,8 +262,8 @@ export const HistoricoExtratoView: React.FC = () => {
                   transition: 'background-color 0.2s ease'
                 }}
               >
-                {copiado ? <Check size={16} /> : <Copy size={16} />}
-                <span>{copiado ? 'Copiado!' : 'Copiar Resumo'}</span>
+                {copiadoDia ? <Check size={16} /> : <Copy size={16} />}
+                <span>{copiadoDia ? 'Copiado!' : 'Copiar Resumo'}</span>
               </button>
             )}
           </div>
@@ -204,7 +297,7 @@ export const HistoricoExtratoView: React.FC = () => {
                 Extrato Fechado
               </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                {extrato ? `${extrato.qtdPagamentos} pagamento(s)` : ''}
+                {extrato ? `${extrato.qtdPagamentos} pagamentos realizados` : ''}
               </span>
             </div>
 
@@ -219,7 +312,7 @@ export const HistoricoExtratoView: React.FC = () => {
               <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
                 <Clock size={28} />
               </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Carregando extrato da planilha...</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Carregando extrato do dia...</p>
             </div>
           )}
 
@@ -229,7 +322,7 @@ export const HistoricoExtratoView: React.FC = () => {
             </div>
           )}
 
-          {/* TABELA ESTILO PLANILHA EXCEL */}
+          {/* TABELA ESTILO PLANILHA */}
           {extrato && !loadingExtrato && (
             <div
               style={{
@@ -240,28 +333,26 @@ export const HistoricoExtratoView: React.FC = () => {
                 overflow: 'hidden'
               }}
             >
-              {/* Top Banner da Planilha */}
               <div
                 style={{
-                  backgroundColor: '#1E293B',
+                  backgroundColor: '#0F172A',
                   color: '#FFFFFF',
                   padding: '10px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottom: '2px solid #0F172A'
+                  borderBottom: '2px solid #020617'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', fontWeight: 700 }}>
-                  <FileSpreadsheet size={18} color="#38BDF8" />
-                  <span>EXTRATO DE COBRANÇAS</span>
+                  <FileSpreadsheet size={18} color="#60A5FA" />
+                  <span>EXTRATO DE COBRANÇAS DO DIA</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                   {formatarDataCurta(extrato.data)}
                 </span>
               </div>
 
-              {/* Tabela Excel com Scroll Horizontal */}
               <div style={{ overflowX: 'auto', width: '100%' }}>
                 <table
                   style={{
@@ -271,7 +362,6 @@ export const HistoricoExtratoView: React.FC = () => {
                     fontSize: '0.84rem'
                   }}
                 >
-                  {/* Cabeçalho de Colunas Excel */}
                   <thead>
                     <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1' }}>
                       <th style={{ padding: '10px 8px', width: '36px', textAlign: 'center', color: '#475569', fontWeight: 800, borderRight: '1px solid #E2E8F0' }}>
@@ -281,20 +371,19 @@ export const HistoricoExtratoView: React.FC = () => {
                         Cliente
                       </th>
                       <th style={{ padding: '10px 12px', color: '#475569', fontWeight: 800, borderRight: '1px solid #E2E8F0' }}>
-                        Item / Parcela
+                        Produto / Parcela
                       </th>
-                      <th style={{ padding: '10px 12px', textAlign: 'right', color: '#475569', fontWeight: 800, minWidth: '110px' }}>
+                      <th style={{ padding: '10px 12px', textAlign: 'right', color: '#475569', fontWeight: 800, minWidth: '100px' }}>
                         Valor Pago
                       </th>
                     </tr>
                   </thead>
 
-                  {/* Linhas da Tabela */}
                   <tbody>
                     {extrato.itens.length === 0 ? (
                       <tr>
                         <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                          Nenhum registro encontrado neste dia.
+                          Nenhum pagamento registrado neste dia.
                         </td>
                       </tr>
                     ) : (
@@ -308,12 +397,10 @@ export const HistoricoExtratoView: React.FC = () => {
                               borderBottom: '1px solid #E2E8F0'
                             }}
                           >
-                            {/* # Índice */}
                             <td style={{ padding: '10px 8px', textAlign: 'center', color: '#64748B', fontWeight: 600, borderRight: '1px solid #E2E8F0' }}>
                               {item.ordem}
                             </td>
 
-                            {/* Cliente */}
                             <td style={{ padding: '10px 12px', borderRight: '1px solid #E2E8F0' }}>
                               <div style={{ fontWeight: 700, color: 'var(--primary-800)' }}>
                                 {item.clienteNome}
@@ -325,7 +412,6 @@ export const HistoricoExtratoView: React.FC = () => {
                               )}
                             </td>
 
-                            {/* Produto / Parcela */}
                             <td style={{ padding: '10px 12px', borderRight: '1px solid #E2E8F0' }}>
                               <div style={{ color: 'var(--primary-800)', fontWeight: 600 }}>
                                 {item.produto}
@@ -337,7 +423,6 @@ export const HistoricoExtratoView: React.FC = () => {
                               )}
                             </td>
 
-                            {/* Valor Pago */}
                             <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#166534', fontSize: '0.92rem' }}>
                               R$ {item.valorPago.toFixed(2)}
                             </td>
@@ -347,7 +432,6 @@ export const HistoricoExtratoView: React.FC = () => {
                     )}
                   </tbody>
 
-                  {/* Rodapé da Tabela: Linha de Totalização */}
                   <tfoot>
                     <tr
                       style={{
@@ -391,7 +475,7 @@ export const HistoricoExtratoView: React.FC = () => {
         </div>
       ) : (
         /* -------------------------------------------------------------------------- */
-        /* MODO 2: LISTA CORRIDA DE DATAS FECHADAS */
+        /* MODO 2: LISTA DE DATAS AGRUPADAS EM MESES COM TOTAIS CONSOLIDADOS          */
         /* -------------------------------------------------------------------------- */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Header da Aba */}
@@ -399,15 +483,15 @@ export const HistoricoExtratoView: React.FC = () => {
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileSpreadsheet size={24} color="var(--accent-600)" />
-                Histórico de Extratos
+                Histórico de Cobrança
               </h2>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                Extratos consolidados dos dias anteriores
+                Extratos consolidados e totais agrupados por mês
               </p>
             </div>
           </div>
 
-          {/* Banner Informativo sobre Fechamento do Dia Atual */}
+          {/* Banner Informativo */}
           <div
             style={{
               padding: '12px 14px',
@@ -421,15 +505,15 @@ export const HistoricoExtratoView: React.FC = () => {
           >
             <AlertCircle size={20} color="#1D4ED8" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.8rem', color: '#1E40AF', lineHeight: 1.4 }}>
-              <strong>Regra de Fechamento:</strong> Os extratos são fechados e consolidados somente após o encerramento do dia. Para acompanhar as cobranças de hoje em andamento, utilize a aba <strong>Resumo Dia</strong>.
+              <strong>Prestação de Contas:</strong> Os totais de cada mês são somados automaticamente para facilitar a prestação de contas mensal. Os extratos do dia de hoje fecham ao término do dia.
             </div>
           </div>
 
-          {/* Campo de Busca por Data */}
+          {/* Campo de Busca por Data / Mês */}
           <div style={{ position: 'relative' }}>
             <input
               type="text"
-              placeholder="Buscar por data (ex: 30/08 ou agosto)..."
+              placeholder="Buscar por data ou mês (ex: 30/08 ou agosto)..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               style={{
@@ -456,7 +540,7 @@ export const HistoricoExtratoView: React.FC = () => {
               <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
                 <Clock size={28} />
               </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando extratos fechados...</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando histórico consolidado...</p>
             </div>
           )}
 
@@ -467,10 +551,10 @@ export const HistoricoExtratoView: React.FC = () => {
             </div>
           )}
 
-          {/* Lista Corrida de Datas */}
+          {/* LISTA DE MESES AGRUPADOS */}
           {!loading && !error && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {diasFiltrados.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {gruposMeses.length === 0 ? (
                 <div
                   style={{
                     padding: '36px 16px',
@@ -486,73 +570,187 @@ export const HistoricoExtratoView: React.FC = () => {
                     Nenhum extrato anterior encontrado
                   </p>
                   <p style={{ fontSize: '0.8rem', margin: 0 }}>
-                    Extratos de dias passados aparecerão aqui assim que houver cobranças finalizadas.
+                    {busca ? `Nenhum resultado para "${busca}".` : 'Extratos anteriores aparecerão aqui organizados por mês.'}
                   </p>
                 </div>
               ) : (
-                diasFiltrados.map((dia) => (
-                  <button
-                    key={dia.data}
-                    type="button"
-                    onClick={() => abrirExtrato(dia.data)}
-                    className="touch-target"
-                    style={{
-                      width: '100%',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '14px 16px',
-                      border: '1px solid var(--border-color, #E2E8F0)',
-                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.15s ease',
-                      gap: '12px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                gruposMeses.map((grupo) => {
+                  const expandido = mesesExpandidos[grupo.chave] ?? true;
+                  const copiadoEsteMes = copiadoMesChave === grupo.chave;
+
+                  return (
+                    <div
+                      key={grupo.chave}
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: 'var(--radius-lg)',
+                        border: '1px solid #CBD5E1',
+                        boxShadow: 'var(--shadow-sm)',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {/* HEADER DO MÊS (CLICÁVEL PARA EXPANDIR/RECOLHER) */}
                       <div
+                        onClick={() => toggleMes(grupo.chave)}
                         style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: 'var(--radius-md)',
-                          backgroundColor: '#F0FDF4',
-                          border: '1px solid #BBF7D0',
+                          backgroundColor: '#0F172A',
+                          color: '#FFFFFF',
+                          padding: '14px 16px',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          gap: '12px'
                         }}
                       >
-                        <Calendar size={20} color="#166534" />
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                          {formatarDataCompleta(dia.data)}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: 'var(--radius-md)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}
+                          >
+                            <Calendar size={18} color="#60A5FA" />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                              {grupo.label}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '1px' }}>
+                              {grupo.dias.length} {grupo.dias.length === 1 ? 'dia fechado' : 'dias fechados'} • {grupo.qtdPagamentos} cobranças
+                            </div>
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          {dia.qtdPagamentos} cobrança(s) realizada(s)
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                          {/* Botão Copiar Resumo do Mês */}
+                          <button
+                            type="button"
+                            title="Copiar resumo do mês para WhatsApp"
+                            onClick={(e) => copiarResumoMesWhatsApp(grupo, e)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              backgroundColor: copiadoEsteMes ? '#166534' : 'rgba(255, 255, 255, 0.15)',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '6px 10px',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {copiadoEsteMes ? <Check size={14} /> : <Copy size={14} />}
+                            <span>{copiadoEsteMes ? 'Copiado!' : 'Copiar Mês'}</span>
+                          </button>
+
+                          {expandido ? <ChevronUp size={20} color="#94A3B8" /> : <ChevronDown size={20} color="#94A3B8" />}
                         </div>
                       </div>
-                    </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
-                          Total Cobrado
-                        </span>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#166534' }}>
-                          R$ {dia.totalCobrado.toFixed(2)}
-                        </span>
+                      {/* CARD DO TOTAL DO MÊS */}
+                      <div
+                        style={{
+                          backgroundColor: '#F0FDF4',
+                          borderBottom: '1px solid #BBF7D0',
+                          padding: '12px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Wallet size={20} color="#166534" />
+                          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                            Total Cobrado em {grupo.label}:
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#15803D' }}>
+                          R$ {grupo.totalCobrado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
                       </div>
 
-                      <ChevronRight size={20} color="var(--text-muted)" />
+                      {/* LISTA DE DIAS DO MÊS (EXPANSÍVEL) */}
+                      {expandido && (
+                        <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#F8FAFC' }}>
+                          {grupo.dias.map((dia) => (
+                            <button
+                              key={dia.data}
+                              type="button"
+                              onClick={() => abrirExtrato(dia.data)}
+                              className="touch-target"
+                              style={{
+                                width: '100%',
+                                backgroundColor: '#FFFFFF',
+                                borderRadius: 'var(--radius-md)',
+                                padding: '12px 14px',
+                                border: '1px solid var(--border-color, #E2E8F0)',
+                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.15s ease',
+                                gap: '10px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: 'var(--radius-md)',
+                                    backgroundColor: '#EFF6FF',
+                                    border: '1px solid #BFDBFE',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  <Calendar size={18} color="#2563EB" />
+                                </div>
+
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                                    {formatarDataCompleta(dia.data)}
+                                  </div>
+                                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '1px' }}>
+                                    {dia.qtdPagamentos} cobrança(s) no dia
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                <div style={{ textAlign: 'right' }}>
+                                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
+                                    Total do Dia
+                                  </span>
+                                  <span style={{ fontSize: '1rem', fontWeight: 800, color: '#166534' }}>
+                                    R$ {Number(dia.totalCobrado).toFixed(2)}
+                                  </span>
+                                </div>
+
+                                <ChevronRight size={18} color="var(--text-muted)" />
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </button>
-                ))
+                  );
+                })
               )}
             </div>
           )}

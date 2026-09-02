@@ -107,6 +107,7 @@ model Parcela {
   dataPagamento  DateTime?
   status         StatusParcela @default(PENDENTE)
   observacao     String?
+  ultimoContatoEm DateTime?
 
   auditorias Auditoria[]
 }
