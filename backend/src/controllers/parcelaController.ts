@@ -8,10 +8,13 @@ import { StatusParcela } from '@prisma/client';
  */
 export const atualizarStatusParcelasAtrasadas = async (): Promise<void> => {
   const agora = new Date();
+  // Início do dia de hoje no fuso local do servidor
+  const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 0, 0, 0, 0);
+
   await prisma.parcela.updateMany({
     where: {
       status: { in: [StatusParcela.PENDENTE, StatusParcela.PARCIAL] },
-      dataVencimento: { lt: agora }
+      dataVencimento: { lt: inicioHoje }
     },
     data: {
       status: StatusParcela.ATRASADA

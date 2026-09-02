@@ -12,9 +12,7 @@ import {
   MessageCircle,
   Phone,
   ChevronDown,
-  ChevronUp,
-  Clock,
-  Send
+  ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -62,8 +60,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
-  const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'COBRAR_HOJE' | 'ATRASADO'>('TODOS');
-  const [filtroContato, setFiltroContato] = useState<'TODOS' | 'PENDENTES' | 'CONTATADOS'>('TODOS');
+  const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'COBRAR_HOJE' | 'ATRASADO'>('COBRAR_HOJE');
   const [gavetaContatadosAberta, setGavetaContatadosAberta] = useState<boolean>(true);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
@@ -116,7 +113,6 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
       return;
     }
 
-    // Extrai apenas dígitos
     let numeros = telefone.replace(/\D/g, '');
 
     if (!numeros || numeros.length < 8) {
@@ -124,18 +120,15 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
       return;
     }
 
-    // Adiciona o DDI 55 do Brasil se necessário
     if (numeros.length === 10 || numeros.length === 11) {
       numeros = `55${numeros}`;
     } else if (numeros.length === 8 || numeros.length === 9) {
       numeros = `55${numeros}`;
     }
 
-    // 1. Abre a conversa no WhatsApp
     const url = `https://wa.me/${numeros}`;
     window.open(url, '_blank', 'noopener,noreferrer');
 
-    // 2. Registra o timestamp de contato no servidor e atualiza estado local imediatamente
     const agoraIso = new Date().toISOString();
     setParcelas(prev => prev.map(item => item.id === p.id ? { ...item, ultimoContatoEm: agoraIso } : item));
     if (parcelaSelecionada && parcelaSelecionada.id === p.id) {
@@ -193,7 +186,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
       
       await carregarParcelas();
 
-      setMensagemSucesso(`✅ Pagamento de R$ ${valorOriginalNum.toFixed(2)} registrado para ${nomeCliente}! O valor foi abatido do saldo devedor.`);
+      setMensagemSucesso(`✅ Pagamento de R$ ${valorOriginalNum.toFixed(2)} registrado para ${nomeCliente}!`);
       
       setTimeout(() => setMensagemSucesso(null), 5000);
     } catch (err: any) {
@@ -234,7 +227,6 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const getStatusCobranca = (dataVencimentoStr: string, statusOriginal: string): 'COBRAR_HOJE' | 'ATRASADO' | 'EM_DIA' | 'PAGA' => {
     if (statusOriginal === 'PAGA') return 'PAGA';
 
-    // Extrai ano, mês e dia diretamente da string YYYY-MM-DD para imunidade a fuso horário
     let anoVenc = 0, mesVenc = 0, diaVenc = 0;
     if (typeof dataVencimentoStr === 'string') {
       const match = dataVencimentoStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -265,7 +257,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     }
   };
 
-  // 1. Filtrar APENAS parcelas com vencimento HOJE ou ATRASADAS (exclui em dia e pagas)
+  // 1. Filtrar APENAS parcelas com vencimento HOJE ou ATRASADAS
   const cobrancasFiltradasPorData = useMemo(() => {
     return parcelas.filter(p => {
       const statusC = getStatusCobranca(p.dataVencimento, p.status);
@@ -308,10 +300,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const qtdHoje = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'COBRAR_HOJE').length;
   const qtdAtrasados = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'ATRASADO').length;
 
-  const totalPendentesGeral = cobrancasFiltradasPorData.filter(p => !foiContatadoHoje(p.ultimoContatoEm)).length;
-  const totalContatadosGeral = cobrancasFiltradasPorData.filter(p => foiContatadoHoje(p.ultimoContatoEm)).length;
-
-  // Função auxiliar de renderização de um Card de Cobrança
+  // Renderização ultra otimizada e consistente de Card de Cobrança
   const renderCardCobranca = (p: Parcela, isJaContatado: boolean) => {
     const statusC = getStatusCobranca(p.dataVencimento, p.status);
     const isHoje = statusC === 'COBRAR_HOJE';
@@ -320,11 +309,10 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     const [yyyy, mm, dd] = p.dataVencimento.substring(0, 10).split('-');
     const dataVencFormatada = `${dd}/${mm}/${yyyy}`;
 
-    // Card styles
-    const cardBorderTop = isHoje ? '5px solid #F97316' : '5px solid #DC2626';
-    const badgeBg = isHoje ? '#FFEDD5' : '#FEE2E2';
-    const badgeText = isHoje ? '#C2410C' : '#B91C1C';
-    const statusLabel = isHoje ? '🟠 Cobrar Hoje' : '🔴 Atrasado';
+    const cardBorderTop = isHoje ? '4px solid #2563EB' : '4px solid #DC2626';
+    const badgeBg = isHoje ? '#EFF6FF' : '#FEE2E2';
+    const badgeText = isHoje ? '#1D4ED8' : '#B91C1C';
+    const statusLabel = isHoje ? '🔵 Hoje' : '🔴 Atrasado';
     const horaContato = formatarHoraContato(p.ultimoContatoEm);
 
     return (
@@ -333,34 +321,36 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         onClick={() => abrirDetalhe(p)}
         style={{
           backgroundColor: isJaContatado ? '#F8FAFC' : '#FFFFFF',
-          borderRadius: 'var(--radius-lg)',
-          padding: '14px 12px',
-          border: isJaContatado ? '1px solid #CBD5E1' : '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-md)',
+          padding: '12px 10px',
+          borderLeft: isJaContatado ? '1px solid #CBD5E1' : '1px solid var(--border-color)',
+          borderRight: isJaContatado ? '1px solid #CBD5E1' : '1px solid var(--border-color)',
+          borderBottom: isJaContatado ? '1px solid #CBD5E1' : '1px solid var(--border-color)',
           borderTop: cardBorderTop,
           boxShadow: isJaContatado ? 'none' : 'var(--shadow-sm)',
           cursor: 'pointer',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          gap: '10px',
-          minHeight: '210px',
+          gap: '8px',
+          minHeight: '215px',
           transition: 'all 0.15s ease',
-          opacity: isJaContatado ? 0.94 : 1,
-          position: 'relative'
+          opacity: isJaContatado ? 0.92 : 1,
+          width: '100%',
+          boxSizing: 'border-box'
         }}
       >
         {/* Top Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minHeight: '22px' }}>
           <span
             style={{
-              padding: '3px 8px',
+              padding: '2px 7px',
               borderRadius: 'var(--radius-full)',
               backgroundColor: badgeBg,
               color: badgeText,
               fontWeight: 800,
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               textAlign: 'center',
-              display: 'inline-block',
               whiteSpace: 'nowrap'
             }}
           >
@@ -370,30 +360,30 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           {isJaContatado && (
             <span
               style={{
-                padding: '3px 8px',
+                padding: '2px 6px',
                 borderRadius: 'var(--radius-full)',
                 backgroundColor: '#DCFCE7',
                 color: '#15803D',
                 fontWeight: 800,
-                fontSize: '0.7rem',
+                fontSize: '0.66rem',
                 textAlign: 'center',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '3px',
+                gap: '2px',
                 whiteSpace: 'nowrap'
               }}
             >
-              <MessageCircle size={11} />
-              <span>Chamado {horaContato ? `às ${horaContato}` : 'Hoje'}</span>
+              <MessageCircle size={10} />
+              <span>{horaContato || 'Chamado'}</span>
             </span>
           )}
         </div>
 
-        {/* Customer Info */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'center' }}>
+        {/* Customer Info (Altura fixa para alinhar todos os cards da fileira perfeitamente) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'center', minHeight: '48px', justifyContent: 'center' }}>
           <h4
             style={{
-              fontSize: '0.92rem',
+              fontSize: '0.88rem',
               fontWeight: 800,
               color: 'var(--primary-800)',
               margin: 0,
@@ -401,16 +391,17 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              wordBreak: 'break-word'
             }}
             title={cliente?.nome}
           >
             {cliente?.nome || 'Cliente'}
           </h4>
 
-          <p
+          <div
             style={{
-              fontSize: '0.74rem',
+              fontSize: '0.72rem',
               color: 'var(--text-muted)',
               display: 'flex',
               alignItems: 'center',
@@ -419,21 +410,24 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               margin: 0,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              width: '100%'
             }}
             title={cliente?.endereco}
           >
-            <MapPin size={12} color="var(--accent-600)" />
-            <span>{cliente?.endereco || 'Sem endereço'}</span>
-          </p>
+            <MapPin size={11} color="var(--accent-600)" style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {cliente?.endereco || 'Sem endereço'}
+            </span>
+          </div>
         </div>
 
         {/* Installment Info & Amount */}
-        <div style={{ padding: '8px 4px', backgroundColor: isJaContatado ? '#EEF2F6' : 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block' }}>
+        <div style={{ padding: '6px 4px', backgroundColor: isJaContatado ? '#EEF2F6' : 'var(--bg-subtle)', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>
             P. {p.numero}/{p.venda?.numParcelas || 1} • {dataVencFormatada}
           </span>
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: isHoje ? '#C2410C' : '#B91C1C', marginTop: '2px' }}>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isHoje ? '#1D4ED8' : '#B91C1C', marginTop: '2px' }}>
             R$ {Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
         </div>
@@ -443,11 +437,11 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           className="touch-target"
           style={{
             width: '100%',
-            height: '38px',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: isHoje ? '#FFEDD5' : '#FEE2E2',
-            color: isHoje ? '#C2410C' : '#B91C1C',
-            border: `1px solid ${isHoje ? '#FDBA74' : '#FCA5A5'}`,
+            height: '36px',
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: isHoje ? '#EFF6FF' : '#FEE2E2',
+            color: isHoje ? '#1D4ED8' : '#B91C1C',
+            border: `1px solid ${isHoje ? '#BFDBFE' : '#FCA5A5'}`,
             fontWeight: 800,
             fontSize: '0.8rem',
             cursor: 'pointer'
@@ -460,18 +454,18 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '20px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '24px' }}>
       
       {/* Banner de Mensagem de Sucesso */}
       {mensagemSucesso && (
         <div
           style={{
-            padding: '14px 16px',
+            padding: '12px 14px',
             backgroundColor: '#DCFCE7',
             color: '#15803D',
             borderRadius: 'var(--radius-md)',
             fontWeight: 700,
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             border: '1px solid #86EFAC',
             display: 'flex',
             alignItems: 'center',
@@ -479,64 +473,66 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             boxShadow: 'var(--shadow-sm)'
           }}
         >
-          <CheckCircle2 size={20} color="#16A34A" />
+          <CheckCircle2 size={18} color="#16A34A" style={{ flexShrink: 0 }} />
           <span>{mensagemSucesso}</span>
         </div>
       )}
 
       {/* Search Input */}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', width: '100%' }}>
         <Search
           size={18}
           color="var(--text-muted)"
-          style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
+          style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
         />
         <input
           type="text"
-          placeholder="Buscar cliente na rota (Cobrar Hoje / Atrasados)..."
+          placeholder="Buscar cliente na rota..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           style={{
             width: '100%',
-            height: '48px',
-            padding: '0 14px 0 42px',
-            borderRadius: 'var(--radius-lg)',
+            height: '44px',
+            padding: '0 12px 0 38px',
+            borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-color)',
             backgroundColor: '#FFFFFF',
-            fontSize: '0.92rem',
+            fontSize: '0.9rem',
             outline: 'none',
             boxShadow: 'var(--shadow-sm)',
+            boxSizing: 'border-box'
           }}
         />
       </div>
 
-      {/* Filter Tabs 1: Cobrar Hoje & Atrasados */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+      {/* Filter Tabs: Cobrar Hoje / Atrasados / Todos */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.9fr', gap: '6px' }}>
         <button
           type="button"
-          onClick={() => setFiltroStatus(filtroStatus === 'COBRAR_HOJE' ? 'TODOS' : 'COBRAR_HOJE')}
+          onClick={() => setFiltroStatus('COBRAR_HOJE')}
           style={{
             padding: '10px 4px',
             borderRadius: 'var(--radius-md)',
-            border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #EA580C' : '1px solid var(--border-color)',
-            backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#FFEDD5' : '#FFFFFF',
-            color: '#C2410C',
+            border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #2563EB' : '1px solid var(--border-color)',
+            backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#EFF6FF' : '#FFFFFF',
+            color: '#1D4ED8',
             fontWeight: 800,
-            fontSize: '0.84rem',
+            fontSize: '0.8rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
-            boxShadow: filtroStatus === 'COBRAR_HOJE' ? 'var(--shadow-sm)' : 'none'
+            gap: '4px',
+            boxShadow: filtroStatus === 'COBRAR_HOJE' ? 'var(--shadow-sm)' : 'none',
+            whiteSpace: 'nowrap'
           }}
         >
-          <span>🟠 Cobrar Hoje ({qtdHoje})</span>
+          <span>🔵 Hoje ({qtdHoje})</span>
         </button>
 
         <button
           type="button"
-          onClick={() => setFiltroStatus(filtroStatus === 'ATRASADO' ? 'TODOS' : 'ATRASADO')}
+          onClick={() => setFiltroStatus('ATRASADO')}
           style={{
             padding: '10px 4px',
             borderRadius: 'var(--radius-md)',
@@ -544,93 +540,59 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             backgroundColor: filtroStatus === 'ATRASADO' ? '#FEE2E2' : '#FFFFFF',
             color: '#B91C1C',
             fontWeight: 800,
-            fontSize: '0.84rem',
+            fontSize: '0.8rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
-            boxShadow: filtroStatus === 'ATRASADO' ? 'var(--shadow-sm)' : 'none'
+            gap: '4px',
+            boxShadow: filtroStatus === 'ATRASADO' ? 'var(--shadow-sm)' : 'none',
+            whiteSpace: 'nowrap'
           }}
         >
           <span>🔴 Atrasados ({qtdAtrasados})</span>
         </button>
-      </div>
-
-      {/* Filter Tabs 2: Fila de Contato (WhatsApp) */}
-      <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--bg-subtle, #F1F5F9)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
-        <button
-          type="button"
-          onClick={() => setFiltroContato('TODOS')}
-          style={{
-            flex: 1,
-            padding: '8px 4px',
-            borderRadius: 'var(--radius-sm)',
-            border: 'none',
-            backgroundColor: filtroContato === 'TODOS' ? '#FFFFFF' : 'transparent',
-            color: filtroContato === 'TODOS' ? 'var(--primary-800)' : 'var(--text-muted)',
-            fontWeight: 700,
-            fontSize: '0.78rem',
-            cursor: 'pointer',
-            boxShadow: filtroContato === 'TODOS' ? 'var(--shadow-sm)' : 'none'
-          }}
-        >
-          Todos ({parcelasExibidas.length})
-        </button>
 
         <button
           type="button"
-          onClick={() => setFiltroContato('PENDENTES')}
+          onClick={() => setFiltroStatus('TODOS')}
           style={{
-            flex: 1.2,
-            padding: '8px 4px',
-            borderRadius: 'var(--radius-sm)',
-            border: 'none',
-            backgroundColor: filtroContato === 'PENDENTES' ? '#FFFFFF' : 'transparent',
-            color: filtroContato === 'PENDENTES' ? '#EA580C' : 'var(--text-muted)',
-            fontWeight: 700,
-            fontSize: '0.78rem',
+            padding: '10px 4px',
+            borderRadius: 'var(--radius-md)',
+            border: filtroStatus === 'TODOS' ? '2px solid var(--primary-800)' : '1px solid var(--border-color)',
+            backgroundColor: filtroStatus === 'TODOS' ? 'var(--primary-100)' : '#FFFFFF',
+            color: 'var(--primary-900)',
+            fontWeight: 800,
+            fontSize: '0.8rem',
             cursor: 'pointer',
-            boxShadow: filtroContato === 'PENDENTES' ? 'var(--shadow-sm)' : 'none'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+            boxShadow: filtroStatus === 'TODOS' ? 'var(--shadow-sm)' : 'none',
+            whiteSpace: 'nowrap'
           }}
         >
-          📌 Faltam Chamar ({pendentesContato.length})
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setFiltroContato('CONTATADOS')}
-          style={{
-            flex: 1.2,
-            padding: '8px 4px',
-            borderRadius: 'var(--radius-sm)',
-            border: 'none',
-            backgroundColor: filtroContato === 'CONTATADOS' ? '#FFFFFF' : 'transparent',
-            color: filtroContato === 'CONTATADOS' ? '#166534' : 'var(--text-muted)',
-            fontWeight: 700,
-            fontSize: '0.78rem',
-            cursor: 'pointer',
-            boxShadow: filtroContato === 'CONTATADOS' ? 'var(--shadow-sm)' : 'none'
-          }}
-        >
-          💬 Já Chamados ({jaContatadosHoje.length})
+          <span>Todos ({cobrancasFiltradasPorData.length})</span>
         </button>
       </div>
+
+
 
       {loading && (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Carregando rota de cobrança de hoje...
+        <div style={{ padding: '40px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          Carregando rota de cobrança...
         </div>
       )}
 
       {error && (
         <div
           style={{
-            padding: '14px',
+            padding: '12px 14px',
             backgroundColor: 'var(--status-atrasada-bg)',
             color: 'var(--status-atrasada-text)',
             borderRadius: 'var(--radius-md)',
-            fontSize: '0.88rem',
+            fontSize: '0.85rem',
           }}
         >
           {error}
@@ -643,20 +605,20 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           {parcelasExibidas.length === 0 ? (
             <div 
               style={{ 
-                padding: '24px 16px', 
+                padding: '24px 14px', 
                 textAlign: 'center', 
                 backgroundColor: '#FFFFFF', 
-                borderRadius: 'var(--radius-lg)',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-color)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '12px'
+                gap: '10px'
               }}
             >
-              <div style={{ fontSize: '0.92rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
                 {busca 
-                  ? `Nenhum cliente em cobrança hoje ou em atraso encontrado com "${busca}".` 
+                  ? `Nenhuma cobrança encontrada com "${busca}".` 
                   : 'Nenhuma cobrança pendente para hoje ou em atraso!'}
               </div>
 
@@ -665,60 +627,58 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   type="button"
                   onClick={() => onNavigate('clientes')}
                   style={{
-                    padding: '10px 16px',
+                    padding: '8px 14px',
                     borderRadius: 'var(--radius-md)',
                     backgroundColor: 'var(--accent-600)',
                     color: '#FFFFFF',
                     border: 'none',
                     fontWeight: 700,
-                    fontSize: '0.88rem',
+                    fontSize: '0.82rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
                     cursor: 'pointer',
                   }}
                 >
-                  <Users size={18} />
-                  <span>Ver Todos os Clientes na Aba Clientes</span>
-                  <ArrowRight size={16} />
+                  <Users size={16} />
+                  <span>Ver Todos os Clientes</span>
+                  <ArrowRight size={14} />
                 </button>
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
               {/* ================================================================ */}
               {/* SEÇÃO 1: FILA DE COBRANÇA — PENDENTES DE CONTATO                 */}
               {/* ================================================================ */}
-              {(filtroContato === 'TODOS' || filtroContato === 'PENDENTES') && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                        📌 Fila de Cobrança — Faltam Chamar
-                      </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 800, backgroundColor: '#FFEDD5', color: '#C2410C', padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
-                        {pendentesContato.length}
-                      </span>
-                    </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                      📌 Fila de Cobrança (Faltam Chamar)
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#EFF6FF', color: '#1D4ED8', padding: '2px 7px', borderRadius: 'var(--radius-full)' }}>
+                      {pendentesContato.length}
+                    </span>
                   </div>
-
-                  {pendentesContato.length === 0 ? (
-                    <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 'var(--radius-md)', color: '#166534', fontSize: '0.85rem', fontWeight: 600 }}>
-                      🎉 Todos os clientes desta lista já receberam mensagem hoje!
-                    </div>
-                  ) : (
-                    <div className="cobrancas-grid">
-                      {pendentesContato.map(p => renderCardCobranca(p, false))}
-                    </div>
-                  )}
                 </div>
-              )}
+
+                {pendentesContato.length === 0 ? (
+                  <div style={{ padding: '16px', textAlign: 'center', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 'var(--radius-md)', color: '#166534', fontSize: '0.82rem', fontWeight: 600 }}>
+                    🎉 Todos os clientes desta lista já receberam mensagem hoje!
+                  </div>
+                ) : (
+                  <div className="cobrancas-grid">
+                    {pendentesContato.map(p => renderCardCobranca(p, false))}
+                  </div>
+                )}
+              </div>
 
               {/* ================================================================ */}
-              {/* SEÇÃO 2: JÁ CHAMADOS NO WHATSAPP HOJE (JOGADOS PARA BAIXO)       */}
+              {/* SEÇÃO 2: JÁ CHAMADOS NO WHATSAPP HOJE                            */}
               {/* ================================================================ */}
-              {(filtroContato === 'TODOS' || filtroContato === 'CONTATADOS') && jaContatadosHoje.length > 0 && (
-                <div style={{ marginTop: filtroContato === 'TODOS' ? '6px' : '0' }}>
+              {jaContatadosHoje.length > 0 && (
+                <div>
                   {/* Cabeçalho da Gaveta de Já Chamados */}
                   <div
                     onClick={() => setGavetaContatadosAberta(!gavetaContatadosAberta)}
@@ -726,21 +686,21 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                       backgroundColor: '#F1F5F9',
                       border: '1px solid #CBD5E1',
                       borderRadius: 'var(--radius-md)',
-                      padding: '12px 14px',
+                      padding: '10px 12px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
-                      marginBottom: gavetaContatadosAberta ? '10px' : '0'
+                      marginBottom: gavetaContatadosAberta ? '8px' : '0'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <MessageCircle size={18} color="#166534" />
-                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1E293B' }}>
-                        📁 Já Chamados no WhatsApp Hoje ({jaContatadosHoje.length})
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MessageCircle size={16} color="#166534" />
+                      <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1E293B' }}>
+                        📁 Já Chamados no WhatsApp ({jaContatadosHoje.length})
                       </span>
                     </div>
-                    {gavetaContatadosAberta ? <ChevronUp size={18} color="#64748B" /> : <ChevronDown size={18} color="#64748B" />}
+                    {gavetaContatadosAberta ? <ChevronUp size={16} color="#64748B" /> : <ChevronDown size={16} color="#64748B" />}
                   </div>
 
                   {/* Grid de Já Chamados */}
@@ -756,8 +716,8 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
 
           {/* Prompt to navigate to Clientes tab */}
           {onNavigate && cobrancasFiltradasPorData.length > 0 && (
-            <div style={{ marginTop: '10px', padding: '12px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            <div style={{ marginTop: '8px', padding: '12px', backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                 Precisa consultar um cliente que não está em cobrança hoje?
               </span>
               <button
@@ -767,17 +727,17 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   marginTop: '6px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '4px',
                   backgroundColor: 'transparent',
                   color: 'var(--accent-700)',
                   border: 'none',
                   fontWeight: 700,
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   cursor: 'pointer'
                 }}
               >
                 <span>Ir para a Aba Clientes (Ver Todos)</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </button>
             </div>
           )}
@@ -799,65 +759,67 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             right: 0,
             bottom: 0,
             backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
+            padding: '12px',
+            boxSizing: 'border-box'
           }}
         >
           <div
             className="animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '480px',
+              maxWidth: '460px',
               backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-lg)',
-              padding: '24px',
-              maxHeight: '88vh',
+              padding: '20px 16px',
+              maxHeight: '90vh',
               overflowY: 'auto',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
               position: 'relative',
+              boxSizing: 'border-box'
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                 <span
                   style={{
-                    padding: '4px 10px',
+                    padding: '3px 8px',
                     borderRadius: 'var(--radius-full)',
-                    backgroundColor: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#FFEDD5' : '#FEE2E2',
-                    color: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#C2410C' : '#B91C1C',
+                    backgroundColor: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#EFF6FF' : '#FEE2E2',
+                    color: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#1D4ED8' : '#B91C1C',
                     fontWeight: 800,
-                    fontSize: '0.78rem'
+                    fontSize: '0.74rem'
                   }}
                 >
-                  {getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '🟠 Cobrar Hoje' : '🔴 Atrasado'}
+                  {getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '🔵 Cobrar Hoje' : '🔴 Atrasado'}
                 </span>
 
                 {foiContatadoHoje(parcelaSelecionada.ultimoContatoEm) && (
                   <span
                     style={{
-                      padding: '4px 10px',
+                      padding: '3px 8px',
                       borderRadius: 'var(--radius-full)',
                       backgroundColor: '#DCFCE7',
                       color: '#15803D',
                       fontWeight: 800,
-                      fontSize: '0.75rem',
+                      fontSize: '0.72rem',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      gap: '3px'
                     }}
                   >
-                    <MessageCircle size={13} />
+                    <MessageCircle size={12} />
                     <span>Chamado hoje às {formatarHoraContato(parcelaSelecionada.ultimoContatoEm)}</span>
                   </span>
                 )}
 
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                   Parcela #{parcelaSelecionada.numero}
                 </span>
               </div>
@@ -866,7 +828,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 onClick={() => setParcelaSelecionada(null)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
               >
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
 
@@ -874,94 +836,71 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             <div
               style={{
                 backgroundColor: 'var(--bg-subtle)',
-                padding: '16px',
+                padding: '14px',
                 borderRadius: 'var(--radius-md)',
-                marginBottom: '16px',
+                marginBottom: '14px',
               }}
             >
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
                 {parcelaSelecionada.venda?.cliente?.nome}
               </h3>
               
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <MapPin size={16} color="var(--accent-600)" /> {parcelaSelecionada.venda?.cliente?.endereco || 'Endereço não cadastrado'}
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-main)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px', margin: '6px 0 0 0' }}>
+                <MapPin size={14} color="var(--accent-600)" style={{ flexShrink: 0 }} />
+                <span>{parcelaSelecionada.venda?.cliente?.endereco || 'Endereço não cadastrado'}</span>
               </p>
 
               {parcelaSelecionada.venda?.cliente?.telefone && (
-                <p style={{ fontSize: '0.85rem', color: '#166534', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                  <Phone size={15} color="#166534" /> {parcelaSelecionada.venda.cliente.telefone}
+                <p style={{ fontSize: '0.82rem', color: '#166534', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600, margin: '4px 0 0 0' }}>
+                  <Phone size={14} color="#166534" style={{ flexShrink: 0 }} />
+                  <span>{parcelaSelecionada.venda.cliente.telefone}</span>
                 </p>
               )}
 
               {parcelaSelecionada.venda?.cliente?.referencias && (
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic', margin: '4px 0 0 0' }}>
                   Ref: {parcelaSelecionada.venda.cliente.referencias}
                 </p>
               )}
             </div>
 
             {/* Sale & Installment Details */}
-            <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: '#FFFFFF' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>
+            <div style={{ marginBottom: '16px', padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: '#FFFFFF' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
                 Produto & Valor
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-800)' }}>
                 {parcelaSelecionada.venda?.itens?.[0]?.produto?.nome || 'Venda de Crediário'}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '0.9rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.88rem' }}>
                 <span>Valor da Parcela:</span>
-                <strong style={{ color: 'var(--primary-800)', fontSize: '1.05rem' }}>
+                <strong style={{ color: 'var(--primary-800)', fontSize: '1rem' }}>
                   R$ {Number(parcelaSelecionada.valor).toFixed(2)}
                 </strong>
               </div>
               {parcelaSelecionada.valorPago && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.88rem', color: '#15803D' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.84rem', color: '#15803D' }}>
                   <span>Valor já pago:</span>
                   <strong>R$ {Number(parcelaSelecionada.valorPago).toFixed(2)}</strong>
                 </div>
               )}
               {parcelaSelecionada.observacao && (
-                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#FEF3C7', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: '#B45309' }}>
+                <div style={{ marginTop: '8px', padding: '8px 10px', backgroundColor: '#FEF3C7', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: '#B45309' }}>
                   💬 <strong>Observação:</strong> {parcelaSelecionada.observacao}
                 </div>
               )}
             </div>
 
             {/* Main Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {/* Botão Registrar Pagamento */}
               <button
                 onClick={() => setModalPagamento(true)}
                 className="touch-target"
                 style={{
                   width: '100%',
-                  height: 'var(--touch-target-large)',
-                  backgroundColor: '#16A34A',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: 'var(--radius-md)',
-                  fontWeight: 800,
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)',
-                }}
-              >
-                <DollarSign size={20} />
-                <span>Registrar Pagamento</span>
-              </button>
-
-              {/* Botão Mandar Mensagem no WhatsApp */}
-              <button
-                onClick={() => abrirWhatsAppCliente(parcelaSelecionada)}
-                className="touch-target"
-                style={{
-                  width: '100%',
                   height: '48px',
-                  backgroundColor: '#25D366',
+                  backgroundColor: '#16A34A',
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
@@ -972,11 +911,36 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   justifyContent: 'center',
                   gap: '8px',
                   cursor: 'pointer',
-                  boxShadow: '0 3px 10px rgba(37, 211, 102, 0.35)',
+                  boxShadow: '0 3px 10px rgba(22, 163, 74, 0.3)',
+                }}
+              >
+                <DollarSign size={18} />
+                <span>Registrar Pagamento</span>
+              </button>
+
+              {/* Botão Mandar Mensagem no WhatsApp */}
+              <button
+                onClick={() => abrirWhatsAppCliente(parcelaSelecionada)}
+                className="touch-target"
+                style={{
+                  width: '100%',
+                  height: '46px',
+                  backgroundColor: '#25D366',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: '0 3px 10px rgba(37, 211, 102, 0.3)',
                   transition: 'background-color 0.15s ease'
                 }}
               >
-                <MessageCircle size={20} />
+                <MessageCircle size={18} />
                 <span>{foiContatadoHoje(parcelaSelecionada.ultimoContatoEm) ? 'Reenviar Mensagem WhatsApp' : 'Mandar Mensagem'}</span>
               </button>
 
@@ -986,13 +950,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 className="touch-target"
                 style={{
                   width: '100%',
-                  height: '46px',
+                  height: '44px',
                   backgroundColor: 'var(--bg-subtle)',
                   color: 'var(--primary-800)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   fontWeight: 700,
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1000,7 +964,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   cursor: 'pointer',
                 }}
               >
-                <FileText size={18} />
+                <FileText size={16} />
                 <span>Registrar Observação</span>
               </button>
             </div>
@@ -1028,22 +992,22 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
+            padding: '12px',
           }}
         >
           <div
             className="animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '420px',
+              maxWidth: '400px',
               backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-lg)',
-              padding: '24px',
+              padding: '20px 16px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
                 Registrar Pagamento
               </h3>
               <button
@@ -1054,13 +1018,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               </button>
             </div>
 
-            <form onSubmit={handleIniciarValidacaoPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleIniciarValidacaoPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
                   Valor Recebido (R$) *
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <DollarSign size={18} color="var(--accent-600)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <DollarSign size={16} color="var(--accent-600)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type="number"
                     step="0.01"
@@ -1070,20 +1034,21 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                     onChange={(e) => setValorPagoInput(e.target.value)}
                     style={{
                       width: '100%',
-                      height: '48px',
-                      padding: '0 12px 0 38px',
+                      height: '46px',
+                      padding: '0 12px 0 36px',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-color)',
-                      fontSize: '1.05rem',
+                      fontSize: '1rem',
                       fontWeight: 800,
                       outline: 'none',
+                      boxSizing: 'border-box'
                     }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
                   Data do Pagamento *
                 </label>
                 <input
@@ -1093,29 +1058,30 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   onChange={(e) => setDataPagamentoInput(e.target.value)}
                   style={{
                     width: '100%',
-                    height: '44px',
+                    height: '42px',
                     padding: '0 12px',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--border-color)',
-                    fontSize: '0.9rem',
+                    fontSize: '0.88rem',
                     outline: 'none',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setModalPagamento(false)}
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: 'var(--bg-subtle)',
                     color: 'var(--text-main)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 700,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: 'pointer',
                   }}
                 >
@@ -1126,13 +1092,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   type="submit"
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: '#16A34A',
                     color: '#FFFFFF',
                     border: 'none',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 800,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: 'pointer',
                   }}
                 >
@@ -1164,46 +1130,46 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
+            padding: '12px',
           }}
         >
           <div
             className="animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '380px',
+              maxWidth: '360px',
               backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-lg)',
-              padding: '24px',
+              padding: '20px 16px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
               textAlign: 'center',
             }}
           >
             <div
               style={{
-                width: '56px',
-                height: '56px',
+                width: '50px',
+                height: '50px',
                 borderRadius: '50%',
                 backgroundColor: '#EFF6FF',
                 color: '#2563EB',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 16px auto',
+                margin: '0 auto 12px auto',
               }}
             >
-              <DollarSign size={28} />
+              <DollarSign size={24} />
             </div>
 
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-800)', margin: '0 0 6px 0' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', margin: '0 0 6px 0' }}>
               Confirmar Valor Recebido
             </h3>
             
-            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: 1.4 }}>
               Digite novamente o valor exato recebido (<strong>R$ {parseFloat(valorPagoInput || '0').toFixed(2)}</strong>) para confirmar a baixa:
             </p>
 
-            <form onSubmit={handleConfirmarEExecutarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={handleConfirmarEExecutarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
                 <input
                   type="number"
@@ -1218,36 +1184,37 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   }}
                   style={{
                     width: '100%',
-                    height: '52px',
+                    height: '48px',
                     textAlign: 'center',
-                    fontSize: '1.4rem',
+                    fontSize: '1.3rem',
                     fontWeight: 900,
                     color: 'var(--primary-800)',
                     borderRadius: 'var(--radius-md)',
                     border: erroConfirmacao ? '2px solid #EF4444' : '2px solid var(--accent-600)',
                     outline: 'none',
+                    boxSizing: 'border-box'
                   }}
                 />
                 {erroConfirmacao && (
-                  <p style={{ fontSize: '0.78rem', color: '#DC2626', marginTop: '6px', textAlign: 'left', lineHeight: 1.3 }}>
+                  <p style={{ fontSize: '0.76rem', color: '#DC2626', marginTop: '6px', textAlign: 'left', lineHeight: 1.3 }}>
                     {erroConfirmacao}
                   </p>
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                 <button
                   type="button"
                   onClick={() => setModalValidacaoValor(false)}
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: 'var(--bg-subtle)',
                     color: 'var(--text-main)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 700,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: 'pointer',
                   }}
                 >
@@ -1259,13 +1226,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   disabled={salvando}
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: salvando ? '#94A3B8' : '#16A34A',
                     color: '#FFFFFF',
                     border: 'none',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 800,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: salvando ? 'not-allowed' : 'pointer',
                   }}
                 >
@@ -1297,22 +1264,22 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
+            padding: '12px',
           }}
         >
           <div
             className="animate-fade-in"
             style={{
               width: '100%',
-              maxWidth: '420px',
+              maxWidth: '400px',
               backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-lg)',
-              padding: '24px',
+              padding: '20px 16px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
                 Registrar Observação
               </h3>
               <button
@@ -1323,9 +1290,9 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               </button>
             </div>
 
-            <form onSubmit={handleSalvarObservacao} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSalvarObservacao} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
                   Nota / Observação sobre o cliente:
                 </label>
                 <textarea
@@ -1336,29 +1303,30 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   onChange={(e) => setObservacaoInput(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '10px 12px',
+                    padding: '10px',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--border-color)',
-                    fontSize: '0.9rem',
+                    fontSize: '0.88rem',
                     outline: 'none',
                     resize: 'none',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setModalObservacao(false)}
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: 'var(--bg-subtle)',
                     color: 'var(--text-main)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 700,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: 'pointer',
                   }}
                 >
@@ -1370,13 +1338,13 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                   disabled={salvando}
                   style={{
                     flex: 1,
-                    height: '44px',
+                    height: '42px',
                     backgroundColor: salvando ? '#94A3B8' : 'var(--accent-600)',
                     color: '#FFFFFF',
                     border: 'none',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 800,
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     cursor: salvando ? 'not-allowed' : 'pointer',
                   }}
                 >

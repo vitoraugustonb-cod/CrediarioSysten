@@ -216,15 +216,23 @@ button, input, select, textarea {
 /* Grid de Cards de Cobrança (2 por fileira no mobile, 4 no desktop) */
 .cobrancas-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 350px) {
+  .cobrancas-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
 }
 
 @media (min-width: 768px) {
   .cobrancas-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
   }
 }
+
 
 

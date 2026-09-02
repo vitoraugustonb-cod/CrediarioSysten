@@ -118,7 +118,7 @@ export const MobileLayout: React.FC = () => {
       </header>
 
       {/* Dynamic Content Views */}
-      <main style={{ padding: '16px', flex: 1 }}>
+      <main style={{ padding: '12px 10px', flex: 1, maxWidth: '100vw', overflowX: 'hidden' }}>
         {activeTab === 'resumo' && <ResumoDiaView onNavigate={(t) => setActiveTab(t)} />}
         {activeTab === 'cobrancas' && <CobrancasView onNavigate={(t) => setActiveTab(t)} />}
         {activeTab === 'venda' && <NovaVendaView onNavigate={(t) => setActiveTab(t)} />}
@@ -160,12 +160,13 @@ export const MobileLayout: React.FC = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '4px',
+                gap: '2px',
                 border: 'none',
                 backgroundColor: 'transparent',
                 color: isActive ? 'var(--accent-600)' : 'var(--text-muted)',
                 cursor: 'pointer',
                 position: 'relative',
+                padding: '0 2px',
                 transition: 'color 0.15s ease',
               }}
             >
@@ -175,7 +176,7 @@ export const MobileLayout: React.FC = () => {
                   style={{
                     position: 'absolute',
                     top: 0,
-                    width: '32px',
+                    width: '28px',
                     height: '3px',
                     backgroundColor: 'var(--accent-600)',
                     borderRadius: '0 0 4px 4px',
@@ -183,11 +184,13 @@ export const MobileLayout: React.FC = () => {
                 />
               )}
 
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               <span
                 style={{
-                  fontSize: '0.72rem',
+                  fontSize: '0.66rem',
                   fontWeight: isActive ? 700 : 500,
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {item.label}
