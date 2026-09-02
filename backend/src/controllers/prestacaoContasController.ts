@@ -43,13 +43,12 @@ async function calcularPrestacaoContasDia(usuarioId: number, dataIso: string) {
     const itensNomes = v.itens.map(i => `${i.quantidade}x ${i.produto?.nome || 'Item'}`).join(', ');
     const nomeProdutoPrincipal = v.itens.map(i => i.produto?.nome).filter(Boolean).join(', ') || 'Produto';
 
-    for (const item of v.itens) {
-      const sub = Number(item.subtotal);
-      if (item.produto?.categoria === 'VARIEDADES') {
-        totalVendidoVariedades += sub;
-      } else {
-        totalVendidoMoveis += sub;
-      }
+    // Usa o tipoVenda da venda (não a categoria do produto), pois os produtos
+    // são criados automaticamente e sempre têm categoria MOVEIS por padrão.
+    if (v.tipoVenda === 'VARIEDADES') {
+      totalVendidoVariedades += totalVenda;
+    } else {
+      totalVendidoMoveis += totalVenda;
     }
 
     const valEntrada = Number(v.valorEntrada || 0);

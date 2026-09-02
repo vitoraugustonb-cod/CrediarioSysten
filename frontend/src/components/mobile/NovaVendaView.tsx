@@ -12,7 +12,9 @@ import {
   UserPlus,
   Layers,
   Sparkles,
-  Search
+  Search,
+  Sofa,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -74,6 +76,9 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
     else d.setDate(d.getDate() + 30);
     return d.toISOString().substring(0, 10);
   };
+
+  // Tipo da venda
+  const [tipoVenda, setTipoVenda] = useState<'MOVEIS' | 'VARIEDADES'>('MOVEIS');
 
   const [primeiroVencimento, setPrimeiroVencimento] = useState<string>(getInitialFirstPayment('MENSAL'));
   const [dataVenda, setDataVenda] = useState<string>(new Date().toISOString().substring(0, 10));
@@ -209,6 +214,7 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
           periodicidade,
           primeiroVencimento,
           dataVenda,
+          tipoVenda,
         },
         token
       );
@@ -289,6 +295,103 @@ export const NovaVendaView: React.FC<NovaVendaViewProps> = () => {
       ) : (
         <form onSubmit={handleSalvarVenda} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
+          {/* SECTION 0: TIPO DA VENDA */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              padding: '18px',
+              borderRadius: 'var(--radius-lg)',
+              border: '2px solid ' + (tipoVenda === 'MOVEIS' ? '#2563EB' : '#7C3AED'),
+              boxShadow: tipoVenda === 'MOVEIS'
+                ? '0 0 0 3px rgba(37,99,235,0.12)'
+                : '0 0 0 3px rgba(124,58,237,0.12)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary-800)', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+              <Sparkles size={18} color={tipoVenda === 'MOVEIS' ? '#2563EB' : '#7C3AED'} />
+              <span>0. Tipo da Venda</span>
+              <span style={{
+                marginLeft: 'auto',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                padding: '3px 10px',
+                borderRadius: '999px',
+                backgroundColor: tipoVenda === 'MOVEIS' ? '#DBEAFE' : '#EDE9FE',
+                color: tipoVenda === 'MOVEIS' ? '#1E40AF' : '#5B21B6'
+              }}>
+                {tipoVenda === 'MOVEIS' ? '🛋️ Móveis' : '🎁 Variedades'}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Botão Móveis */}
+              <button
+                type="button"
+                onClick={() => setTipoVenda('MOVEIS')}
+                style={{
+                  padding: '18px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: tipoVenda === 'MOVEIS' ? '2px solid #2563EB' : '2px solid var(--border-subtle)',
+                  backgroundColor: tipoVenda === 'MOVEIS' ? '#EFF6FF' : '#FFFFFF',
+                  color: tipoVenda === 'MOVEIS' ? '#1E40AF' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: tipoVenda === 'MOVEIS' ? '0 2px 8px rgba(37,99,235,0.2)' : 'none'
+                }}
+              >
+                <Sofa size={28} color={tipoVenda === 'MOVEIS' ? '#2563EB' : '#94A3B8'} />
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800 }}>Móveis</div>
+                  <div style={{ fontSize: '0.72rem', opacity: 0.8, marginTop: '2px' }}>Sofás, armários, camas…</div>
+                </div>
+                {tipoVenda === 'MOVEIS' && (
+                  <CheckCircle2 size={18} color="#2563EB" />
+                )}
+              </button>
+
+              {/* Botão Variedades */}
+              <button
+                type="button"
+                onClick={() => setTipoVenda('VARIEDADES')}
+                style={{
+                  padding: '18px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: tipoVenda === 'VARIEDADES' ? '2px solid #7C3AED' : '2px solid var(--border-subtle)',
+                  backgroundColor: tipoVenda === 'VARIEDADES' ? '#F5F3FF' : '#FFFFFF',
+                  color: tipoVenda === 'VARIEDADES' ? '#5B21B6' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: tipoVenda === 'VARIEDADES' ? '0 2px 8px rgba(124,58,237,0.2)' : 'none'
+                }}
+              >
+                <ShoppingBag size={28} color={tipoVenda === 'VARIEDADES' ? '#7C3AED' : '#94A3B8'} />
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800 }}>Variedades</div>
+                  <div style={{ fontSize: '0.72rem', opacity: 0.8, marginTop: '2px' }}>Roupas, eletrônicos, outros…</div>
+                </div>
+                {tipoVenda === 'VARIEDADES' && (
+                  <CheckCircle2 size={18} color="#7C3AED" />
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* SECTION 1: SEÇÃO DO CLIENTE */}
           <div
             style={{

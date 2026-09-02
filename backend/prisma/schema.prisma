@@ -24,6 +24,11 @@ enum CategoriaProduto {
   VARIEDADES
 }
 
+enum TipoVenda {
+  MOVEIS
+  VARIEDADES
+}
+
 model Usuario {
   id        Int           @id @default(autoincrement())
   nome      String
@@ -61,15 +66,17 @@ model Produto {
 }
 
 model Venda {
-  id           Int      @id @default(autoincrement())
-  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  id           Int       @id @default(autoincrement())
+  cliente      Cliente   @relation(fields: [clienteId], references: [id])
   clienteId    Int
-  vendedor     Usuario  @relation("VendedorVendas", fields: [vendedorId], references: [id])
+  vendedor     Usuario   @relation("VendedorVendas", fields: [vendedorId], references: [id])
   vendedorId   Int
-  valorTotal   Decimal  @db.Decimal(10, 2)
-  valorEntrada Decimal? @db.Decimal(10, 2)
+  valorTotal   Decimal   @db.Decimal(10, 2)
+  valorEntrada Decimal?  @db.Decimal(10, 2)
   numParcelas  Int
-  dataVenda    DateTime @default(now())
+  dataVenda    DateTime  @default(now())
+  tipoVenda    TipoVenda @default(MOVEIS)
+  criadoEm    DateTime  @default(now())
 
   itens      ItemVenda[]
   parcelas   Parcela[]

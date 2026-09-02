@@ -128,7 +128,7 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
     for (const p of todasParcelas) {
       const vOriginal = Number(p.valor);
       const vPago = p.valorPago ? Number(p.valorPago) : 0;
-      
+
       totalOriginal += vOriginal;
       totalPago += vPago;
 

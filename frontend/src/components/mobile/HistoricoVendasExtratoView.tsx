@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { 
-  ShoppingBag, 
   Calendar, 
   ChevronRight, 
   ArrowLeft, 
@@ -9,7 +8,9 @@ import {
   Copy, 
   Check, 
   Receipt,
-  AlertCircle
+  AlertCircle,
+  Sofa,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -44,8 +45,42 @@ function formatarDataCurta(dataIso: string): string {
   return `${dia}/${mes}/${ano}`;
 }
 
+type AbaAtiva = 'MOVEIS' | 'VARIEDADES';
+
+const ABA_CONFIG = {
+  MOVEIS: {
+    label: 'Móveis',
+    emoji: '🛋️',
+    icon: Sofa,
+    cor: '#1E40AF',
+    bgCor: '#EFF6FF',
+    borderCor: '#BFDBFE',
+    badgeBg: '#DBEAFE',
+    badgeText: '#1E40AF',
+    headerBg: '#1E3A8A',
+    totalKey: 'totalVendidoMoveis' as keyof DiaFechadoVendasItem,
+    qtdKey: 'qtdVendasMoveis' as keyof DiaFechadoVendasItem,
+    tipoFiltro: 'MOVEIS' as const,
+  },
+  VARIEDADES: {
+    label: 'Variedades',
+    emoji: '🎁',
+    icon: ShoppingBag,
+    cor: '#5B21B6',
+    bgCor: '#F5F3FF',
+    borderCor: '#DDD6FE',
+    badgeBg: '#EDE9FE',
+    badgeText: '#5B21B6',
+    headerBg: '#4C1D95',
+    totalKey: 'totalVendidoVariedades' as keyof DiaFechadoVendasItem,
+    qtdKey: 'qtdVendasVariedades' as keyof DiaFechadoVendasItem,
+    tipoFiltro: 'VARIEDADES' as const,
+  },
+};
+
 export const HistoricoVendasExtratoView: React.FC = () => {
   const { token } = useAuth();
+  const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>('MOVEIS');
 
   const [diasFechados, setDiasFechados] = useState<DiaFechadoVendasItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -96,35 +131,108 @@ export const HistoricoVendasExtratoView: React.FC = () => {
     setError(null);
   };
 
+  const mudarAba = (aba: AbaAtiva) => {
+    setAbaAtiva(aba);
+    voltarParaLista();
+    setBusca('');
+  };
+
+  const cfg = ABA_CONFIG[abaAtiva];
+
   const copiarResumoWhatsApp = () => {
     if (!extrato) return;
+    const itensFiltrados = extrato.itens.filter(i => i.tipoVenda === abaAtiva);
+    const totalFiltrado = itensFiltrados.reduce((acc, i) => acc + i.valorTotal, 0);
     const dataStr = formatarDataCurta(extrato.data);
-    let texto = `🛍️ *EXTRATO DE VENDAS - ${dataStr}*\n`;
+    let texto = `${cfg.emoji} *EXTRATO DE VENDAS (${cfg.label}) - ${dataStr}*\n`;
     texto += `----------------------------------------\n`;
-    extrato.itens.forEach(item => {
-      texto += `${item.ordem}. *${item.clienteNome}*: R$ ${item.valorTotal.toFixed(2)} (${item.itens} - ${item.condicao})\n`;
+    itensFiltrados.forEach((item, idx) => {
+      texto += `${idx + 1}. *${item.clienteNome}*: R$ ${item.valorTotal.toFixed(2)} (${item.itens} - ${item.condicao})\n`;
     });
     texto += `----------------------------------------\n`;
-    texto += `💰 *TOTAL VENDIDO:* R$ ${extrato.totalVendido.toFixed(2)}\n`;
-    texto += `📦 *Qtd. Vendas:* ${extrato.qtdVendas}\n`;
+    texto += `💰 *TOTAL ${cfg.label.toUpperCase()}:* R$ ${totalFiltrado.toFixed(2)}\n`;
+    texto += `📦 *Qtd. Vendas:* ${itensFiltrados.length}\n`;
 
     navigator.clipboard.writeText(texto);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2500);
   };
 
-  const diasFiltrados = diasFechados.filter(d => {
+  // Filtra dias que têm ao menos uma venda do tipo da aba ativa
+  const diasFiltradosPorTipo = diasFechados.filter(d => {
+    const qtd = Number(d[cfg.qtdKey] ?? 0);
+    return qtd > 0;
+  });
+
+  const diasFiltrados = diasFiltradosPorTipo.filter(d => {
     const dataFormatada = formatarDataCompleta(d.data).toLowerCase();
     const dataCurta = formatarDataCurta(d.data);
     const termo = busca.toLowerCase();
     return dataFormatada.includes(termo) || dataCurta.includes(termo);
   });
 
+  // Itens do extrato filtrados pelo tipo da aba ativa
+  const itensFiltrados = extrato?.itens.filter(i => i.tipoVenda === abaAtiva) ?? [];
+  const totalFiltrado = itensFiltrados.reduce((acc, i) => acc + i.valorTotal, 0);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* -------------------------------------------------------------------------- */}
-      {/* MODO 1: EXTRATO DETALHADO DE VENDAS DO DIA (TABELA EXCEL) */}
-      {/* -------------------------------------------------------------------------- */}
+
+      {/* ================================================================ */}
+      {/* SELETOR DE ABAS */}
+      {/* ================================================================ */}
+      {!diaSelecionado && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '8px',
+          }}
+        >
+          {(['MOVEIS', 'VARIEDADES'] as AbaAtiva[]).map(aba => {
+            const c = ABA_CONFIG[aba];
+            const ativo = abaAtiva === aba;
+            const Icon = c.icon;
+            const totalGeral = diasFechados.reduce((acc, d) => acc + Number(d[c.totalKey] ?? 0), 0);
+            return (
+              <button
+                key={aba}
+                type="button"
+                onClick={() => mudarAba(aba)}
+                style={{
+                  padding: '14px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: ativo ? `2px solid ${c.cor}` : '2px solid var(--border-subtle)',
+                  backgroundColor: ativo ? c.bgCor : '#FFFFFF',
+                  color: ativo ? c.cor : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: ativo ? `0 2px 8px ${c.cor}30` : 'none',
+                }}
+              >
+                <Icon size={22} color={ativo ? c.cor : '#94A3B8'} />
+                <span style={{ fontSize: '0.92rem', fontWeight: 800 }}>{c.label}</span>
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: ativo ? c.cor : 'var(--text-muted)',
+                  opacity: ativo ? 1 : 0.7
+                }}>
+                  R$ {totalGeral.toFixed(2)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ================================================================ */}
+      {/* MODO 1: EXTRATO DETALHADO DO DIA */}
+      {/* ================================================================ */}
       {diaSelecionado ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Top Bar com Botão Voltar e Ações */}
@@ -157,7 +265,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  backgroundColor: copiado ? '#1E40AF' : 'var(--primary-800)',
+                  backgroundColor: copiado ? '#1E40AF' : cfg.headerBg,
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
@@ -180,7 +288,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-lg)',
               padding: '16px',
-              border: '1px solid var(--border-color)',
+              border: `1px solid ${cfg.borderCor}`,
               boxShadow: 'var(--shadow-sm)',
               display: 'flex',
               flexDirection: 'column',
@@ -194,16 +302,19 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                   fontWeight: 800,
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
-                  color: '#1E40AF',
-                  backgroundColor: '#DBEAFE',
+                  color: cfg.badgeText,
+                  backgroundColor: cfg.badgeBg,
                   padding: '3px 8px',
-                  borderRadius: 'var(--radius-sm)'
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
                 }}
               >
-                Extrato de Vendas Fechado
+                {cfg.emoji} Extrato — {cfg.label}
               </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                {extrato ? `${extrato.qtdVendas} venda(s)` : ''}
+                {extrato ? `${itensFiltrados.length} venda(s)` : ''}
               </span>
             </div>
 
@@ -218,7 +329,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
                 <Clock size={28} />
               </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Carregando extrato de vendas da planilha...</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Carregando extrato de vendas...</p>
             </div>
           )}
 
@@ -228,7 +339,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
             </div>
           )}
 
-          {/* TABELA ESTILO PLANILHA EXCEL */}
+          {/* TABELA ESTILO PLANILHA */}
           {extrato && !loadingExtrato && (
             <div
               style={{
@@ -242,7 +353,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               {/* Top Banner da Planilha */}
               <div
                 style={{
-                  backgroundColor: '#0F172A',
+                  backgroundColor: cfg.headerBg,
                   color: '#FFFFFF',
                   padding: '10px 14px',
                   display: 'flex',
@@ -252,15 +363,15 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', fontWeight: 700 }}>
-                  <ShoppingBag size={18} color="#60A5FA" />
-                  <span>EXTRATO DE VENDAS</span>
+                  {React.createElement(cfg.icon, { size: 18, color: '#A5B4FC' })}
+                  <span>EXTRATO — {cfg.label.toUpperCase()}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                   {formatarDataCurta(extrato.data)}
                 </span>
               </div>
 
-              {/* Tabela Excel com Scroll Horizontal */}
+              {/* Tabela */}
               <div style={{ overflowX: 'auto', width: '100%' }}>
                 <table
                   style={{
@@ -270,7 +381,6 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                     fontSize: '0.84rem'
                   }}
                 >
-                  {/* Cabeçalho de Colunas Excel */}
                   <thead>
                     <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1' }}>
                       <th style={{ padding: '10px 8px', width: '36px', textAlign: 'center', color: '#475569', fontWeight: 800, borderRight: '1px solid #E2E8F0' }}>
@@ -288,16 +398,15 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                     </tr>
                   </thead>
 
-                  {/* Linhas da Tabela */}
                   <tbody>
-                    {extrato.itens.length === 0 ? (
+                    {itensFiltrados.length === 0 ? (
                       <tr>
                         <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                          Nenhuma venda registrada neste dia.
+                          Nenhuma venda de {cfg.label.toLowerCase()} registrada neste dia.
                         </td>
                       </tr>
                     ) : (
-                      extrato.itens.map((item, idx) => {
+                      itensFiltrados.map((item, idx) => {
                         const isPar = idx % 2 === 0;
                         return (
                           <tr
@@ -307,12 +416,10 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                               borderBottom: '1px solid #E2E8F0'
                             }}
                           >
-                            {/* # Índice */}
                             <td style={{ padding: '10px 8px', textAlign: 'center', color: '#64748B', fontWeight: 600, borderRight: '1px solid #E2E8F0' }}>
-                              {item.ordem}
+                              {idx + 1}
                             </td>
 
-                            {/* Cliente */}
                             <td style={{ padding: '10px 12px', borderRight: '1px solid #E2E8F0' }}>
                               <div style={{ fontWeight: 700, color: 'var(--primary-800)' }}>
                                 {item.clienteNome}
@@ -324,18 +431,16 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                               )}
                             </td>
 
-                            {/* Itens e Condição */}
                             <td style={{ padding: '10px 12px', borderRight: '1px solid #E2E8F0' }}>
                               <div style={{ color: 'var(--primary-800)', fontWeight: 600 }}>
                                 {item.itens}
                               </div>
-                              <div style={{ fontSize: '0.74rem', color: '#2563EB', marginTop: '2px', fontWeight: 600 }}>
+                              <div style={{ fontSize: '0.74rem', color: cfg.cor, marginTop: '2px', fontWeight: 600 }}>
                                 {item.condicao}
                               </div>
                             </td>
 
-                            {/* Valor Total da Venda */}
-                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#1E40AF', fontSize: '0.92rem' }}>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: cfg.cor, fontSize: '0.92rem' }}>
                               R$ {item.valorTotal.toFixed(2)}
                             </td>
                           </tr>
@@ -344,13 +449,12 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                     )}
                   </tbody>
 
-                  {/* Rodapé da Tabela: Linha de Totalização */}
                   <tfoot>
                     <tr
                       style={{
-                        backgroundColor: '#DBEAFE',
-                        borderTop: '2px solid #93C5FD',
-                        borderBottom: '2px solid #93C5FD'
+                        backgroundColor: cfg.badgeBg,
+                        borderTop: `2px solid ${cfg.borderCor}`,
+                        borderBottom: `2px solid ${cfg.borderCor}`
                       }}
                     >
                       <td
@@ -359,25 +463,25 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                           padding: '12px 14px',
                           textAlign: 'right',
                           fontWeight: 800,
-                          color: '#1E40AF',
+                          color: cfg.badgeText,
                           fontSize: '0.88rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.02em',
-                          borderRight: '1px solid #93C5FD'
+                          borderRight: `1px solid ${cfg.borderCor}`
                         }}
                       >
-                        Soma Total Vendido no Dia:
+                        Total {cfg.label} no Dia:
                       </td>
                       <td
                         style={{
                           padding: '12px 14px',
                           textAlign: 'right',
                           fontWeight: 900,
-                          color: '#1E3A8A',
+                          color: cfg.cor,
                           fontSize: '1.15rem'
                         }}
                       >
-                        R$ {extrato.totalVendido.toFixed(2)}
+                        R$ {totalFiltrado.toFixed(2)}
                       </td>
                     </tr>
                   </tfoot>
@@ -387,42 +491,42 @@ export const HistoricoVendasExtratoView: React.FC = () => {
           )}
         </div>
       ) : (
-        /* -------------------------------------------------------------------------- */
-        /* MODO 2: LISTA CORRIDA DE DATAS FECHADAS DE VENDAS */
-        /* -------------------------------------------------------------------------- */
+        /* ================================================================ */
+        /* MODO 2: LISTA DE DATAS FECHADAS (filtrada por tipo da aba) */
+        /* ================================================================ */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Header da Aba */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShoppingBag size={24} color="#2563EB" />
-                Histórico de Vendas
+                {React.createElement(cfg.icon, { size: 24, color: cfg.cor })}
+                Histórico — {cfg.label}
               </h2>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                Extratos consolidados de vendas dos dias anteriores
+                Extratos de vendas de {cfg.label.toLowerCase()} por dia
               </p>
             </div>
           </div>
 
-          {/* Banner Informativo sobre Fechamento do Dia Atual */}
+          {/* Banner Informativo */}
           <div
             style={{
               padding: '12px 14px',
               borderRadius: 'var(--radius-md)',
-              backgroundColor: '#EFF6FF',
-              border: '1px solid #BFDBFE',
+              backgroundColor: cfg.bgCor,
+              border: `1px solid ${cfg.borderCor}`,
               display: 'flex',
               alignItems: 'flex-start',
               gap: '10px'
             }}
           >
-            <AlertCircle size={20} color="#1D4ED8" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ fontSize: '0.8rem', color: '#1E40AF', lineHeight: 1.4 }}>
-              <strong>Regra de Fechamento:</strong> Os extratos de vendas são fechados somente após o encerramento do dia. Para acompanhar as vendas de hoje em andamento, utilize a aba <strong>Resumo Dia</strong>.
+            <AlertCircle size={20} color={cfg.cor} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ fontSize: '0.8rem', color: cfg.badgeText, lineHeight: 1.4 }}>
+              <strong>Regra de Fechamento:</strong> Os extratos são fechados somente após o encerramento do dia. Acompanhe as vendas de hoje na aba <strong>Resumo Dia</strong>.
             </div>
           </div>
 
-          {/* Campo de Busca por Data */}
+          {/* Campo de Busca */}
           <div style={{ position: 'relative' }}>
             <input
               type="text"
@@ -453,7 +557,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
               <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
                 <Clock size={28} />
               </div>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando extratos de vendas fechados...</p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Buscando extratos...</p>
             </div>
           )}
 
@@ -464,7 +568,7 @@ export const HistoricoVendasExtratoView: React.FC = () => {
             </div>
           )}
 
-          {/* Lista Corrida de Datas */}
+          {/* Lista de Datas */}
           {!loading && !error && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {diasFiltrados.length === 0 ? (
@@ -480,76 +584,83 @@ export const HistoricoVendasExtratoView: React.FC = () => {
                 >
                   <Receipt size={36} color="var(--text-muted)" style={{ margin: '0 auto 8px auto', display: 'block', opacity: 0.5 }} />
                   <p style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--primary-800)', margin: '0 0 4px 0' }}>
-                    Nenhum extrato de venda anterior encontrado
+                    Nenhum extrato de {cfg.label.toLowerCase()} encontrado
                   </p>
                   <p style={{ fontSize: '0.8rem', margin: 0 }}>
-                    Extratos de vendas de dias passados aparecerão aqui assim que houver vendas finalizadas.
+                    {busca
+                      ? `Nenhum resultado para "${busca}".`
+                      : `Extratos de ${cfg.label.toLowerCase()} aparecerão aqui após finalizados.`
+                    }
                   </p>
                 </div>
               ) : (
-                diasFiltrados.map((dia) => (
-                  <button
-                    key={dia.data}
-                    type="button"
-                    onClick={() => abrirExtrato(dia.data)}
-                    className="touch-target"
-                    style={{
-                      width: '100%',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '14px 16px',
-                      border: '1px solid var(--border-color, #E2E8F0)',
-                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.15s ease',
-                      gap: '12px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: 'var(--radius-md)',
-                          backgroundColor: '#EFF6FF',
-                          border: '1px solid #BFDBFE',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        <Calendar size={20} color="#1E40AF" />
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                          {formatarDataCompleta(dia.data)}
+                diasFiltrados.map((dia) => {
+                  const total = Number(dia[cfg.totalKey] ?? 0);
+                  const qtd = Number(dia[cfg.qtdKey] ?? 0);
+                  return (
+                    <button
+                      key={dia.data}
+                      type="button"
+                      onClick={() => abrirExtrato(dia.data)}
+                      className="touch-target"
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '14px 16px',
+                        border: '1px solid var(--border-color, #E2E8F0)',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.15s ease',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: 'var(--radius-md)',
+                            backgroundColor: cfg.bgCor,
+                            border: `1px solid ${cfg.borderCor}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          <Calendar size={20} color={cfg.cor} />
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          {dia.qtdVendas} venda(s) realizada(s)
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-800)' }}>
+                            {formatarDataCompleta(dia.data)}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {qtd} venda(s) de {cfg.label.toLowerCase()}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
-                          Total Vendido
-                        </span>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1E40AF' }}>
-                          R$ {dia.totalVendido.toFixed(2)}
-                        </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>
+                            Total {cfg.label}
+                          </span>
+                          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: cfg.cor }}>
+                            R$ {total.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <ChevronRight size={20} color="var(--text-muted)" />
                       </div>
-
-                      <ChevronRight size={20} color="var(--text-muted)" />
-                    </div>
-                  </button>
-                ))
+                    </button>
+                  );
+                })
               )}
             </div>
           )}

@@ -243,6 +243,7 @@ export async function criarVendaAPI(
     periodicidade?: 'MENSAL' | 'QUINZENAL' | 'SEMANAL';
     primeiroVencimento?: string;
     dataVenda?: string;
+    tipoVenda?: 'MOVEIS' | 'VARIEDADES';
   },
   token: string | null = null
 ) {
@@ -387,7 +388,11 @@ export async function getExtratoDia(dataIso: string, token: string | null): Prom
 export interface DiaFechadoVendasItem {
   data: string; // YYYY-MM-DD
   totalVendido: number;
+  totalVendidoMoveis: number;
+  totalVendidoVariedades: number;
   qtdVendas: number;
+  qtdVendasMoveis: number;
+  qtdVendasVariedades: number;
 }
 
 export interface ExtratoDiaVendasItem {
@@ -402,6 +407,7 @@ export interface ExtratoDiaVendasItem {
   valorEntrada: number;
   numParcelas: number;
   valorTotal: number;
+  tipoVenda: 'MOVEIS' | 'VARIEDADES';
   dataVenda: string;
   criadoEm: string;
 }
@@ -409,6 +415,8 @@ export interface ExtratoDiaVendasItem {
 export interface ExtratoDiaVendasResponse {
   data: string;
   totalVendido: number;
+  totalMoveis: number;
+  totalVariedades: number;
   qtdVendas: number;
   itens: ExtratoDiaVendasItem[];
 }

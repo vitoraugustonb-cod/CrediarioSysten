@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { StatusParcela } from '@prisma/client';
+import { StatusParcela, TipoVenda } from '@prisma/client';
 
 export const registrarVenda = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -16,7 +16,8 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
       numParcelas, 
       periodicidade, 
       primeiroVencimento, 
-      dataVenda 
+      dataVenda,
+      tipoVenda
     } = req.body;
 
     const numParcelasInt = parseInt(numParcelas, 10);
@@ -176,7 +177,8 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
           valorTotal: valorTotalNum,
           valorEntrada: valorEntradaNum > 0 ? valorEntradaNum : null,
           numParcelas: numParcelasEfetivas,
-          dataVenda: dataVendaBase
+          dataVenda: dataVendaBase,
+          tipoVenda: tipoVenda === 'VARIEDADES' ? TipoVenda.VARIEDADES : TipoVenda.MOVEIS
         }
       });
 
@@ -373,36 +375,55 @@ export const listarDiasFechadosVendas = async (req: Request, res: Response): Pro
       orderBy: { dataVenda: 'desc' }
     });
 
-    const mapaDias = new Map<string, { data: string; totalVendido: number; qtdVendas: number }>();
+    const mapaDias = new Map<string, {
+      data: string;
+      totalVendido: number;
+      totalVendidoMoveis: number;
+      totalVendidoVariedades: number;
+      qtdVendas: number;
+      qtdVendasMoveis: number;
+      qtdVendasVariedades: number;
+    }>();
 
     for (const v of vendas) {
       const dataIso = typeof v.dataVenda === 'string'
         ? v.dataVenda.split('T')[0]
         : v.dataVenda.toISOString().split('T')[0];
 
-      // Regra: Não exibe o dia atual (o extrato do dia só fecha após o dia finalizar)
-      if (dataIso >= hojeStr) {
-        continue;
-      }
+      if (dataIso >= hojeStr) continue;
 
       const val = Number(v.valorTotal);
+      const isMoveis = v.tipoVenda === TipoVenda.MOVEIS;
 
       if (!mapaDias.has(dataIso)) {
         mapaDias.set(dataIso, {
           data: dataIso,
           totalVendido: val,
-          qtdVendas: 1
+          totalVendidoMoveis: isMoveis ? val : 0,
+          totalVendidoVariedades: isMoveis ? 0 : val,
+          qtdVendas: 1,
+          qtdVendasMoveis: isMoveis ? 1 : 0,
+          qtdVendasVariedades: isMoveis ? 0 : 1
         });
       } else {
         const item = mapaDias.get(dataIso)!;
         item.totalVendido += val;
+        if (isMoveis) {
+          item.totalVendidoMoveis += val;
+          item.qtdVendasMoveis += 1;
+        } else {
+          item.totalVendidoVariedades += val;
+          item.qtdVendasVariedades += 1;
+        }
         item.qtdVendas += 1;
       }
     }
 
     const listaDias = Array.from(mapaDias.values()).map(d => ({
       ...d,
-      totalVendido: Math.round(d.totalVendido * 100) / 100
+      totalVendido: Math.round(d.totalVendido * 100) / 100,
+      totalVendidoMoveis: Math.round(d.totalVendidoMoveis * 100) / 100,
+      totalVendidoVariedades: Math.round(d.totalVendidoVariedades * 100) / 100
     })).sort((a, b) => b.data.localeCompare(a.data));
 
     res.json(listaDias);
@@ -502,16 +523,25 @@ export const obterExtratoDiaVendas = async (req: Request, res: Response): Promis
         valorEntrada: valEntrada,
         numParcelas: v.parcelas?.length || 0,
         valorTotal: Number(v.valorTotal),
+        tipoVenda: v.tipoVenda,
         dataVenda: v.dataVenda,
         criadoEm: v.criadoEm
       };
     });
 
     const totalVendido = itensExtrato.reduce((acc, item) => acc + item.valorTotal, 0);
+    const totalMoveis = itensExtrato
+      .filter(i => i.tipoVenda === TipoVenda.MOVEIS)
+      .reduce((acc, item) => acc + item.valorTotal, 0);
+    const totalVariedades = itensExtrato
+      .filter(i => i.tipoVenda === TipoVenda.VARIEDADES)
+      .reduce((acc, item) => acc + item.valorTotal, 0);
 
     res.json({
       data: dataIso,
       totalVendido: Math.round(totalVendido * 100) / 100,
+      totalMoveis: Math.round(totalMoveis * 100) / 100,
+      totalVariedades: Math.round(totalVariedades * 100) / 100,
       qtdVendas: itensExtrato.length,
       itens: itensExtrato
     });
