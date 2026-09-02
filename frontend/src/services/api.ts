@@ -429,4 +429,26 @@ export async function getExtratoVendasDia(dataIso: string, token: string | null)
   return await fetchWithAuth(`/vendas/extrato-dia?data=${dataIso}`, token);
 }
 
+// 20. PATCH /clientes/:id — Atualizar dados do cliente
+export async function atualizarClienteAPI(
+  id: number,
+  dados: { nome?: string; telefone?: string; endereco?: string; referencias?: string | null },
+  token: string | null = null
+): Promise<Cliente> {
+  return await fetchWithAuth(`/clientes/${id}`, token, {
+    method: 'PATCH',
+    body: JSON.stringify(dados),
+  });
+}
 
+// 21. PATCH /parcelas/:id/data-vencimento — Alterar data de vencimento de parcela
+export async function alterarDataVencimentoParcelaAPI(
+  id: number,
+  dataVencimento: string,
+  token: string | null = null
+): Promise<Parcela> {
+  return await fetchWithAuth(`/parcelas/${id}/data-vencimento`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ dataVencimento }),
+  });
+}

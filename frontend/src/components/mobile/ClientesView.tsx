@@ -15,7 +15,10 @@ import {
   ArrowLeft,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  Pencil,
+  CalendarClock,
+  Save
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -24,6 +27,8 @@ import {
   getSaldoCliente, 
   getClientePorId,
   registrarPagamentoAPI,
+  atualizarClienteAPI,
+  alterarDataVencimentoParcelaAPI,
   type Cliente, 
   type SaldoDevedorCliente 
 } from '../../services/api';
@@ -86,6 +91,19 @@ export const ClientesView: React.FC = () => {
   const [endereco, setEndereco] = useState<string>('');
   const [referencias, setReferencias] = useState<string>('');
   const [salvando, setSalvando] = useState<boolean>(false);
+
+  // Edit Client State
+  const [editandoCliente, setEditandoCliente] = useState<boolean>(false);
+  const [editNome, setEditNome] = useState<string>('');
+  const [editTelefone, setEditTelefone] = useState<string>('');
+  const [editEndereco, setEditEndereco] = useState<string>('');
+  const [editReferencias, setEditReferencias] = useState<string>('');
+  const [salvandoEdicaoCliente, setSalvandoEdicaoCliente] = useState<boolean>(false);
+
+  // Alterar Data Vencimento Parcela State
+  const [parcelaParaAltData, setParcelaParaAltData] = useState<any | null>(null);
+  const [novaDataVencimento, setNovaDataVencimento] = useState<string>('');
+  const [salvandoDataParcela, setSalvandoDataParcela] = useState<boolean>(false);
 
   const carregarClientes = useCallback(async () => {
     setLoading(true);
@@ -154,6 +172,67 @@ export const ClientesView: React.FC = () => {
     setMensagemSucesso(null);
     setHistoricoPagamentos([]);
     setAbaModalCliente('debitos');
+    setEditandoCliente(false);
+    setParcelaParaAltData(null);
+  };
+
+  // ---- Edição de dados do cliente ----
+  const abrirEdicaoCliente = () => {
+    const c = clienteSaldoSel?.cliente || clienteSelObj;
+    if (!c) return;
+    setEditNome(c.nome || '');
+    setEditTelefone(c.telefone || '');
+    setEditEndereco(c.endereco || '');
+    setEditReferencias((c as any).referencias || '');
+    setEditandoCliente(true);
+  };
+
+  const handleSalvarEdicaoCliente = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cliente = clienteSaldoSel?.cliente || clienteSelObj;
+    if (!cliente) return;
+    setSalvandoEdicaoCliente(true);
+    try {
+      await atualizarClienteAPI(
+        cliente.id,
+        { nome: editNome, telefone: editTelefone, endereco: editEndereco, referencias: editReferencias || null },
+        token
+      );
+      setEditandoCliente(false);
+      setMensagemSucesso('✅ Dados do cliente atualizados com sucesso!');
+      await abrirSaldoCliente({ ...cliente, nome: editNome, telefone: editTelefone, endereco: editEndereco }, abaModalCliente);
+      await carregarClientes();
+    } catch (err: any) {
+      alert(`❌ Erro ao atualizar cliente: ${err.message}`);
+    } finally {
+      setSalvandoEdicaoCliente(false);
+    }
+  };
+
+  // ---- Alteração de data de vencimento de parcela ----
+  const iniciarAltDataParcela = (p: any) => {
+    const dataAtual = typeof p.dataVencimento === 'string'
+      ? p.dataVencimento.split('T')[0]
+      : new Date(p.dataVencimento).toISOString().split('T')[0];
+    setParcelaParaAltData(p);
+    setNovaDataVencimento(dataAtual);
+    setParcelaParaPagamento(null); // fecha o formulário de pagamento se estiver aberto
+  };
+
+  const handleSalvarDataParcela = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!parcelaParaAltData || !novaDataVencimento || !clienteSelObj) return;
+    setSalvandoDataParcela(true);
+    try {
+      await alterarDataVencimentoParcelaAPI(parcelaParaAltData.id, novaDataVencimento, token);
+      setMensagemSucesso(`✅ Data da Parcela #${parcelaParaAltData.numero} alterada com sucesso!`);
+      setParcelaParaAltData(null);
+      await abrirSaldoCliente(clienteSelObj, abaModalCliente);
+    } catch (err: any) {
+      alert(`❌ Erro ao alterar data: ${err.message}`);
+    } finally {
+      setSalvandoDataParcela(false);
+    }
   };
 
   const iniciarPagamentoAdiantado = (p: any) => {
@@ -538,7 +617,7 @@ export const ClientesView: React.FC = () => {
           >
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle, #E2E8F0)', paddingBottom: '12px' }}>
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Ficha do Cliente
                 </span>
@@ -552,14 +631,109 @@ export const ClientesView: React.FC = () => {
                 )}
               </div>
 
-              <button
-                onClick={fecharModalSaldo}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}
-                aria-label="Fechar modal"
-              >
-                <X size={24} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                {!loadingSaldo && !editandoCliente && (
+                  <button
+                    type="button"
+                    onClick={abrirEdicaoCliente}
+                    title="Editar dados do cliente"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '6px 12px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid #BFDBFE',
+                      backgroundColor: '#EFF6FF',
+                      color: '#1E40AF',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Pencil size={14} />
+                    <span>Editar</span>
+                  </button>
+                )}
+                <button
+                  onClick={fecharModalSaldo}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}
+                  aria-label="Fechar modal"
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
+
+            {/* Painel de Edição do Cliente */}
+            {editandoCliente && (
+              <form
+                onSubmit={handleSalvarEdicaoCliente}
+                style={{
+                  backgroundColor: '#EFF6FF',
+                  border: '1px solid #BFDBFE',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Pencil size={16} /> Editar Dados do Cliente
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditandoCliente(false)}
+                    style={{ background: 'none', border: 'none', color: '#1E40AF', cursor: 'pointer', fontSize: '0.78rem', textDecoration: 'underline' }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+
+                {[
+                  { label: 'Nome', value: editNome, setter: setEditNome, required: true, placeholder: 'Nome completo' },
+                  { label: 'Telefone', value: editTelefone, setter: setEditTelefone, required: false, placeholder: '(00) 00000-0000' },
+                  { label: 'Endereço', value: editEndereco, setter: setEditEndereco, required: true, placeholder: 'Rua, número, bairro' },
+                  { label: 'Referências', value: editReferencias, setter: setEditReferencias, required: false, placeholder: 'Ponto de referência (opcional)' },
+                ].map(({ label, value, setter, required, placeholder }) => (
+                  <div key={label}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#1E40AF', marginBottom: '4px' }}>{label}</label>
+                    <input
+                      type="text"
+                      required={required}
+                      value={value}
+                      onChange={e => setter(e.target.value)}
+                      placeholder={placeholder}
+                      style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: 'var(--radius-md)', border: '1px solid #93C5FD', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="submit"
+                  disabled={salvandoEdicaoCliente}
+                  style={{
+                    height: '42px',
+                    backgroundColor: salvandoEdicaoCliente ? '#93C5FD' : '#1E40AF',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    cursor: salvandoEdicaoCliente ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Save size={16} />
+                  {salvandoEdicaoCliente ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </form>
+            )}
 
             {/* Navegação entre Abas: Débitos & Histórico */}
             <div style={{ display: 'flex', gap: '8px', backgroundColor: 'var(--bg-subtle, #F1F5F9)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
@@ -821,6 +995,67 @@ export const ClientesView: React.FC = () => {
                                     const resta = Number(p.valor) - vPago;
                                     const estaAtrasada = p.status === 'ATRASADA' || new Date(p.dataVencimento) < new Date();
 
+                                    // Formulário de alterar data desta parcela
+                                    if (parcelaParaAltData?.id === p.id) {
+                                      return (
+                                        <form
+                                          key={p.id}
+                                          onSubmit={handleSalvarDataParcela}
+                                          style={{
+                                            padding: '12px',
+                                            border: '1px solid #FDE68A',
+                                            borderRadius: 'var(--radius-md)',
+                                            backgroundColor: '#FFFBEB',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '10px'
+                                          }}
+                                        >
+                                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                              <CalendarClock size={16} /> Alterar Vencimento — Parcela #{p.numero}
+                                            </span>
+                                            <button type="button" onClick={() => setParcelaParaAltData(null)} style={{ background: 'none', border: 'none', color: '#92400E', cursor: 'pointer', fontSize: '0.78rem', textDecoration: 'underline' }}>
+                                              Cancelar
+                                            </button>
+                                          </div>
+                                          <div>
+                                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#92400E', marginBottom: '4px' }}>
+                                              Nova Data de Vencimento
+                                            </label>
+                                            <input
+                                              type="date"
+                                              required
+                                              value={novaDataVencimento}
+                                              onChange={e => setNovaDataVencimento(e.target.value)}
+                                              style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: 'var(--radius-md)', border: '1px solid #FCD34D', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                                            />
+                                          </div>
+                                          <button
+                                            type="submit"
+                                            disabled={salvandoDataParcela}
+                                            style={{
+                                              height: '40px',
+                                              backgroundColor: salvandoDataParcela ? '#FCD34D' : '#D97706',
+                                              color: '#FFFFFF',
+                                              border: 'none',
+                                              borderRadius: 'var(--radius-md)',
+                                              fontWeight: 700,
+                                              fontSize: '0.88rem',
+                                              cursor: salvandoDataParcela ? 'not-allowed' : 'pointer',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              gap: '6px'
+                                            }}
+                                          >
+                                            <Save size={14} />
+                                            {salvandoDataParcela ? 'Salvando...' : 'Confirmar Nova Data'}
+                                          </button>
+                                        </form>
+                                      );
+                                    }
+
                                     return (
                                       <div
                                         key={p.id}
@@ -847,28 +1082,52 @@ export const ClientesView: React.FC = () => {
                                           </div>
                                         </div>
 
-                                        <button
-                                          type="button"
-                                          onClick={() => iniciarPagamentoAdiantado(p)}
-                                          style={{
-                                            padding: '8px 14px',
-                                            borderRadius: 'var(--radius-md)',
-                                            backgroundColor: '#166534',
-                                            color: '#FFFFFF',
-                                            border: 'none',
-                                            fontWeight: 700,
-                                            fontSize: '0.82rem',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px',
-                                            whiteSpace: 'nowrap',
-                                            flexShrink: 0
-                                          }}
-                                        >
-                                          <DollarSign size={14} />
-                                          <span>Adiantar</span>
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                                          {/* Botão: Alterar Data Vencimento */}
+                                          <button
+                                            type="button"
+                                            title="Alterar data de vencimento"
+                                            onClick={() => iniciarAltDataParcela(p)}
+                                            style={{
+                                              padding: '8px',
+                                              borderRadius: 'var(--radius-md)',
+                                              backgroundColor: '#FEF3C7',
+                                              color: '#D97706',
+                                              border: '1px solid #FDE68A',
+                                              cursor: 'pointer',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              flexShrink: 0
+                                            }}
+                                          >
+                                            <CalendarClock size={16} />
+                                          </button>
+
+                                          {/* Botão: Adiantar Pagamento */}
+                                          <button
+                                            type="button"
+                                            onClick={() => iniciarPagamentoAdiantado(p)}
+                                            style={{
+                                              padding: '8px 14px',
+                                              borderRadius: 'var(--radius-md)',
+                                              backgroundColor: '#166534',
+                                              color: '#FFFFFF',
+                                              border: 'none',
+                                              fontWeight: 700,
+                                              fontSize: '0.82rem',
+                                              cursor: 'pointer',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: '4px',
+                                              whiteSpace: 'nowrap',
+                                              flexShrink: 0
+                                            }}
+                                          >
+                                            <DollarSign size={14} />
+                                            <span>Adiantar</span>
+                                          </button>
+                                        </div>
                                       </div>
                                     );
                                   })}

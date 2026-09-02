@@ -157,3 +157,44 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
     res.status(500).json({ erro: 'Erro interno ao calcular saldo devedor do cliente.' });
   }
 };
+export const atualizarCliente = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const idStr = Array.isArray(id) ? id[0] : id;
+    const clienteId = parseInt(idStr, 10);
+
+    if (isNaN(clienteId)) {
+      res.status(400).json({ erro: 'ID de cliente inválido.' });
+      return;
+    }
+
+    const cliente = await prisma.cliente.findUnique({ where: { id: clienteId } });
+    if (!cliente) {
+      res.status(404).json({ erro: 'Cliente não encontrado.' });
+      return;
+    }
+
+    const { nome, telefone, endereco, referencias } = req.body;
+    const dados: any = {};
+
+    if (nome !== undefined && typeof nome === 'string' && nome.trim()) dados.nome = nome.trim();
+    if (telefone !== undefined && typeof telefone === 'string') dados.telefone = telefone.trim();
+    if (endereco !== undefined && typeof endereco === 'string' && endereco.trim()) dados.endereco = endereco.trim();
+    if (referencias !== undefined) dados.referencias = referencias ? String(referencias).trim() : null;
+
+    if (Object.keys(dados).length === 0) {
+      res.status(400).json({ erro: 'Nenhum campo válido foi enviado para atualização.' });
+      return;
+    }
+
+    const clienteAtualizado = await prisma.cliente.update({
+      where: { id: clienteId },
+      data: dados
+    });
+
+    res.json(clienteAtualizado);
+  } catch (error) {
+    console.error('Erro ao atualizar cliente:', error);
+    res.status(500).json({ erro: 'Erro interno ao atualizar dados do cliente.' });
+  }
+};

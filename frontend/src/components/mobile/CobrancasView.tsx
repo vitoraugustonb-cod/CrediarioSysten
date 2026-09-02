@@ -158,16 +158,31 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const getStatusCobranca = (dataVencimentoStr: string, statusOriginal: string): 'COBRAR_HOJE' | 'ATRASADO' | 'EM_DIA' | 'PAGA' => {
     if (statusOriginal === 'PAGA') return 'PAGA';
 
-    const dVenc = new Date(dataVencimentoStr);
-    const dHoje = new Date();
+    // Extrai ano, mês e dia diretamente da string YYYY-MM-DD para imunidade a fuso horário
+    let anoVenc = 0, mesVenc = 0, diaVenc = 0;
+    if (typeof dataVencimentoStr === 'string') {
+      const match = dataVencimentoStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        anoVenc = Number(match[1]);
+        mesVenc = Number(match[2]) - 1;
+        diaVenc = Number(match[3]);
+      }
+    }
 
-    // Normaliza para início do dia local
-    const vencLocal = new Date(dVenc.getFullYear(), dVenc.getMonth(), dVenc.getDate()).getTime();
+    if (!anoVenc) {
+      const d = new Date(dataVencimentoStr);
+      anoVenc = d.getFullYear();
+      mesVenc = d.getMonth();
+      diaVenc = d.getDate();
+    }
+
+    const dHoje = new Date();
+    const vencLocal = new Date(anoVenc, mesVenc, diaVenc).getTime();
     const hojeLocal = new Date(dHoje.getFullYear(), dHoje.getMonth(), dHoje.getDate()).getTime();
 
     if (vencLocal === hojeLocal) {
       return 'COBRAR_HOJE';
-    } else if (vencLocal < hojeLocal) {
+    } else if (vencLocal < hojeLocal || statusOriginal === 'ATRASADA') {
       return 'ATRASADO';
     } else {
       return 'EM_DIA';

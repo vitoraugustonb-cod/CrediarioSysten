@@ -33,9 +33,9 @@ export const listarDiasFechados = async (req: Request, res: Response): Promise<v
     const mapaDias = new Map<string, { data: string; totalCobrado: number; qtdPagamentos: number }>();
 
     for (const p of pagamentos) {
-      const dataIso = typeof p.dataPagamento === 'string'
-        ? p.dataPagamento.split('T')[0]
-        : p.dataPagamento.toISOString().split('T')[0];
+      const dataIso = p.dataPagamento instanceof Date
+        ? p.dataPagamento.toISOString().split('T')[0]
+        : String(p.dataPagamento).split('T')[0];
 
       // Regra: Não exibe o dia atual (o extrato do dia só fecha após o dia finalizar)
       if (dataIso >= hojeStr) {

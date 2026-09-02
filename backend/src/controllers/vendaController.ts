@@ -386,9 +386,9 @@ export const listarDiasFechadosVendas = async (req: Request, res: Response): Pro
     }>();
 
     for (const v of vendas) {
-      const dataIso = typeof v.dataVenda === 'string'
-        ? v.dataVenda.split('T')[0]
-        : v.dataVenda.toISOString().split('T')[0];
+      const dataIso = v.dataVenda instanceof Date
+        ? v.dataVenda.toISOString().split('T')[0]
+        : String(v.dataVenda).split('T')[0];
 
       if (dataIso >= hojeStr) continue;
 

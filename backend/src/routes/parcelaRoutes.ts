@@ -4,7 +4,8 @@ import {
   listarHistoricoParcelas,
   registrarPagamento,
   registrarObservacao,
-  ajustarParcela
+  ajustarParcela,
+  alterarDataVencimentoParcela
 } from '../controllers/parcelaController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { roleMiddleware } from '../middlewares/roleMiddleware.js';
@@ -18,5 +19,6 @@ router.get('/parcelas/historico', listarHistoricoParcelas);
 router.patch('/parcelas/:id/pagamento', registrarPagamento);
 router.patch('/parcelas/:id/observacao', registrarObservacao);
 router.patch('/parcelas/:id/ajuste', roleMiddleware(['GERENTE']), ajustarParcela);
+router.patch('/parcelas/:id/data-vencimento', alterarDataVencimentoParcela);
 
 export default router;

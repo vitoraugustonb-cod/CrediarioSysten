@@ -418,3 +418,76 @@ export const ajustarParcela = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ erro: 'Erro interno ao realizar ajuste manual na parcela.' });
   }
 };
+
+/**
+ * PATCH /parcelas/:id/data-vencimento
+ * Altera apenas a data de vencimento de uma parcela em aberto.
+ * Acessível a qualquer usuário autenticado (vendedor/cobrador).
+ */
+export const alterarDataVencimentoParcela = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const idStr = Array.isArray(id) ? id[0] : id;
+    const parcelaId = parseInt(idStr, 10);
+
+    if (isNaN(parcelaId)) {
+      res.status(400).json({ erro: 'ID de parcela inválido.' });
+      return;
+    }
+
+    const { dataVencimento } = req.body;
+
+    if (!dataVencimento || typeof dataVencimento !== 'string') {
+      res.status(400).json({ erro: 'A nova data de vencimento é obrigatória.' });
+      return;
+    }
+
+    let novaData: Date;
+    if (typeof dataVencimento === 'string' && dataVencimento.includes('-')) {
+      const [yyyy, mm, dd] = dataVencimento.split('-').map(Number);
+      novaData = new Date(yyyy, mm - 1, dd, 12, 0, 0);
+    } else {
+      novaData = new Date(dataVencimento);
+    }
+
+    if (isNaN(novaData.getTime())) {
+      res.status(400).json({ erro: 'Data de vencimento inválida. Use o formato YYYY-MM-DD.' });
+      return;
+    }
+
+    const parcela = await prisma.parcela.findUnique({ where: { id: parcelaId } });
+    if (!parcela) {
+      res.status(404).json({ erro: 'Parcela não encontrada.' });
+      return;
+    }
+
+    if (parcela.status === StatusParcela.PAGA) {
+      res.status(400).json({ erro: 'Não é possível alterar a data de uma parcela já paga.' });
+      return;
+    }
+
+    const agora = new Date();
+    const hojeInicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+    const vencInicio = new Date(novaData.getFullYear(), novaData.getMonth(), novaData.getDate()).getTime();
+
+    let novoStatus = parcela.status;
+    if (vencInicio < hojeInicio && parcela.status === StatusParcela.PENDENTE) {
+      novoStatus = StatusParcela.ATRASADA;
+    } else if (vencInicio >= hojeInicio && parcela.status === StatusParcela.ATRASADA) {
+      novoStatus = StatusParcela.PENDENTE;
+    }
+
+    const parcelaAtualizada = await prisma.parcela.update({
+      where: { id: parcelaId },
+      data: {
+        dataVencimento: novaData,
+        status: novoStatus
+      }
+    });
+
+    res.json(parcelaAtualizada);
+  } catch (error) {
+    console.error('Erro ao alterar data de vencimento da parcela:', error);
+    res.status(500).json({ erro: 'Erro interno ao alterar data de vencimento.' });
+  }
+};
