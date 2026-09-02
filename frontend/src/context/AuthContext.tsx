@@ -4,10 +4,28 @@ import { AuthContext } from './AuthContextDefinition';
 
 const API_BASE_URL = '';
 
+const STORAGE_TOKEN_KEY = '@crediario:token';
+const STORAGE_USER_KEY = '@crediario:usuario';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Token stored in React memory context as requested
-  const [token, setToken] = useState<string | null>(null);
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  // Inicializa o token e usuário a partir do localStorage para manter a sessão persistente
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(STORAGE_TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  });
+
+  const [usuario, setUsuario] = useState<Usuario | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_USER_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
 
     try {
-      // Attempt real API call to backend port 3300
+      // Real API call to backend
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,6 +49,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setToken(data.token);
       setUsuario(data.usuario);
+
+      // Salva no localStorage para persistência permanente
+      try {
+        localStorage.setItem(STORAGE_TOKEN_KEY, data.token);
+        localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(data.usuario));
+      } catch (storageErr) {
+        console.warn('Não foi possível salvar no localStorage:', storageErr);
+      }
+
       setLoading(false);
       return true;
     } catch (err: any) {
@@ -45,29 +72,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     const mockToken = `mock-jwt-token-${Date.now()}-${perfil}`;
     
+    let demoUser: Usuario;
     if (perfil === 'GERENTE') {
-      setUsuario({
+      demoUser = {
         id: 1,
         nome: 'Carlos Eduardo (Gerente)',
         email: 'gerente@crediario.com',
         perfil: 'GERENTE',
-      });
+      };
     } else {
-      setUsuario({
+      demoUser = {
         id: 2,
         nome: 'Marcos Silva (Vendedor/Cobrador)',
         email: 'marcos.cobrador@crediario.com',
         perfil: 'VENDEDOR_COBRADOR',
-      });
+      };
     }
     
+    setUsuario(demoUser);
     setToken(mockToken);
+
+    try {
+      localStorage.setItem(STORAGE_TOKEN_KEY, mockToken);
+      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(demoUser));
+    } catch {}
   };
 
   const logout = () => {
     setToken(null);
     setUsuario(null);
     setError(null);
+
+    try {
+      localStorage.removeItem(STORAGE_TOKEN_KEY);
+      localStorage.removeItem(STORAGE_USER_KEY);
+    } catch {}
   };
 
   return (
