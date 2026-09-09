@@ -373,6 +373,50 @@ O projeto utiliza variáveis de ambiente para isolamento seguro de credenciais e
 
 ---
 
+## 🧰 Scripts Úteis & Banco de Dados
+
+Comandos essenciais para desenvolvimento e manutenção diária:
+
+### Backend
+
+```bash
+# Iniciar servidor em modo watch (recarregamento automático)
+npm run dev
+
+# Abrir painel gráfico do Prisma Studio no navegador
+npx prisma studio
+
+# Criar e aplicar uma nova migração no banco de dados
+npx prisma migrate dev --name <nome_da_alteracao>
+
+# Resetar o banco de dados e reaplicar todas as migrações
+npx prisma migrate reset
+
+# Executar script de seed para criar usuário gerente inicial
+npx tsx src/scripts/seedGerente.ts
+
+# Gerar novamente o Prisma Client tipado após alterar schema.prisma
+npx prisma generate
+```
+
+### Frontend
+
+```bash
+# Iniciar servidor de desenvolvimento do Vite (HMR ultra-rápido)
+npm run dev
+
+# Gerar build otimizado para produção na pasta /dist
+npm run build
+
+# Pré-visualizar localmente o build gerado de produção
+npm run preview
+
+# Checagem estática de tipos TypeScript sem gerar bundle
+npx tsc --noEmit
+```
+
+---
+
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
