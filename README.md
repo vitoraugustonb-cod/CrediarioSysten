@@ -350,6 +350,29 @@ O Crediário System foi concebido para ambientes onde a integridade financeira e
 
 ---
 
+## ⚙️ Variáveis de Ambiente
+
+O projeto utiliza variáveis de ambiente para isolamento seguro de credenciais em desenvolvimento e produção:
+
+### Backend (`backend/.env`)
+
+| Variável | Tipo | Obrigatória | Padrão Local | Descrição |
+| :--- | :---: | :---: | :--- | :--- |
+| `PORT` | `number` | Não | `3300` | Porta onde o servidor HTTP do Express escutará requisições |
+| `DATABASE_URL` | `string` | **Sim** | `mysql://...` | String de conexão com o banco MySQL via Prisma Client |
+| `JWT_SECRET` | `string` | **Sim** | — | Segredo criptográfico para geração e validação de tokens JWT |
+| `JWT_EXPIRES_IN` | `string` | Não | `1d` | Período de validade da sessão do token (ex: `12h`, `1d`, `7d`) |
+
+### Frontend (`frontend/.env`)
+
+| Variável | Tipo | Obrigatória | Padrão Local | Descrição |
+| :--- | :---: | :---: | :--- | :--- |
+| `VITE_API_URL` | `string` | Não | `http://localhost:3300/api` | Endpoint base da API REST para consumo via axios/fetch |
+
+> ⚠️ **Atenção:** Nunca comite arquivos `.env` contendo credenciais reais ou chaves de produção. Utilize sempre `.env.example` como modelo de referência.
+
+---
+
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
