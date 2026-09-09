@@ -137,6 +137,35 @@ flowchart TD
 
 ---
 
+## 📱 Módulos Operacionais Mobile
+
+Projetado com foco em usabilidade sob luz solar e operações de rua rápidas com apenas uma mão:
+
+- **1. Cobranças Operacionais do Dia:**
+  - Filtragem automática das parcelas de hoje e em atraso com categorização visual (badges coloridos).
+  - Acesso direto ao WhatsApp do cliente em um toque para envio de lembretes ou contato prévio.
+  - Baixa de pagamento imediata com tela de confirmação de segurança.
+
+- **2. Busca e Ficha de Clientes:**
+  - Busca instantânea sem necessidade de paginação rígida, filtrando por nome, telefone ou logradouro.
+  - Extrato individual com total em dívida, histórico de compras e parcelas vincendas.
+  - Opção de amortização ou quitação adiantada de carnês direto pelo card do cliente.
+
+- **3. Ponto de Venda Ágil (Nova Venda):**
+  - Autocomplete preditivo de clientes sem telas modais pesadas.
+  - Seleção de múltiplos itens do catálogo com cálculo dinâmico de subtotais.
+  - Simulação em tempo real do carnê: altere a quantidade de parcelas e visualize o valor exato de cada parcela antes de finalizar.
+
+- **4. Histórico Financeiro & Extrato Consolidado:**
+  - Telas dedicadas para histórico detalhado de parcelas recebidas e histórico analítico de vendas efetuadas.
+  - Filtros por período com totalizadores de volume recebido e saldo a receber.
+
+- **5. Resumo do Dia & Fechamento de Caixa:**
+  - Exibição de valores totais recebidos na jornada do cobrador.
+  - Discriminativo de pagamentos por modalidade para simplificar o acerto final com a gerência.
+
+---
+
 ## 🗂️ Estrutura do Projeto
 
 ```
