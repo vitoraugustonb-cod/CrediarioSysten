@@ -417,6 +417,22 @@ npx tsc --noEmit
 
 ---
 
+## 🚀 Roadmap
+
+O desenvolvimento contínuo do Crediário System prioriza ferramentas práticas para aumentar a recuperação de crédito e a produtividade operacional:
+
+- [x] **Módulo Gerencial:** Painel com KPIs, métricas de vendas e comissões por cobrador.
+- [x] **Carnê Automatizado:** Emissão com prazos flexíveis (semanal, quinzenal e mensal).
+- [x] **Segurança Dupla:** Modal de conferência manual de valores para evitar baixas errôneas.
+- [x] **Histórico & Extratos:** Painéis dedicados de prestação de contas mobile e desktop.
+- [ ] **Modo PWA Offline-First:** Armazenamento local com IndexedDB e sincronização automática ao restabelecer conexão de internet em áreas de sinal fraco.
+- [ ] **Impressão Térmica Bluetooth:** Integração com mini-impressoras térmicas portáteis (58mm e 80mm) para entrega imediata do recibo ao cliente.
+- [ ] **Notificações via WhatsApp:** Envio automatizado de lembretes de vencimento e chave Pix para pagamento à distância.
+- [ ] **Exportação Analítica:** Relatórios contábeis e fechamento mensal em PDF e planilhas Excel (`.xlsx`).
+- [ ] **Roteirização Inteligente de Cobrança:** Ordenação geográfica de clientes no mapa para otimizar o itinerário do cobrador.
+
+---
+
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
