@@ -17,8 +17,29 @@
   <img src="https://img.shields.io/badge/Arquitetura-API_REST-blue?logoColor=white" alt="API REST">
   <img src="https://img.shields.io/badge/Auth-JWT-F7B731?logoColor=white" alt="JWT">
   <img src="https://img.shields.io/badge/Design-Mobile_First-8B5CF6?logoColor=white" alt="Mobile First">
+  <img src="https://img.shields.io/badge/Licença-Privada-red" alt="Licença">
   <img src="https://img.shields.io/badge/Status-Em_Desenvolvimento-orange" alt="Status">
 </p>
+
+---
+
+## 📑 Sumário
+
+- [📱 Sobre o Projeto](#-sobre-o-projeto)
+- [🎨 Design & Usabilidade](#-design--usabilidade)
+- [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
+- [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
+- [🔄 Fluxo de Venda & Ciclo de Vida](#-fluxo-de-venda--ciclo-de-vida)
+- [📱 Módulos Operacionais Mobile](#-módulos-operacionais-mobile)
+- [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
+- [🛠️ Como Executar o Projeto](#️-como-executar-o-projeto)
+- [🌐 Referência da API REST](#-referência-da-api-rest)
+- [🔒 Segurança & Auditoria](#-segurança--auditoria)
+- [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
+- [🧰 Scripts Úteis & Banco de Dados](#-scripts-úteis--banco-de-dados)
+- [🚀 Roadmap](#-roadmap)
+- [🤝 Contribuição & Boas Práticas](#-contribuição--boas-práticas)
+- [📜 Licença](#-licença)
 
 ---
 
