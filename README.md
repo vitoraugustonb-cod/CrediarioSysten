@@ -433,6 +433,31 @@ O desenvolvimento contínuo do Crediário System prioriza ferramentas práticas 
 
 ---
 
+## 🤝 Contribuição & Boas Práticas
+
+Contribuições, sugestões e melhorias são bem-vindas! Para manter a rastreabilidade e a qualidade do código:
+
+1. **Faça um Fork** do projeto e crie uma branch descritiva:
+   ```bash
+   git checkout -b feature/minha-nova-funcionalidade
+   ```
+2. **Siga o padrão Conventional Commits**:
+   - `feat:` Novas funcionalidades ou telas
+   - `fix:` Correções de bugs ou validações
+   - `docs:` Modificações em documentação ou README
+   - `refactor:` Melhorias internas de código sem alterar comportamento
+   - `chore:` Ajustes de pacotes, configs ou ferramentas
+3. **Valide a tipagem estática e linting**:
+   ```bash
+   # No frontend
+   npm run build
+   # No backend
+   npx tsc --noEmit
+   ```
+4. **Abra um Pull Request** detalhando o problema resolvido ou a melhoria implementada.
+
+---
+
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
