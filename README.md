@@ -86,6 +86,28 @@ O frontend foi desenvolvido com as melhores práticas de design moderno, apresen
 
 ---
 
+## 📐 Regras de Negócio Financeiras
+
+O sistema opera com regras contábeis e financeiras desenhadas especificamente para a realidade de crediário de rua e lojistas:
+
+1. **Geração Automática do Plano de Parcelamento:**
+   - O valor total da venda deduzido de eventual entrada é dividido igualmente pelo número de parcelas acordadas.
+   - Suporte a frequências: **Semanal** (a cada 7 dias), **Quinzenal** (a cada 15 dias) e **Mensal** (mesmo dia do mês subsequente).
+   - Centavos residuais decorrentes de dízimas na divisão são automaticamente ajustados na primeira parcela para garantir fechamento de 100% do saldo total.
+
+2. **Critério de Atraso e Cobrança Diária:**
+   - Parcelas com data de vencimento anterior à data atual (`vencimento < hoje`) e com status diferente de `PAGA` são categorizadas instantaneamente como **Em Atraso**.
+   - Na aba operacional do cobrador, clientes inadimplentes ganham destaque prioritário no topo da listagem com contadores de dias decorridos.
+
+3. **Amortização e Pagamento Adiantado:**
+   - O sistema permite o pagamento antecipado de parcelas vincendas diretamente pela ficha do cliente.
+   - Amortizações parciais abatem prioritariamente a parcela mais antiga em aberto, impedindo que juros ou carência se acumulem desnecessariamente.
+
+4. **Prestação de Contas & Fechamento de Caixa:**
+   - Todo pagamento processado é creditado ao operador autenticado, gerando um histórico diário consolidado para conferência física de valores (dinheiro, Pix ou transferência) no fim do expediente.
+
+---
+
 ## 🗂️ Estrutura do Projeto
 
 ```
