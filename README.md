@@ -222,6 +222,33 @@ Após rodar o seed do gerente, use as credenciais abaixo para o primeiro login:
 
 ---
 
+## 🌐 Referência da API REST
+
+A API segue padrões RESTful, retornando respostas estruturadas em formato JSON e utilizando códigos HTTP semânticos (200, 201, 400, 401, 403, 404, 500).
+
+Todas as rotas (exceto `/api/auth/login`) exigem o cabeçalho `Authorization: Bearer <token_jwt>`.
+
+| Módulo | Método | Endpoint | Perfil Mínimo | Descrição |
+| :--- | :---: | :--- | :---: | :--- |
+| **Autenticação** | `POST` | `/api/auth/login` | Público | Autentica usuário e retorna JWT com dados de sessão |
+| **Usuários** | `GET` | `/api/users` | Gerente | Lista funcionários com contadores e status |
+| **Usuários** | `POST` | `/api/users` | Gerente | Cadastra novo funcionário (Gerente/Cobrador) |
+| **Usuários** | `PATCH` | `/api/users/:id/status` | Gerente | Ativa ou desativa o acesso de um funcionário |
+| **Clientes** | `GET` | `/api/clientes` | Todos | Lista clientes com busca por nome/telefone e saldo |
+| **Clientes** | `POST` | `/api/clientes` | Todos | Cadastra um novo cliente no sistema |
+| **Clientes** | `GET` | `/api/clientes/:id` | Todos | Detalha histórico completo, carnês e endereço |
+| **Produtos** | `GET` | `/api/produtos` | Todos | Catálogo de produtos com preço e categorias |
+| **Produtos** | `POST` | `/api/produtos` | Gerente | Cadastro de novos produtos no estoque/catálogo |
+| **Vendas** | `POST` | `/api/vendas` | Todos | Registra venda e gera parcelas automaticamente |
+| **Vendas** | `GET` | `/api/vendas/:id` | Todos | Detalhes da venda, itens e parcelamento |
+| **Parcelas** | `GET` | `/api/parcelas/cobrancas` | Cobrador | Lista cobranças do dia e parcelas em atraso |
+| **Parcelas** | `POST` | `/api/parcelas/:id/pagar` | Cobrador | Baixa parcela com confirmação e auditoria |
+| **Relatórios** | `GET` | `/api/relatorios/dashboard` | Gerente | Indicadores macro (KPIs, volume, inadimplência) |
+| **Relatórios** | `GET` | `/api/relatorios/mensal` | Gerente | Desempenho individual e comissões do mês |
+| **Prestação** | `GET` | `/api/prestacao-contas/resumo` | Todos | Prestação diária de caixa do operador autenticado |
+
+---
+
 ## 🗃️ Modelo de Dados Resumido
 
 ```
