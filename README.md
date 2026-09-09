@@ -108,6 +108,35 @@ O sistema opera com regras contábeis e financeiras desenhadas especificamente p
 
 ---
 
+## 🔄 Fluxo de Venda & Ciclo de Vida
+
+O ciclo operacional do crediário envolve desde o lançamento da venda com controle de entrada até o encerramento do carnê:
+
+```mermaid
+flowchart TD
+    A[Início: Nova Venda] --> B[Seleção/Cadastro de Cliente]
+    B --> C[Adição de Itens e Produtos]
+    C --> D{Possui Entrada?}
+    D -- Sim --> E[Deduz Entrada do Total]
+    D -- Não --> F[Valor Total a Parcelar]
+    E --> G[Configurar Periodicidade e Qtd Parcelas]
+    F --> G
+    G --> H[Transação Atômica no Banco de Dados]
+    H --> I[Criação da Venda + Carnê de Parcelas]
+    
+    subgraph Ciclo de Vida da Parcela
+        I --> J[Status: PENDENTE]
+        J -->|Data Atual <= Vencimento| K[Na Carteira: A Vencer]
+        J -->|Data Atual > Vencimento| L[Em Atraso: Fila Prioritária]
+        K -->|Cobrador Recebe Pagamento| M[Confirmação de Segurança de Valor]
+        L -->|Cobrador Recebe Pagamento| M
+        M -->|Confirmação Válida| N[Status: PAGA]
+        N --> O[Geração de Registro Imutável de Auditoria]
+    end
+```
+
+---
+
 ## 🗂️ Estrutura do Projeto
 
 ```
