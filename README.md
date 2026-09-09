@@ -327,6 +327,29 @@ Venda    ──< ItemVenda >── Produto
 
 ---
 
+## 🔒 Segurança & Auditoria
+
+O Crediário System foi concebido para ambientes onde a integridade financeira e a prevenção de fraudes ou erros operacionais são vitais:
+
+- **Autenticação Stateless com JWT:**
+  - Tokens criptografados assinados com algoritmo HMAC SHA-256 e tempo de expiração controlado.
+  - Middlewares de autorização granular (`authMiddleware` e `roleMiddleware`) que barram acessos não autorizados antes da camada de controlador.
+
+- **Proteção Criptográfica de Credenciais:**
+  - Todas as senhas de usuários são criptografadas com `bcryptjs` utilizando salt rounds elevados antes da persistência.
+
+- **Trilha de Auditoria Imutável (Append-Only):**
+  - Toda baixa ou alteração de parcela gera automaticamente um registro na tabela `Auditoria`.
+  - Armazena ID da parcela, ID do cobrador responsável, valor exato recebido, data/hora precisa e observações, garantindo rastreabilidade jurídica e contábil.
+
+- **Mecanismo de Validação Anti-Erro Operacional:**
+  - Para evitar cliques acidentais na tela sensível ao toque do celular em campo, a confirmação do recebimento exige a digitação manual do valor. Discrepâncias bloqueiam o botão de confirmação.
+
+- **Transações Atômicas de Banco de Dados:**
+  - Vendas, itens e parcelas são criados dentro de uma única transação atômica (`prisma.$transaction`). Se qualquer passo falhar, nenhum dado corrompido ou carnê órfão é gravado.
+
+---
+
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
