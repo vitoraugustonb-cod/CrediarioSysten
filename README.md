@@ -120,15 +120,16 @@ O frontend foi desenvolvido com as melhores práticas de design moderno, apresen
 
 ## ⚙️ Funcionalidades Principais
 
-### 👤 Perfil: Gerente
+### 👤 Perfil: Gerente (Painel Administrativo Desktop)
 
-- **Dashboard Gerencial em Tempo Real:** KPIs da empresa com total de clientes, vendas do dia, valor em aberto e cobranças realizadas.
-- **Gestão de Funcionários:** Cadastro, ativação e desativação de vendedores/cobradores.
-- **Gestão de Clientes & Produtos:** Visão global de todos os clientes cadastrados, saldo devedor acumulado e catálogo de produtos com categorias.
-- **Registro de Vendas Completo:** Criação de vendas com múltiplos itens, valor de entrada opcional e geração automática do carnê de parcelas (periodicidade mensal, quinzenal ou semanal).
-- **Visualização de Carnê:** Consulta detalhada de todas as parcelas de cada venda, com status atualizado em tempo real.
-- **Relatório Mensal Consolidado:** Desempenho individual de cada funcionário com total cobrado, número de cobranças e comissão.
-- **Prestação de Contas Global:** Visão da movimentação financeira diária de todos os cobradores da empresa.
+Projetado para telas grandes com visualização analítica, tomada de decisão e controle contábil:
+- **Dashboard Gerencial em Tempo Real:** Indicadores macro (KPIs) exibindo faturamento bruto do dia, taxa de conversão de cobranças, volume total de recebíveis em aberto e clientes inadimplentes.
+- **Gestão & Governança de Equipe:** Cadastro unificado de colaboradores com atribuição estrita de perfis (`GERENTE` ou `VENDEDOR`), além de ativação/desativação instantânea de acessos para colaboradores desligados.
+- **Relatório de Desempenho & Comissões:** Cálculo automatizado de metas e comissões por cobrador com base no volume financeiro recuperado no mês selecionado.
+- **Gestão Central de Clientes e Limites:** Visualização de fichas completas, saldo devedor consolidado e auditoria de compras anteriores.
+- **Catálogo de Produtos & Controle de Preços:** Cadastro, categorização e atualização de preços dos itens comercializados.
+- **Painel de Vendas Multi-item:** Emissão de contratos de crediário com múltiplos produtos, cálculo em tempo real de entrada e geração de parcelas semanais, quinzenais ou mensais.
+- **Prestação de Contas Consolidada:** Visão global das entradas de caixa de todos os cobradores de rua para conferência diária no fechamento do expediente.
 
 ### 🛵 Perfil: Vendedor / Cobrador
 
