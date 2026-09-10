@@ -29,6 +29,7 @@
 
 - [📱 Sobre o Projeto](#-sobre-o-projeto)
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
+- [🏗️ Arquitetura em Camadas](#️-arquitetura-em-camadas)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
@@ -70,6 +71,38 @@ O sistema resolve definitivamente esses gargalos ao desacoplar a inteligência d
 | **ORM & Migrations** | Prisma ORM | 6.x | Tipagem autogerada com Prisma Client, migrações declarativas seguras e suporte a transações atômicas. |
 | **Banco de Dados** | MySQL | 8.0 | ACID compliance robusto, integridade relacional nativa e alta performance para relatórios tabulares. |
 | **Segurança & Criptografia**| JWT + bcryptjs | — | Autenticação stateless baseada em claims assinadas com SHA-256 e hashing de senhas com salt. |
+
+---
+
+## 🏗️ Arquitetura em Camadas
+
+A aplicação adota um padrão em camadas desacopladas, garantindo que regras de negócio, persistência e apresentação permaneçam isoladas:
+
+```mermaid
+flowchart LR
+    subgraph Client["Camada de Apresentação (Frontend SPA)"]
+        UI_Desk["Painel Gerencial Desktop"]
+        UI_Mob["Interface Cobrador Mobile"]
+        Context["AuthContext & API Client"]
+    end
+
+    subgraph Server["Camada de Aplicação (Backend REST API)"]
+        Middlewares["Middlewares (JWT & RBAC)"]
+        Controllers["Controllers de Domínio (Venda, Parcela, etc)"]
+        Prisma["Prisma ORM Client & Transactions"]
+    end
+
+    subgraph Data["Camada de Dados"]
+        MySQL[("Banco Relacional MySQL 8.0")]
+    end
+
+    UI_Desk --> Context
+    UI_Mob --> Context
+    Context -- "HTTP/JSON com Bearer Token" --> Middlewares
+    Middlewares --> Controllers
+    Controllers --> Prisma
+    Prisma <--> MySQL
+```
 
 ---
 
