@@ -442,6 +442,21 @@ Todas as rotas (exceto `/api/auth/login`) exigem o cabeçalho `Authorization: Be
 | **Relatórios** | `GET` | `/api/relatorios/mensal` | Gerente | Desempenho individual e comissões do mês |
 | **Prestação** | `GET` | `/api/prestacao-contas/resumo` | Todos | Prestação diária de caixa do operador autenticado |
 
+### 🚥 Padronização de Códigos de Resposta HTTP
+
+Todas as respostas da API seguem a convenção semântica do protocolo HTTP:
+
+| Código HTTP | Significado | Situação Típica |
+| :---: | :--- | :--- |
+| `200 OK` | Operação realizada com êxito | Listagem de clientes, consulta de parcelas ou baixa efetuada |
+| `201 Created` | Recurso criado com sucesso | Cadastro de novo cliente, venda registrada ou usuário criado |
+| `400 Bad Request` | Parâmetros ou payload inválidos | Falta de dados obrigatórios ou valor monetário inválido |
+| `401 Unauthorized` | Falha de autenticação ou token ausente | Token JWT expirado, inválido ou não informado |
+| `403 Forbidden` | Permissão insuficiente para a rota | Cobrador tentando acessar endpoints restritos à gerência |
+| `404 Not Found` | Recurso não localizado | Cliente, venda ou parcela não encontrada no banco |
+| `409 Conflict` | Conflito de integridade de dados | Tentativa de pagar parcela já baixada anteriormente |
+| `500 Server Error` | Erro inesperado interno | Falha de infraestrutura ou exceção não capturada |
+
 ### 📦 Exemplos de Payloads
 
 <details>
