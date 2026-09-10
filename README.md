@@ -367,6 +367,90 @@ Todas as rotas (exceto `/api/auth/login`) exigem o cabeçalho `Authorization: Be
 | **Relatórios** | `GET` | `/api/relatorios/mensal` | Gerente | Desempenho individual e comissões do mês |
 | **Prestação** | `GET` | `/api/prestacao-contas/resumo` | Todos | Prestação diária de caixa do operador autenticado |
 
+### 📦 Exemplos de Payloads
+
+<details>
+<summary><strong>1. Autenticação (POST /api/auth/login)</strong></summary>
+
+```json
+// Request Body
+{
+  "email": "gerente@crediario.com",
+  "senha": "senhaSegura123"
+}
+
+// Response Body (200 OK)
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "usuario": {
+    "id": 1,
+    "nome": "Vitor Augusto",
+    "email": "gerente@crediario.com",
+    "perfil": "GERENTE"
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>2. Criação de Venda com Parcelamento (POST /api/vendas)</strong></summary>
+
+```json
+// Request Body
+{
+  "clienteId": 4,
+  "entrada": 50.00,
+  "qtdParcelas": 4,
+  "frequencia": "SEMANAL",
+  "itens": [
+    { "produtoId": 2, "quantidade": 1, "precoUnitario": 150.00 },
+    { "produtoId": 5, "quantidade": 2, "precoUnitario": 45.00 }
+  ]
+}
+
+// Response Body (201 Created)
+{
+  "id": 12,
+  "clienteId": 4,
+  "total": 240.00,
+  "entrada": 50.00,
+  "saldoRestante": 190.00,
+  "parcelas": [
+    { "numero": 1, "valor": 47.50, "vencimento": "2026-09-16T00:00:00.000Z", "status": "PENDENTE" },
+    { "numero": 2, "valor": 47.50, "vencimento": "2026-09-23T00:00:00.000Z", "status": "PENDENTE" },
+    { "numero": 3, "valor": 47.50, "vencimento": "2026-09-30T00:00:00.000Z", "status": "PENDENTE" },
+    { "numero": 4, "valor": 47.50, "vencimento": "2026-10-07T00:00:00.000Z", "status": "PENDENTE" }
+  ]
+}
+```
+</details>
+
+<details>
+<summary><strong>3. Baixa de Cobrança / Pagamento (POST /api/parcelas/:id/pagar)</strong></summary>
+
+```json
+// Request Body
+{
+  "valorPago": 47.50,
+  "formaPagamento": "PIX"
+}
+
+// Response Body (200 OK)
+{
+  "sucesso": true,
+  "mensagem": "Parcela baixada com sucesso.",
+  "parcela": {
+    "id": 34,
+    "vendaId": 12,
+    "numero": 1,
+    "status": "PAGA",
+    "valorPago": 47.50,
+    "dataPagamento": "2026-09-09T22:30:00.000Z"
+  }
+}
+```
+</details>
+
 ---
 
 ## 🗃️ Modelo de Dados Resumido
