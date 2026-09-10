@@ -139,6 +139,20 @@ O frontend foi desenvolvido com as melhores práticas de design moderno, apresen
 - **Validação de Segurança Dupla no Pagamento:** Ao registrar um pagamento, um modal de confirmação solicita que o vendedor redigite o valor, evitando lançamentos acidentais por clique errado.
 - **Pesquisa Inteligente com Autocomplete:** Campos de busca com filtragem em tempo real por nome, telefone ou endereço em listas de clientes e cobranças.
 
+### 🎨 Tokens do Design System & Paleta de Cores Semântica
+
+A interface adota variáveis CSS globais para garantir coerência visual em todos os componentes:
+
+| Token CSS | Valor HEX / HSL | Finalidade Semântica |
+| :--- | :---: | :--- |
+| `--primary` | `#2563eb` | Ações principais, botões de destaque e navegação ativa |
+| `--primary-hover` | `#1d4ed8` | Estados de hover em botões primários |
+| `--success` | `#16a34a` | Parcelas pagas, confirmações de recebimento e badges de sucesso |
+| `--warning` | `#f59e0b` | Parcelas que vencem hoje e alertas de atenção |
+| `--danger` | `#dc2626` | Parcelas em atraso, cancelamentos e mensagens de erro |
+| `--surface` | `#ffffff` / `#1e293b` | Fundo de cards, tabelas e modais (suporte a modo escuro) |
+| `--background` | `#f8fafc` / `#0f172a` | Fundo principal da página com contraste suave |
+
 ---
 
 ## ⚙️ Funcionalidades Principais
