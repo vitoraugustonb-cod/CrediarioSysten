@@ -193,32 +193,33 @@ flowchart TD
 
 ---
 
-## 📱 Módulos Operacionais Mobile
+## 📱 Módulos Operacionais Mobile (Uso em Campo)
 
-Projetado com foco em usabilidade sob luz solar e operações de rua rápidas com apenas uma mão:
+Projetado especificamente para o ritmo dinâmico de vendedores externos e cobradores de rua, com foco em ergonomia para operação com apenas uma mão e legibilidade sob sol forte:
 
 - **1. Cobranças Operacionais do Dia:**
-  - Filtragem automática das parcelas de hoje e em atraso com categorização visual (badges coloridos).
-  - Acesso direto ao WhatsApp do cliente em um toque para envio de lembretes ou contato prévio.
-  - Baixa de pagamento imediata com tela de confirmação de segurança.
+  - Filtragem automática das parcelas de hoje e em atraso com categorização visual por badges de status com alto contraste.
+  - Acesso direto ao WhatsApp do cliente em um toque com mensagem pré-formatada para lembretes ou confirmação prévia de visita.
+  - Baixa de pagamento imediata com tela de confirmação de segurança com teclado numérico otimizado para evitar erros de digitação em movimento.
 
-- **2. Busca e Ficha de Clientes:**
-  - Busca instantânea sem necessidade de paginação rígida, filtrando por nome, telefone ou logradouro.
-  - Extrato individual com total em dívida, histórico de compras e parcelas vincendas.
+- **2. Busca e Ficha de Clientes Inteligente:**
+  - Busca instantânea sem necessidade de paginação rígida, filtrando por nome, telefone ou logradouro com debounce de digitação.
+  - Extrato individual completo com total em dívida acumulada, histórico detalhado de compras e parcelas vincendas.
   - Opção de amortização ou quitação adiantada de carnês direto pelo card do cliente.
 
-- **3. Ponto de Venda Ágil (Nova Venda):**
-  - Autocomplete preditivo de clientes sem telas modais pesadas.
-  - Seleção de múltiplos itens do catálogo com cálculo dinâmico de subtotais.
-  - Simulação em tempo real do carnê: altere a quantidade de parcelas e visualize o valor exato de cada parcela antes de finalizar.
+- **3. Ponto de Venda Ágil (Nova Venda em Campo):**
+  - Autocomplete preditivo de clientes sem telas modais pesadas ou lentidão de rede.
+  - Seleção de múltiplos itens do catálogo com cálculo dinâmico de subtotais e estoque.
+  - Simulação em tempo real do carnê: altere a quantidade de parcelas e visualize o valor exato de cada parcela e as datas de vencimento antes de finalizar o fechamento.
 
 - **4. Histórico Financeiro & Extrato Consolidado:**
-  - Telas dedicadas para histórico detalhado de parcelas recebidas e histórico analítico de vendas efetuadas.
+  - Telas dedicadas para histórico detalhado de parcelas recebidas e histórico analítico de vendas efetuadas pelo próprio operador.
   - Filtros por período com totalizadores de volume recebido e saldo a receber.
 
-- **5. Resumo do Dia & Fechamento de Caixa:**
+- **5. Resumo da Jornada & Fechamento de Caixa:**
   - Exibição de valores totais recebidos na jornada do cobrador.
-  - Discriminativo de pagamentos por modalidade para simplificar o acerto final com a gerência.
+  - Discriminativo de pagamentos por modalidade (Dinheiro, Pix ou Cartão) para agilizar o acerto e conferência com a gerência ao final do dia.
+  - Indicador de metas de cobrança atingidas no dia.
 
 ---
 
