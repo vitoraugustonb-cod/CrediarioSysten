@@ -229,7 +229,10 @@ flowchart TD
         J -->|Data Atual > Vencimento| L[Em Atraso: Fila Prioritária]
         K -->|Cobrador Recebe Pagamento| M[Confirmação de Segurança de Valor]
         L -->|Cobrador Recebe Pagamento| M
-        M -->|Confirmação Válida| N[Status: PAGA]
+        K -->|Pagamento Antecipado| M
+        M -->|Valor Total| N[Status: PAGA]
+        M -->|Amortização Parcial| P[Saldo Abatido: Mantém PENDENTE]
+        P --> O[Geração de Registro Imutável de Auditoria]
         N --> O[Geração de Registro Imutável de Auditoria]
     end
 ```
