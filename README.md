@@ -698,6 +698,20 @@ npx tsc --noEmit
 ### 4. Sessão expirada ou erro 401 Unauthorized persistente
 - Limpe os dados de autenticação salvos no `localStorage` do navegador pelo DevTools (`F12` -> Application -> Local Storage -> Clear) e refaça o login.
 
+### 5. Divergência de Fuso Horário nas Datas de Vencimento
+- O MySQL e o Node.js devem estar sincronizados com o fuso brasileiro (`America/Sao_Paulo` ou UTC).
+- No arquivo `backend/.env`, certifique-se de configurar a connection string permitindo UTC para evitar deslocamentos nas parcelas:
+  ```
+  DATABASE_URL="mysql://root:root@localhost:3306/crediario_db?timezone=Z"
+  ```
+
+### 6. Erro de Migração Pendente (`P3009` ou `P3005`)
+- Caso o schema local esteja em conflito durante o desenvolvimento:
+  ```bash
+  cd backend && npx prisma migrate reset
+  ```
+  > ⚠️ Este comando recria o banco de dados e reaplica as migrações limpas.
+
 ---
 
 ## 🚀 Roadmap & Ciclo de Lançamentos
