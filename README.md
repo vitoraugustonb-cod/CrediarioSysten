@@ -501,6 +501,12 @@ O Crediário System foi concebido para ambientes onde a integridade financeira e
 - **Transações Atômicas de Banco de Dados:**
   - Vendas, itens e parcelas são criados dentro de uma única transação atômica (`prisma.$transaction`). Se qualquer passo falhar, nenhum dado corrompido ou carnê órfão é gravado.
 
+- **Proteção Contra Race Conditions & Baixas Duplicadas:**
+  - O endpoint de pagamento verifica o status da parcela em tempo real antes de gravar o recebimento; caso a parcela já tenha sido baixada por outro operador, a requisição é rejeitada com código 409/400 idempotente.
+
+- **Controle de Origem & Proteção de Cabeçalhos (CORS):**
+  - Configuração restrita de Cross-Origin Resource Sharing no Express para permitir requisições estritamente das origens frontend autorizadas.
+
 ---
 
 ## ⚙️ Variáveis de Ambiente
