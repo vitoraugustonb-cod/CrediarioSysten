@@ -462,14 +462,21 @@ Usuario  ──< Venda >── Cliente
 Venda    ──< ItemVenda >── Produto
 ```
 
-| Entidade     | Descrição                                                  |
-|--------------|------------------------------------------------------------|
-| `Usuario`    | Gerentes e Vendedores/Cobradores com autenticação JWT      |
-| `Cliente`    | Dados cadastrais e histórico de compras no crediário       |
-| `Venda`      | Cabeçalho da venda com valor total, entrada e parcelas     |
-| `ItemVenda`  | Produtos individuais associados a cada venda               |
-| `Parcela`    | Carnê gerado automaticamente com vencimento e status       |
-| `Auditoria`  | Log imutável de todas as operações em parcelas             |
+| Entidade     | Atributos Principais | Descrição & Relacionamentos |
+|--------------|----------------------|-----------------------------|
+| `Usuario`    | `id`, `nome`, `email`, `senha`, `perfil`, `ativo` | Operadores do sistema com perfis `GERENTE` ou `VENDEDOR`. |
+| `Cliente`    | `id`, `nome`, `telefone`, `cpf`, `endereco`, `limite` | Cadastro do comprador e histórico de cobrança. Possui `1:N` Vendas. |
+| `Venda`      | `id`, `clienteId`, `usuarioId`, `total`, `entrada`, `criadoEm` | Registro mestre da transação comercial. Conecta Cliente e Vendedor. |
+| `ItemVenda`  | `id`, `vendaId`, `produtoId`, `quantidade`, `precoUnitario` | Linha detalhada dos produtos comercializados na venda. |
+| `Produto`    | `id`, `nome`, `preco`, `categoria`, `estoque` | Itens disponíveis para composição do carnê de compras. |
+| `Parcela`    | `id`, `vendaId`, `numero`, `valor`, `vencimento`, `status`, `valorPago`, `dataPagamento` | Parcelas do carnê com status `PENDENTE`, `PAGA` ou `ATRASADA`. |
+| `Auditoria`  | `id`, `parcelaId`, `usuarioId`, `acao`, `valor`, `criadoEm` | Log imutável (append-only) de cada recebimento ou alteração. |
+
+### 🔠 Enumerações do Sistema (Prisma Enums)
+
+- **`Perfil`**: `GERENTE` (Acesso total administrativo) \| `VENDEDOR` (Acesso operacional de rua/vendas).
+- **`StatusParcela`**: `PENDENTE` (A vencer ou aguardando) \| `PAGA` (Quitada) \| `ATRASADA` (Vencimento expirado sem baixa).
+- **`FrequenciaParcelamento`**: `SEMANAL` (7 dias) \| `QUINZENAL` (15 dias) \| `MENSAL` (30 dias).
 
 ---
 
