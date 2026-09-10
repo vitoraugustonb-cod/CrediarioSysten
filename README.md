@@ -41,6 +41,7 @@
 - [🔒 Segurança & Auditoria](#-segurança--auditoria)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
 - [🧰 Scripts Úteis & Banco de Dados](#-scripts-úteis--banco-de-dados)
+- [❓ Resolução de Problemas (FAQ)](#-resolução-de-problemas-faq)
 - [🚀 Roadmap](#-roadmap)
 - [🤝 Contribuição & Boas Práticas](#-contribuição--boas-práticas)
 - [📜 Licença](#-licença)
@@ -573,6 +574,31 @@ npm run preview
 # Checagem estática de tipos TypeScript sem gerar bundle
 npx tsc --noEmit
 ```
+
+---
+
+## ❓ Resolução de Problemas (FAQ)
+
+### 1. `PrismaClientInitializationError: Can't reach database server at localhost:3306`
+- Verifique se o serviço do MySQL está ativo e rodando na porta 3306.
+- Caso esteja usando Docker, confira o status do container com `docker ps`.
+- Certifique-se de que a `DATABASE_URL` no arquivo `backend/.env` corresponde ao usuário, senha e porta corretos.
+
+### 2. Porta já em uso (`EADDRINUSE: 3300` ou `5173`)
+- O backend usa por padrão a porta `3300` e o Vite a porta `5173`.
+- No Windows, identifique e finalize o processo com:
+  ```powershell
+  Get-Process -Id (Get-NetTCPConnection -LocalPort 3300).OwningProcess | Stop-Process
+  ```
+
+### 3. Erro de tipos ou campos do Prisma não encontrados
+- Sempre que você alterar o arquivo `backend/prisma/schema.prisma` ou rodar migrações novas, regenere o cliente executando:
+  ```bash
+  cd backend && npx prisma generate
+  ```
+
+### 4. Sessão expirada ou erro 401 Unauthorized persistente
+- Limpe os dados de autenticação salvos no `localStorage` do navegador pelo DevTools (`F12` -> Application -> Local Storage -> Clear) e refaça o login.
 
 ---
 
