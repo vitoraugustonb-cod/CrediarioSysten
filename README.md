@@ -199,6 +199,12 @@ O sistema opera com regras contábeis e financeiras desenhadas especificamente p
 4. **Prestação de Contas & Fechamento de Caixa:**
    - Todo pagamento processado é creditado ao operador autenticado, gerando um histórico diário consolidado para conferência física de valores (dinheiro, Pix ou transferência) no fim do expediente.
 
+5. **Tratamento de Centavos Residuais (Arredondamento Fiscal):**
+   - Ao dividir valores ímpares (ex.: R$ 100,00 em 3 parcelas), o sistema gera duas parcelas de R$ 33,33 e ajusta a diferença de R$ 0,01 na primeira parcela (R$ 33,34), garantindo soma exata de 100% do saldo contratado.
+
+6. **Amortização e Quitação Flexível:**
+   - O cliente pode efetuar pagamentos parciais; o sistema abate a amortização na parcela mais antiga em aberto, mantendo o saldo remanescente visível no carnê.
+
 ---
 
 ## 🔄 Fluxo de Venda & Ciclo de Vida
