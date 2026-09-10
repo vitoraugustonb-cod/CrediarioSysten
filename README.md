@@ -82,6 +82,9 @@ O sistema resolve definitivamente esses gargalos ao desacoplar a inteligência d
 | **ORM & Migrations** | Prisma ORM | 6.x | Tipagem autogerada com Prisma Client, migrações declarativas seguras e suporte a transações atômicas. |
 | **Banco de Dados** | MySQL | 8.0 | ACID compliance robusto, integridade relacional nativa e alta performance para relatórios tabulares. |
 | **Segurança & Criptografia**| JWT + bcryptjs | — | Autenticação stateless baseada em claims assinadas com SHA-256 e hashing de senhas com salt. |
+| **Validação de Schemas** | Zod | 3.x | Validação rigorosa de contratos de entrada na API REST com inferência automática de tipos. |
+| **Ícones & UI** | Lucide React | 0.x | Conjunto consistente de ícones SVG limpos e otimizados para interface web e mobile. |
+| **Utilitários de Data** | date-fns | 4.x | Manipulação imutável de datas para cálculo preciso de vencimentos semanais, quinzenais e mensais. |
 
 ---
 
