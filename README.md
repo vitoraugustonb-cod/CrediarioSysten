@@ -314,6 +314,35 @@ Crediario/
 > docker run --name crediario-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=crediario_db -p 3306:3306 -d mysql:8.0
 > ```
 
+#### 🐳 Alternativa: Execução Rápida via Docker Compose
+
+Caso prefira orquestrar o banco via Docker Compose, utilize a configuração abaixo:
+
+```yaml
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: crediario-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: crediario_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+```
+
+Para iniciar o banco em segundo plano com persistência:
+```bash
+docker compose up -d
+```
+
 ---
 
 ### 1. Clonando o Repositório
