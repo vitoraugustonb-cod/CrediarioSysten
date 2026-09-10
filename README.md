@@ -597,6 +597,15 @@ O Crediário System foi concebido para ambientes onde a integridade financeira e
 - **Controle de Origem & Proteção de Cabeçalhos (CORS):**
   - Configuração restrita de Cross-Origin Resource Sharing no Express para permitir requisições estritamente das origens frontend autorizadas.
 
+- **Proteção Contra Injeção de SQL Nativa:**
+  - O uso estrito de consultas parametrizadas pelo Prisma Client elimina o risco de ataques por SQL Injection.
+
+- **Mitigação de Ataques de Força Bruta:**
+  - Validação de credenciais balanceada pelo `bcryptjs` com salt rounds adequados para proteção contra ataques de dicionário.
+
+- **Conformidade e Privacidade de Dados (LGPD):**
+  - Dados sensíveis de clientes (CPF, endereço e telefone) são acessíveis exclusivamente por operadores autorizados e registrados em log.
+
 ---
 
 ## ⚙️ Variáveis de Ambiente
