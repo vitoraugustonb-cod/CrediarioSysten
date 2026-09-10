@@ -28,6 +28,7 @@
 ## 📑 Sumário
 
 - [📱 Sobre o Projeto](#-sobre-o-projeto)
+- [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
@@ -55,6 +56,20 @@ Tradicionalmente, a gestão de crediário é vulnerável a perdas financeiras po
 - **Lentidão no ponto de venda:** Dificuldade para consultar o saldo devedor ou limite do cliente na hora de aprovar novas compras.
 
 O sistema resolve definitivamente esses gargalos ao desacoplar a inteligência de negócios em uma **API REST robusta (Node.js + Express + Prisma)** e uma interface responsiva **SPA (React 19 + Vite)**, proporcionando controle rigoroso de clientes, carnês flexíveis, rotas de cobrança com alertas prioritários e dashboards analíticos em tempo real.
+
+---
+
+## 💻 Stack Tecnológica & Justificativas
+
+| Camada | Tecnologia | Versão | Justificativa Técnica |
+| :--- | :--- | :---: | :--- |
+| **Frontend Core** | React | 19.x | Renderização reativa de alto desempenho e componentização limpa com hooks modernos. |
+| **Build & Tooling** | Vite | 6.x | Hot Module Replacement (HMR) instantâneo e bundling otimizado com Rollup. |
+| **Linguagem (Fullstack)** | TypeScript | 5.x | Tipagem estática end-to-end, evitando erros em tempo de execução nas operações financeiras. |
+| **Backend Framework** | Node.js + Express | 22.x / 5.x | Ecossistema maduro, assíncrono e leve para processar requisições REST com mínima latência. |
+| **ORM & Migrations** | Prisma ORM | 6.x | Tipagem autogerada com Prisma Client, migrações declarativas seguras e suporte a transações atômicas. |
+| **Banco de Dados** | MySQL | 8.0 | ACID compliance robusto, integridade relacional nativa e alta performance para relatórios tabulares. |
+| **Segurança & Criptografia**| JWT + bcryptjs | — | Autenticação stateless baseada em claims assinadas com SHA-256 e hashing de senhas com salt. |
 
 ---
 
