@@ -627,26 +627,37 @@ O desenvolvimento contínuo do Crediário System prioriza ferramentas práticas 
 
 ## 🤝 Contribuição & Boas Práticas
 
-Contribuições, sugestões e melhorias são bem-vindas! Para manter a rastreabilidade e a qualidade do código:
+Contribuições, sugestões de melhoria e correções são muito bem-vindas! Para manter a rastreabilidade e a consistência técnica do repositório:
 
-1. **Faça um Fork** do projeto e crie uma branch descritiva:
-   ```bash
-   git checkout -b feature/minha-nova-funcionalidade
-   ```
-2. **Siga o padrão Conventional Commits**:
-   - `feat:` Novas funcionalidades ou telas
-   - `fix:` Correções de bugs ou validações
-   - `docs:` Modificações em documentação ou README
-   - `refactor:` Melhorias internas de código sem alterar comportamento
-   - `chore:` Ajustes de pacotes, configs ou ferramentas
-3. **Valide a tipagem estática e linting**:
-   ```bash
-   # No frontend
-   npm run build
-   # No backend
-   npx tsc --noEmit
-   ```
-4. **Abra um Pull Request** detalhando o problema resolvido ou a melhoria implementada.
+### 1. Padrão de Nomenclatura de Branches
+- `feat/nome-da-feature` para novas implementações.
+- `fix/descricao-do-bug` para correções de problemas relatados.
+- `docs/melhoria-documentacao` para manuais ou README.
+
+### 2. Padrão de Commits (Conventional Commits)
+Utilizamos o padrão semântico para garantir histórico limpo e geração automatizada de changelogs:
+
+| Prefixo | Finalidade | Exemplo |
+| :--- | :--- | :--- |
+| `feat:` | Implementação de nova funcionalidade | `feat: adicionar filtro por bairro na rota de cobranca` |
+| `fix:` | Resolução de bug ou falha de regra | `fix: corrigir calculo de dizima na primeira parcela` |
+| `docs:` | Atualizações em documentação ou diagramas | `docs: detalhar payloads da api rest` |
+| `refactor:` | Refatoração de código sem impacto no comportamento | `refactor: simplificar hook useAuth no mobile` |
+| `perf:` | Melhorias diretas de performance | `perf: otimizar consulta prisma com select especifico` |
+| `chore:` | Alterações em dependências, scripts ou configs | `chore: atualizar prisma para v6.4.0` |
+
+### 3. Checklist de Validação Antes do Pull Request
+Antes de submeter seu PR, garanta que todos os checks locais passaram:
+```bash
+# Frontend: build sem erros
+cd frontend && npm run build
+
+# Backend: checagem estática de tipos
+cd ../backend && npx tsc --noEmit
+```
+
+### 4. Abertura do Pull Request
+Abra o PR apontando para a branch `main`, descrevendo o contexto da mudança, capturas de tela (quando visual) e passos para teste.
 
 ---
 
