@@ -735,6 +735,11 @@ O desenvolvimento contínuo do Crediário System prioriza ferramentas práticas 
 - [ ] **Roteirização Inteligente de Cobrança:** Ordenação geográfica de clientes no mapa para otimizar o itinerário do cobrador.
 - [ ] **Leitura de Código de Barras / QR Code:** Busca ultrarrápida do carnê por escaneamento da câmera do smartphone.
 
+### 🔮 v1.3.0 — Inteligência Financeira & Expansão
+- [ ] **Score de Crédito do Cliente:** Algoritmo que calcula automaticamente a pontualidade do pagador baseado no histórico de parcelas.
+- [ ] **PIX Dinâmico Integrado:** Geração de QR Code PIX com valor e chave Copia e Cola individual por parcela via Open Finance.
+- [ ] **Otimização Geográfica de Rotas:** Ordenação dinâmica da fila diária de cobrança por proximidade no Google Maps.
+
 ---
 
 ## 🤝 Contribuição & Boas Práticas
