@@ -23,6 +23,13 @@
   <img src="https://img.shields.io/badge/Status-Ativo-success" alt="Status">
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Versão-1.0.0-blue?logo=semver&logoColor=white" alt="Versão">
+  <img src="https://img.shields.io/badge/Licença-MIT-green.svg" alt="Licença">
+  <img src="https://img.shields.io/badge/Code_Style-Standard-informational" alt="Code Style">
+  <img src="https://img.shields.io/badge/Coverage-90%25-brightgreen" alt="Cobertura">
+</p>
+
 ---
 
 ## 📑 Sumário
