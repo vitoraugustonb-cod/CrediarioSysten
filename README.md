@@ -62,7 +62,10 @@ O **Crediário System** é uma aplicação web full-stack desenvolvida para mode
 Tradicionalmente, a gestão de crediário é vulnerável a perdas financeiras por depender de cadernetas de papel, planilhas desatualizadas ou canhotos físicos, o que acarreta:
 - **Inadimplência invisível:** Falta de clareza imediata sobre quais clientes estão atrasados hoje;
 - **Desvios ou erros de repasse:** Dificuldade na prestação de contas dos cobradores de rua ao fim da jornada diária;
-- **Lentidão no ponto de venda:** Dificuldade para consultar o saldo devedor ou limite do cliente na hora de aprovar novas compras.
+- **Lentidão no ponto de venda:** Dificuldade para consultar o saldo devedor ou limite do cliente na hora de aprovar novas compras;
+- **Atrito no fechamento de contas:** Cálculos manuais sujeitos a dízimas periódicas e erros na conferência de valores arrecadados no dia;
+- **Ausência de trilha de auditoria:** Falta de rastreabilidade exata sobre quem recebeu cada parcela, data/hora e forma de pagamento;
+- **Comunicação descentralizada:** Dificuldade para notificar clientes antes da expiração dos vencimentos dos carnês.
 
 O sistema resolve definitivamente esses gargalos ao desacoplar a inteligência de negócios em uma **API REST robusta (Node.js + Express + Prisma)** e uma interface responsiva **SPA (React 19 + Vite)**, proporcionando controle rigoroso de clientes, carnês flexíveis, rotas de cobrança com alertas prioritários e dashboards analíticos em tempo real.
 
