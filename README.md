@@ -118,6 +118,15 @@ flowchart LR
     Prisma <--> MySQL
 ```
 
+### 🛡️ Fluxo de Autenticação & Autorização na API
+
+1. **Requisição do Cliente:** A SPA envia credenciais para `/api/auth/login`.
+2. **Emissão de Token:** O servidor valida o hash com `bcryptjs` e emite um JWT assinado com claims (`id`, `email`, `perfil`).
+3. **Interceptação por Middlewares:**
+   - `authMiddleware`: Verifica a assinatura e validade temporal do Bearer token.
+   - `roleMiddleware`: Garante que rotas administrativas (`/api/relatorios/*`, `/api/users/*`) sejam acessíveis exclusivamente pelo perfil `GERENTE`.
+4. **Isolamento de Domínio:** Controllers delegam consultas ao Prisma Client, que encapsula transações ACID no MySQL 8.0.
+
 ---
 
 ## 🎨 Design & Usabilidade
