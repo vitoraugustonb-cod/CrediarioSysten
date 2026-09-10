@@ -659,9 +659,15 @@ cd ../backend && npx tsc --noEmit
 ### 4. Abertura do Pull Request
 Abra o PR apontando para a branch `main`, descrevendo o contexto da mudança, capturas de tela (quando visual) e passos para teste.
 
+<p align="right"><a href="#-crediário-system">⬆ Voltar ao topo</a></p>
+
 ---
 
 ## 📜 Licença
 
 Este projeto é desenvolvido para fins de gestão comercial e controle financeiro de crediário.  
 Todos os direitos reservados © 2025 — Vitor Augusto.
+
+<p align="center">
+  <sub>Feito com ❤️ e TypeScript para simplificar a gestão de crediário no Brasil.</sub>
+</p>
