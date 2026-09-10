@@ -260,8 +260,13 @@ Crediario/
 
 ### Pré-requisitos
 - **Node.js** v18 ou superior
-- **MySQL** 8.0 rodando localmente (ou outro banco suportado pelo Prisma)
+- **MySQL** 8.0 rodando localmente (ou via Docker)
 - **npm** ou **yarn**
+
+> 💡 **Dica rápida com Docker:** Caso não queira instalar o MySQL diretamente na máquina, suba uma instância limpa em segundos com o comando:
+> ```bash
+> docker run --name crediario-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=crediario_db -p 3306:3306 -d mysql:8.0
+> ```
 
 ---
 
