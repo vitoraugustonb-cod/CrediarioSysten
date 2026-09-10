@@ -47,9 +47,14 @@
 
 ## 📱 Sobre o Projeto
 
-O **Crediário System** é uma aplicação web full-stack desenvolvida para digitalizar e centralizar toda a gestão de vendas no crediário para pequenos e médios comércios.
+O **Crediário System** é uma aplicação web full-stack desenvolvida para modernizar, digitalizar e centralizar toda a operação de vendas no crediário próprio para pequenos e médios comércios, lojas de confecção, óticas, móveis e profissionais autônomos de vendas externas.
 
-O sistema resolve a dor de controlar manualmente cadernetas e carnês físicos, substituindo-os por uma plataforma digital intuitiva e segura. Construído com uma arquitetura desacoplada entre uma **API REST (Node.js + Express)** e um **Frontend SPA (React + Vite)**, o sistema oferece controle completo de clientes, geração de carnês de parcelamento, lançamento de cobranças diárias e dashboards financeiros — tudo com controle de acesso baseado em perfis de usuário.
+Tradicionalmente, a gestão de crediário é vulnerável a perdas financeiras por depender de cadernetas de papel, planilhas desatualizadas ou canhotos físicos, o que acarreta:
+- **Inadimplência invisível:** Falta de clareza imediata sobre quais clientes estão atrasados hoje;
+- **Desvios ou erros de repasse:** Dificuldade na prestação de contas dos cobradores de rua ao fim da jornada diária;
+- **Lentidão no ponto de venda:** Dificuldade para consultar o saldo devedor ou limite do cliente na hora de aprovar novas compras.
+
+O sistema resolve definitivamente esses gargalos ao desacoplar a inteligência de negócios em uma **API REST robusta (Node.js + Express + Prisma)** e uma interface responsiva **SPA (React 19 + Vite)**, proporcionando controle rigoroso de clientes, carnês flexíveis, rotas de cobrança com alertas prioritários e dashboards analíticos em tempo real.
 
 ---
 
