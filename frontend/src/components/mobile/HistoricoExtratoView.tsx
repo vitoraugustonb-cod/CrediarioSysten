@@ -209,10 +209,6 @@ export const HistoricoExtratoView: React.FC = () => {
     return Array.from(mapa.values()).sort((a, b) => b.chave.localeCompare(a.chave));
   }, [diasFiltrados]);
 
-  // Total acumulado geral exibido
-  const totalGeralCobrado = useMemo(() => {
-    return gruposMeses.reduce((acc, g) => acc + g.totalCobrado, 0);
-  }, [gruposMeses]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

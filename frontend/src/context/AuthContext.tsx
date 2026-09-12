@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import type { Usuario, PerfilUsuario } from '../types/auth';
 import { AuthContext } from './AuthContextDefinition';
 
-const API_BASE_URL = '';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 
 const STORAGE_TOKEN_KEY = '@crediario:token';
 const STORAGE_USER_KEY = '@crediario:usuario';

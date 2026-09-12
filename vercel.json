@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/(login|usuarios|clientes|produtos|vendas|parcelas|prestacao-contas|relatorios|pagamentos|health)(/.*)?",
+      "destination": "/api/index"
+    }
+  ]
+}

@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
     "seed": "tsx src/scripts/seedGerente.ts",
     "reset-db": "tsx src/scripts/resetBanco.ts"
   },
@@ -17,15 +18,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/adapter-mariadb": "^7.9.1",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mariadb": "^3.5.3",
-    "mysql2": "^3.23.2"
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

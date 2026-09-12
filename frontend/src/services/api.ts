@@ -1,6 +1,7 @@
 // API Service Module for Crediário System
 // Base URL uses relative path so Vite dev proxy handles it seamlessly (LAN, localhost, and tunnels)
-export const API_BASE_URL = '';
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 
 export interface Cliente {
   id: number;
