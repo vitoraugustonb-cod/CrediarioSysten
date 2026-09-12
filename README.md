@@ -596,3 +596,26 @@ npx tsc --noEmit         # Checagem estática de tipos TypeScript
   ```
   DATABASE_URL="mysql://root:root@localhost:3306/crediario_db?timezone=Z"
   ```
+
+---
+
+## 🚀 Roadmap & Ciclo de Lançamentos
+
+### 📦 v1.0.0 — Versão Estável (Concluída)
+- [x] Painel gerencial analítico com KPIs e relatórios de comissão.
+- [x] Emissão de carnês com frequência semanal, quinzenal e mensal.
+- [x] Rota diária de cobrança prioritária com baixa de segurança dupla.
+- [x] Trilha de auditoria contábil imutável (append-only).
+
+### ⚡ v1.1.0 — Mobilidade & Notificações (Em Andamento)
+- [ ] Modo PWA Offline-First com sincronização automática de dados.
+- [ ] Integração com WhatsApp para lembretes automáticos de vencimento e chave Pix.
+- [ ] Exportação de relatórios contábeis em formato PDF e planilhas Excel (`.xlsx`).
+
+### 🛠️ v1.2.0 — Automação de Campo & Hardware
+- [ ] Integração com mini-impressoras térmicas Bluetooth (58mm e 80mm).
+- [ ] Leitura de código de barras e QR Code pela câmera para busca rápida de carnês.
+
+### 🔮 v1.3.0 — Inteligência Financeira
+- [ ] Algoritmo preditivo de score de crédito para análise de risco do pagador.
+- [ ] Roteirização dinâmica de itinerários de cobrança via Google Maps.
