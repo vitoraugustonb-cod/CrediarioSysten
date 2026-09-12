@@ -69,3 +69,22 @@ O sistema resolve esses gargalos integrando uma **API REST em Node.js com Expres
 - Verificação de segurança dupla na baixa de pagamentos;
 - Registro imutável de auditoria contábil (append-only);
 - Painéis gerenciais em tempo real com cálculo automático de comissões.
+
+---
+
+## 💻 Stack Tecnológica & Justificativas
+
+A escolha das tecnologias baseou-se em critérios rigorosos de robustez, performance e tipagem estática ponta a ponta:
+
+| Camada | Tecnologia | Versão | Justificativa Técnica |
+| :--- | :--- | :---: | :--- |
+| **Frontend Core** | React | 19.x | Renderização reativa de alto desempenho e componentização limpa com hooks modernos. |
+| **Build & Tooling** | Vite | 6.x | Hot Module Replacement (HMR) instantâneo e bundling otimizado com Rollup. |
+| **Linguagem (Fullstack)** | TypeScript | 5.x | Tipagem estática end-to-end, prevenindo falhas em cálculos financeiros em tempo de execução. |
+| **Backend Framework** | Node.js + Express | 22.x / 5.x | Servidor assíncrono, leve e maduro para processar requisições REST com mínima latência. |
+| **ORM & Migrations** | Prisma ORM | 6.x | Tipagem autogerada com Prisma Client, migrações declarativas seguras e suporte a transações atômicas. |
+| **Banco de Dados** | MySQL | 8.0 | ACID compliance robusto, integridade relacional nativa e alta performance para relatórios tabulares. |
+| **Segurança & Criptografia** | JWT + bcryptjs | — | Autenticação stateless baseada em claims assinadas com HMAC SHA-256 e hashing de senhas com salt. |
+| **Validação de Schemas** | Zod | 3.x | Validação rigorosa de contratos de entrada na API REST com inferência automática de tipos. |
+| **Ícones & UI** | Lucide React | 0.x | Biblioteca moderna e consistente de ícones SVG limpos e otimizados para web e mobile. |
+| **Utilitários de Data** | date-fns | 4.x | Manipulação imutável de datas para cálculo exato de vencimentos semanais, quinzenais e mensais. |
