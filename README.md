@@ -22,3 +22,50 @@
   <img src="https://img.shields.io/badge/Coverage-90%25-brightgreen" alt="Cobertura">
   <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença">
 </p>
+
+---
+
+## 📑 Sumário
+
+- [📱 Sobre o Projeto](#-sobre-o-projeto)
+- [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
+- [🏗️ Arquitetura em Camadas](#️-arquitetura-em-camadas)
+- [🎨 Design & Usabilidade](#-design--usabilidade)
+- [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
+- [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
+- [🔄 Fluxo de Venda & Ciclo de Vida](#-fluxo-de-venda--ciclo-de-vida)
+- [📱 Módulos Operacionais Mobile](#-módulos-operacionais-mobile)
+- [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
+- [🛠️ Como Executar o Projeto](#️-como-executar-o-projeto)
+- [🔐 Contas de Acesso Padrão](#-contas-de-acesso-padrão)
+- [🌐 Referência da API REST](#-referência-da-api-rest)
+- [🗃️ Modelo de Dados & Diagrama ERD](#️-modelo-de-dados--diagrama-erd)
+- [🔒 Segurança, Concorrência & LGPD](#-segurança-concorrência--lgpd)
+- [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
+- [🧰 Scripts Úteis & Banco de Dados](#-scripts-úteis--banco-de-dados)
+- [❓ Resolução de Problemas (FAQ)](#-resolução-de-problemas-faq)
+- [🚀 Roadmap & Ciclo de Lançamentos](#-roadmap--ciclo-de-lançamentos)
+- [🤝 Contribuição & Boas Práticas](#-contribuição--boas-práticas)
+- [📜 Licença](#-licença)
+
+---
+
+## 📱 Sobre o Projeto
+
+O **Crediário System** é uma solução web full-stack desenvolvida para digitalizar e revolucionar as operações de crediário próprio para comércios locais, confecções, óticas, lojas de móveis e vendedores externos.
+
+### 🔴 O Cenário Tradicional e suas Dores
+A dependência de cadernetas de papel, canhotos físicos ou planilhas desatualizadas gera graves problemas operacionais e financeiros:
+- **Inadimplência Invisível:** Dificuldade em identificar rapidamente clientes com parcelas vencidas no dia;
+- **Falta de Controle de Repasse:** Complexidade na prestação de contas diária entre cobradores de rua e a gerência;
+- **Lentidão no Ponto de Venda:** Demora na consulta de saldo devedor e aprovação de novos limites de crédito;
+- **Erros de Cálculo Manual:** Dízimas periódicas e diferenças de centavos no fechamento do caixa;
+- **Ausência de Trilha de Auditoria:** Impossibilidade de rastrear com precisão quem recebeu cada valor e quando;
+- **Comunicação Descentralizada:** Falta de canais diretos para avisar clientes sobre vencimentos iminentes.
+
+### 🟢 A Solução Digital do Crediário System
+O sistema resolve esses gargalos integrando uma **API REST em Node.js com Express e Prisma ORM** a uma interface responsiva **SPA em React 19 com Vite**, oferecendo:
+- Rota inteligente de cobrança diária priorizada por urgência;
+- Verificação de segurança dupla na baixa de pagamentos;
+- Registro imutável de auditoria contábil (append-only);
+- Painéis gerenciais em tempo real com cálculo automático de comissões.
