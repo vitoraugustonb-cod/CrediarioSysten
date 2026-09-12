@@ -520,3 +520,16 @@ erDiagram
         datetime criadoEm
     }
 ```
+
+---
+
+## 🔒 Segurança, Concorrência & LGPD
+
+O Crediário System adota políticas rigorosas para proteção de dados e integridade financeira:
+
+- **Autenticação Stateless JWT:** Tokens HMAC SHA-256 com tempo de expiração curto e renovação segura.
+- **Criptografia com Bcrypt:** Senhas armazenadas com salt rounds elevados para proteção contra ataques de dicionário e força bruta.
+- **Trilha de Auditoria Append-Only:** Toda baixa, quitação ou amortização gera um registro imutável na tabela `Auditoria`.
+- **Transações Atômicas no Prisma:** Criação de vendas, itens e carnês encapsulados em `prisma.$transaction` para garantir integridade ACID.
+- **Prevenção de Race Conditions:** Verificação atômica de status antes da baixa para impedir quitações duplicadas simultâneas.
+- **Conformidade LGPD:** Restrição de acesso aos dados cadastrais e financeiros sensíveis apenas a operadores devidamente autenticados.
