@@ -270,3 +270,37 @@ Projetado especificamente para o ritmo dos vendedores e cobradores externos:
 
 5. **Resumo da Jornada & Fechamento de Caixa:**
    - Totalizadores por modalidade (Dinheiro, Pix, Cartão) para prestação de contas diária.
+
+---
+
+## 🗂️ Estrutura do Projeto
+
+```
+Crediario/
+├── backend/                    # Servidor API Node.js/Express + Prisma
+│   ├── prisma/
+│   │   ├── schema.prisma       # Modelo de dados relacional
+│   │   └── migrations/         # Histórico versionado de migrações
+│   ├── src/
+│   │   ├── controllers/        # Lógica de domínio (vendas, parcelas, relatórios)
+│   │   ├── middlewares/        # Autenticação JWT e validação de papéis (RBAC)
+│   │   ├── routes/             # Definição e roteamento da API REST
+│   │   ├── lib/                # Instância do Prisma Client
+│   │   ├── scripts/            # Seeds e utilitários de banco de dados
+│   │   └── server.ts           # Inicialização do servidor HTTP Express
+│   └── package.json
+│
+├── frontend/                   # Aplicação Frontend React + Vite
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── desktop/        # Visões do painel administrativo
+│   │   │   ├── mobile/         # Visões da interface do cobrador
+│   │   │   └── common/         # Componentes compartilhados (Modais, Botões)
+│   │   ├── context/            # AuthContext (token JWT e dados de sessão)
+│   │   ├── hooks/              # Hooks customizados (useAuth, etc)
+│   │   ├── services/           # Camada de comunicação com a API REST
+│   │   └── App.tsx             # Componente raiz com roteamento por perfil
+│   └── package.json
+│
+└── README.md
+```
