@@ -569,3 +569,30 @@ npm run dev              # Inicia servidor Vite com HMR
 npm run build            # Gera pacote otimizado de produção
 npx tsc --noEmit         # Checagem estática de tipos TypeScript
 ```
+
+---
+
+## ❓ Resolução de Problemas (FAQ)
+
+### 1. Falha ao conectar ao banco (`PrismaClientInitializationError`)
+- Certifique-se de que o serviço MySQL está ativo na porta 3306.
+- Caso utilize Docker, confira o status executando `docker ps`.
+- Valide as credenciais presentes na `DATABASE_URL` no arquivo `backend/.env`.
+
+### 2. Porta ocupada (`EADDRINUSE: 3300` ou `5173`)
+- No Windows PowerShell, finalize o processo em uso:
+  ```powershell
+  Get-Process -Id (Get-NetTCPConnection -LocalPort 3300).OwningProcess | Stop-Process
+  ```
+
+### 3. Campos não reconhecidos pelo Prisma Client
+- Sempre que modificar o `schema.prisma`, regenere os tipos:
+  ```bash
+  cd backend && npx prisma generate
+  ```
+
+### 4. Divergência de Fuso Horário nos Vencimentos
+- Configure a connection string do Prisma para UTC:
+  ```
+  DATABASE_URL="mysql://root:root@localhost:3306/crediario_db?timezone=Z"
+  ```
