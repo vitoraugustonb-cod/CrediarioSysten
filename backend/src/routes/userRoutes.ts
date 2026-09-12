@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { criarUsuario, listarUsuarios } from '../controllers/userController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { roleMiddleware } from '../middlewares/roleMiddleware.js';
+import { validateBody } from '../middlewares/validateMiddleware.js';
+import { criarUsuarioSchema } from '../validators/schemas.js';
 
 const router = Router();
 
@@ -16,6 +18,7 @@ router.post(
   '/usuarios',
   authMiddleware,
   roleMiddleware(['GERENTE']),
+  validateBody(criarUsuarioSchema),
   criarUsuario
 );
 
