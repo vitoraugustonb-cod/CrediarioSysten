@@ -150,3 +150,26 @@ sequenceDiagram
     DB-->>Controller: Retorna dados consolidados
     Controller-->>Frontend: 200 OK com payload JSON
 ```
+
+---
+
+## 🎨 Design & Usabilidade
+
+O frontend foi desenvolvido com foco em estética premium, velocidade de resposta e facilidade operacional:
+
+- **Interface Dual-Platform:** Detecção inteligente do dispositivo para entregar uma experiência sob medida — painel gerencial em tela cheia para desktop e interface ergonômica voltada para uso com uma só mão no mobile.
+- **Design System com Variáveis Semânticas:** Cores HSL balanceadas, tipografia moderna do Google Fonts, sombras suaves e suporte preparado para tema escuro.
+- **Micro-Interações Fluidas:** Transições animadas em modais, feedbacks de sucesso instantâneos e loaders sutis em operações assíncronas.
+- **Validação de Segurança Dupla:** Para evitar baixas acidentais em telas sensíveis ao toque, a confirmação do pagamento exige a redigitação do valor.
+
+### 🎨 Tokens do Design System
+
+| Token CSS | Valor HEX / HSL | Finalidade Semântica |
+| :--- | :---: | :--- |
+| `--primary` | `#2563eb` | Ações principais, botões de destaque e navegação ativa |
+| `--primary-hover` | `#1d4ed8` | Estados de hover em botões primários |
+| `--success` | `#16a34a` | Parcelas pagas, confirmações de recebimento e badges de sucesso |
+| `--warning` | `#f59e0b` | Parcelas que vencem hoje e alertas de atenção |
+| `--danger` | `#dc2626` | Parcelas em atraso, cancelamentos e mensagens de erro |
+| `--surface` | `#ffffff` / `#1e293b` | Fundo de cards, tabelas e modais (suporte a modo escuro) |
+| `--background` | `#f8fafc` / `#0f172a` | Fundo principal da página com contraste balanceado |
