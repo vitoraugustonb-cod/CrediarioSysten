@@ -244,3 +244,29 @@ flowchart TD
         N --> O[Geração de Registro Imutável de Auditoria]
     end
 ```
+
+---
+
+## 📱 Módulos Operacionais Mobile (Uso em Campo)
+
+Projetado especificamente para o ritmo dos vendedores e cobradores externos:
+
+1. **Cobranças Operacionais do Dia:**
+   - Fila prioritária com vencimentos do dia e parcelas atrasadas.
+   - Acesso com 1 clique ao WhatsApp do cliente com mensagem pré-configurada.
+   - Baixa imediata com teclado numérico otimizado.
+
+2. **Busca e Ficha de Clientes:**
+   - Autocomplete preditivo por nome, telefone ou endereço com debounce de digitação.
+   - Extrato completo com dívida acumulada, carnês ativos e histórico de compras.
+   - Botão para antecipar quitação de parcelas futuras.
+
+3. **Ponto de Venda Ágil (Nova Venda em Campo):**
+   - Lançamento multi-itens com cálculo dinâmico de subtotais.
+   - Simulação instantânea do carnê antes de salvar a venda.
+
+4. **Histórico Financeiro & Extrato Consolidado:**
+   - Extratos filtrados por período com totalizadores de volume recebido.
+
+5. **Resumo da Jornada & Fechamento de Caixa:**
+   - Totalizadores por modalidade (Dinheiro, Pix, Cartão) para prestação de contas diária.
