@@ -173,3 +173,22 @@ O frontend foi desenvolvido com foco em estética premium, velocidade de respost
 | `--danger` | `#dc2626` | Parcelas em atraso, cancelamentos e mensagens de erro |
 | `--surface` | `#ffffff` / `#1e293b` | Fundo de cards, tabelas e modais (suporte a modo escuro) |
 | `--background` | `#f8fafc` / `#0f172a` | Fundo principal da página com contraste balanceado |
+
+---
+
+## ⚙️ Funcionalidades Principais
+
+### 👤 Perfil: Gerente (Painel Administrativo Desktop)
+- **Dashboard Analítico em Tempo Real:** Faturamento bruto diário, taxa de conversão de cobranças, montante de recebíveis e lista de inadimplentes.
+- **Governança de Equipe:** Cadastro unificado de operadores, controle de papéis (`GERENTE` ou `VENDEDOR`) e ativação/desativação instantânea de acessos.
+- **Comissões e Metas:** Relatórios de produtividade individual com apuração de percentuais de comissão sobre valores recuperados.
+- **Gestão de Clientes e Limite:** Histórico consolidado de compras, saldo devedor e controle de limites.
+- **Catálogo de Produtos:** Cadastro, precificação e categorização de mercadorias.
+- **Fechamento e Prestação Global:** Visualização consolidada de todas as entradas de caixa dos cobradores no expediente.
+
+### 🛵 Perfil: Vendedor / Cobrador (App Mobile)
+- **Aba de Cobranças Prioritárias:** Fila de trabalho com clientes que possuem parcelas vencendo **hoje** ou **em atraso**.
+- **Baixa Segura com Conferência:** Modal com dupla confirmação de digitação do valor recebido.
+- **Pagamento Adiantado:** Quitação antecipada de parcelas futuras diretamente no card do cliente.
+- **Pesquisa Inteligente de Clientes:** Autocomplete com busca preditiva por nome, telefone ou endereço sem lentidão.
+- **Prestação de Contas Pessoal:** Resumo diário dos valores arrecadados dividido por modalidade (Dinheiro, Pix e Cartão).
