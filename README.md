@@ -214,3 +214,33 @@ O sistema implementa regras contábeis sólidas para assegurar integridade finan
 
 4. **Prestação de Contas e Fechamento de Caixa:**
    - Todo pagamento é associado ao ID do operador autenticado no momento da baixa, possibilitando conciliação física de caixa ao final do dia.
+
+---
+
+## 🔄 Fluxo de Venda & Ciclo de Vida
+
+```mermaid
+flowchart TD
+    A[Início: Nova Venda] --> B[Seleção/Cadastro de Cliente]
+    B --> C[Adição de Itens e Produtos]
+    C --> D{Possui Entrada?}
+    D -- Sim --> E[Deduz Entrada do Total]
+    D -- Não --> F[Valor Total a Parcelar]
+    E --> G[Configurar Periodicidade e Qtd Parcelas]
+    F --> G
+    G --> H[Transação Atômica no Banco de Dados]
+    H --> I[Criação da Venda + Carnê de Parcelas]
+    
+    subgraph Ciclo de Vida da Parcela
+        I --> J[Status: PENDENTE]
+        J -->|Data Atual <= Vencimento| K[Na Carteira: A Vencer]
+        J -->|Data Atual > Vencimento| L[Em Atraso: Fila Prioritária]
+        K -->|Cobrador Recebe Pagamento| M[Confirmação de Segurança de Valor]
+        L -->|Cobrador Recebe Pagamento| M
+        K -->|Pagamento Antecipado| M
+        M -->|Valor Total| N[Status: PAGA]
+        M -->|Amortização Parcial| P[Saldo Abatido: Mantém PENDENTE]
+        P --> O[Geração de Registro Imutável de Auditoria]
+        N --> O[Geração de Registro Imutável de Auditoria]
+    end
+```
