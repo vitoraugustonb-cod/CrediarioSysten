@@ -4,6 +4,7 @@ export interface TokenPayload {
   id: number;
   email: string;
   perfil: PerfilUsuario;
+  nome?: string;
 }
 
 declare global {
