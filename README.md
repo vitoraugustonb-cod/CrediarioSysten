@@ -533,3 +533,39 @@ O Crediário System adota políticas rigorosas para proteção de dados e integr
 - **Transações Atômicas no Prisma:** Criação de vendas, itens e carnês encapsulados em `prisma.$transaction` para garantir integridade ACID.
 - **Prevenção de Race Conditions:** Verificação atômica de status antes da baixa para impedir quitações duplicadas simultâneas.
 - **Conformidade LGPD:** Restrição de acesso aos dados cadastrais e financeiros sensíveis apenas a operadores devidamente autenticados.
+
+---
+
+## ⚙️ Variáveis de Ambiente
+
+### Backend (`backend/.env`)
+| Variável | Tipo | Obrigatória | Padrão | Descrição |
+| :--- | :---: | :---: | :---: | :--- |
+| `PORT` | `number` | Não | `3300` | Porta do servidor HTTP Express |
+| `DATABASE_URL` | `string` | **Sim** | — | Connection string do MySQL |
+| `JWT_SECRET` | `string` | **Sim** | — | Chave de assinatura dos tokens JWT |
+
+### Frontend (`frontend/.env`)
+| Variável | Tipo | Obrigatória | Padrão | Descrição |
+| :--- | :---: | :---: | :---: | :--- |
+| `VITE_API_URL` | `string` | Não | `http://localhost:3300/api` | URL base da API REST |
+
+---
+
+## 🧰 Scripts Úteis & Banco de Dados
+
+### Backend
+```bash
+npm run dev              # Executa servidor com recarregamento em tempo real
+npx prisma studio        # Interface web visual do banco de dados
+npx prisma migrate dev   # Cria e aplica migrações no banco
+npx prisma migrate reset # Reseta o banco e reaplica migrações limpas
+npx tsx src/scripts/seedGerente.ts # Popula usuário Gerente padrão
+```
+
+### Frontend
+```bash
+npm run dev              # Inicia servidor Vite com HMR
+npm run build            # Gera pacote otimizado de produção
+npx tsc --noEmit         # Checagem estática de tipos TypeScript
+```
