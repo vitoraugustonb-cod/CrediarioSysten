@@ -192,3 +192,25 @@ O frontend foi desenvolvido com foco em estética premium, velocidade de respost
 - **Pagamento Adiantado:** Quitação antecipada de parcelas futuras diretamente no card do cliente.
 - **Pesquisa Inteligente de Clientes:** Autocomplete com busca preditiva por nome, telefone ou endereço sem lentidão.
 - **Prestação de Contas Pessoal:** Resumo diário dos valores arrecadados dividido por modalidade (Dinheiro, Pix e Cartão).
+
+---
+
+## 📐 Regras de Negócio Financeiras
+
+O sistema implementa regras contábeis sólidas para assegurar integridade financeira:
+
+1. **Geração Automática do Plano de Parcelamento:**
+   - O saldo restante (`total - entrada`) é dividido de forma igualitária pelo número de parcelas acordadas.
+   - Suporte a frequências: **Semanal** (a cada 7 dias), **Quinzenal** (a cada 15 dias) e **Mensal** (mesmo dia do mês subsequente).
+   - Centavos residuais decorrentes de dízimas na divisão são automaticamente ajustados na primeira parcela para garantir fechamento de 100% do saldo contratado.
+
+2. **Critério de Atraso e Priorização Diária:**
+   - Parcelas com vencimento anterior à data atual (`vencimento < hoje`) e status diferente de `PAGA` são marcadas como **Em Atraso**.
+   - Clientes inadimplentes recebem prioridade máxima na fila do cobrador com contadores de dias em atraso.
+
+3. **Amortização e Quitação Antecipada:**
+   - Pagamentos parciais abatem prioritariamente o saldo da parcela mais antiga em aberto.
+   - Quitações integrais antecipadas atualizam o status para `PAGA` e registram a data efetiva do recebimento.
+
+4. **Prestação de Contas e Fechamento de Caixa:**
+   - Todo pagamento é associado ao ID do operador autenticado no momento da baixa, possibilitando conciliação física de caixa ao final do dia.
