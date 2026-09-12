@@ -304,3 +304,86 @@ Crediario/
 │
 └── README.md
 ```
+
+---
+
+## 🛠️ Como Executar o Projeto
+
+### Pré-requisitos
+- **Node.js** v18 ou superior
+- **MySQL** 8.0 rodando localmente (ou via Docker)
+- **npm** ou **yarn**
+
+#### 🐳 Execução Rápida do Banco via Docker Compose
+
+Caso queira inicializar o banco de dados em segundos sem instalar o MySQL localmente:
+
+```yaml
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: crediario-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: crediario_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+```
+
+Inicie o container:
+```bash
+docker compose up -d
+```
+
+---
+
+### 1. Clonando o Repositório
+
+```bash
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+cd CrediarioSysten
+```
+
+---
+
+### 2. Configurando o Back-end
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
+
+Configure o arquivo `.env` com suas credenciais:
+```env
+PORT=3300
+DATABASE_URL="mysql://root:root@localhost:3306/crediario_db"
+JWT_SECRET="sua_chave_secreta_super_segura"
+```
+
+Execute as migrações e o seed inicial:
+```bash
+npx prisma migrate dev
+npx tsx src/scripts/seedGerente.ts
+npm run dev
+```
+Servidor disponível em `http://localhost:3300`
+
+---
+
+### 3. Configurando o Front-end
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+Aplicação disponível em `http://localhost:5173`
