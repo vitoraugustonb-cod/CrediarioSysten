@@ -619,3 +619,40 @@ npx tsc --noEmit         # Checagem estática de tipos TypeScript
 ### 🔮 v1.3.0 — Inteligência Financeira
 - [ ] Algoritmo preditivo de score de crédito para análise de risco do pagador.
 - [ ] Roteirização dinâmica de itinerários de cobrança via Google Maps.
+
+---
+
+## 🤝 Contribuição & Boas Práticas
+
+Contribuições e sugestões são bem-vindas! Para manter a organização do repositório:
+
+1. **Padrão de Branches:**
+   - `feat/nome-da-feature` para novas funcionalidades
+   - `fix/descricao-do-bug` para correções de falhas
+   - `docs/melhoria-documentacao` para documentação
+
+2. **Padrão de Commits (Conventional Commits):**
+   - `feat:` novas implementações
+   - `fix:` correção de problemas
+   - `docs:` melhorias na documentação
+   - `refactor:` refatorações sem alteração de comportamento
+   - `chore:` ajustes em dependências e configurações
+
+3. **Checklist Pré-PR:**
+   ```bash
+   cd frontend && npm run build
+   cd ../backend && npx tsc --noEmit
+   ```
+
+<p align="right"><a href="#-crediário-system">⬆ Voltar ao topo</a></p>
+
+---
+
+## 📜 Licença
+
+Desenvolvido para gestão comercial e controle financeiro de crediário.  
+Todos os direitos reservados © 2025 — Vitor Augusto.
+
+<p align="center">
+  <sub>Feito com ❤️ e TypeScript para simplificar a gestão de crediário no Brasil.</sub>
+</p>
