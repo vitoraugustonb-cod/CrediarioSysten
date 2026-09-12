@@ -152,6 +152,7 @@ async function fetchWithAuth(endpoint: string, token: string | null, options: Re
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: 'include',
     headers,
   });
 
