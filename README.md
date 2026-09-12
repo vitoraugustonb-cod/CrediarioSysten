@@ -437,3 +437,86 @@ Todas as requisições protegidas exigem o cabeçalho `Authorization: Bearer <to
 | `404 Not Found` | Recurso não localizado | Parcela ou cliente inexistente |
 | `409 Conflict` | Conflito de estado | Parcela já quitada anteriormente |
 | `500 Server Error` | Erro interno do servidor | Falha de infraestrutura no banco de dados |
+
+---
+
+## 🗃️ Modelo de Dados & Diagrama ERD
+
+Diagrama de Entidade-Relacionamento documentando as entidades centrais e suas cardinalidades no Prisma:
+
+```mermaid
+erDiagram
+    Usuario ||--o{ Venda : "registra"
+    Usuario ||--o{ Auditoria : "executa"
+    Cliente ||--o{ Venda : "realiza"
+    Venda ||--|{ ItemVenda : "contem"
+    Venda ||--|{ Parcela : "gera"
+    Produto ||--o{ ItemVenda : "compoe"
+    Parcela ||--o{ Auditoria : "rastreada_por"
+
+    Usuario {
+        int id PK
+        string nome
+        string email UK
+        string senha
+        Perfil perfil
+        boolean ativo
+        datetime criadoEm
+    }
+
+    Cliente {
+        int id PK
+        string nome
+        string telefone
+        string cpf UK
+        string endereco
+        decimal limite
+        datetime criadoEm
+    }
+
+    Venda {
+        int id PK
+        int clienteId FK
+        int usuarioId FK
+        decimal total
+        decimal entrada
+        FrequenciaParcelamento frequencia
+        datetime criadoEm
+    }
+
+    ItemVenda {
+        int id PK
+        int vendaId FK
+        int produtoId FK
+        int quantidade
+        decimal precoUnitario
+    }
+
+    Produto {
+        int id PK
+        string nome
+        decimal preco
+        string categoria
+        int estoque
+    }
+
+    Parcela {
+        int id PK
+        int vendaId FK
+        int numero
+        decimal valor
+        datetime vencimento
+        StatusParcela status
+        decimal valorPago
+        datetime dataPagamento
+    }
+
+    Auditoria {
+        int id PK
+        int parcelaId FK
+        int usuarioId FK
+        string acao
+        decimal valor
+        datetime criadoEm
+    }
+```
