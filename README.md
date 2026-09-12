@@ -88,3 +88,65 @@ A escolha das tecnologias baseou-se em critérios rigorosos de robustez, perform
 | **Validação de Schemas** | Zod | 3.x | Validação rigorosa de contratos de entrada na API REST com inferência automática de tipos. |
 | **Ícones & UI** | Lucide React | 0.x | Biblioteca moderna e consistente de ícones SVG limpos e otimizados para web e mobile. |
 | **Utilitários de Data** | date-fns | 4.x | Manipulação imutável de datas para cálculo exato de vencimentos semanais, quinzenais e mensais. |
+
+---
+
+## 🏗️ Arquitetura em Camadas
+
+A aplicação adota uma arquitetura em camadas desacopladas com isolamento estrito de responsabilidades:
+
+```mermaid
+flowchart LR
+    subgraph Client["Camada de Apresentação (Frontend SPA)"]
+        UI_Desk["Painel Gerencial Desktop"]
+        UI_Mob["Interface Cobrador Mobile"]
+        Context["AuthContext & API Client"]
+    end
+
+    subgraph Server["Camada de Aplicação (Backend REST API)"]
+        Middlewares["Middlewares (JWT & RBAC)"]
+        Controllers["Controllers de Domínio (Venda, Parcela, etc)"]
+        Prisma["Prisma ORM Client & Transactions"]
+    end
+
+    subgraph Data["Camada de Dados"]
+        MySQL[("Banco Relacional MySQL 8.0")]
+    end
+
+    UI_Desk --> Context
+    UI_Mob --> Context
+    Context -- "HTTP/JSON com Bearer Token" --> Middlewares
+    Middlewares --> Controllers
+    Controllers --> Prisma
+    Prisma <--> MySQL
+```
+
+### 🛡️ Fluxo de Autenticação & Autorização JWT (Sequência)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Operador / Gerente
+    participant Frontend as SPA React (Vite)
+    participant AuthMW as Auth & Role Middleware
+    participant Controller as Auth Controller
+    participant DB as MySQL (via Prisma)
+
+    User->>Frontend: Informa email e senha
+    Frontend->>Controller: POST /api/auth/login
+    Controller->>DB: Busca usuário por email
+    DB-->>Controller: Retorna hash de senha e perfil
+    Controller->>Controller: Valida senha com bcryptjs
+    Controller->>Controller: Gera token JWT assinado (HMAC SHA-256)
+    Controller-->>Frontend: Retorna { token, usuario: { id, nome, email, perfil } }
+    Frontend->>Frontend: Salva token e direciona para visão (Desktop/Mobile)
+    
+    Note over Frontend,AuthMW: Requisições subsequentes protegidas
+    Frontend->>AuthMW: GET /api/relatorios/dashboard [Header: Bearer Token]
+    AuthMW->>AuthMW: Valida assinatura e expiração do JWT
+    AuthMW->>AuthMW: Verifica se perfil == GERENTE (RoleMiddleware)
+    AuthMW->>Controller: Executa controlador de relatórios
+    Controller->>DB: Executa queries analíticas
+    DB-->>Controller: Retorna dados consolidados
+    Controller-->>Frontend: 200 OK com payload JSON
+```
