@@ -13,32 +13,45 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const emailSanitizado = String(email).trim().toLowerCase();
+
     const usuario = await prisma.usuario.findUnique({
-      where: { email }
+      where: { email: emailSanitizado }
     });
 
     if (!usuario) {
+      console.warn(`[SEGURANÇA] Tentativa de login falha para e-mail inexistente: ${emailSanitizado}`);
       res.status(401).json({ erro: 'Credenciais inválidas.' });
       return;
     }
 
     if (!usuario.ativo) {
+      console.warn(`[SEGURANÇA] Tentativa de login para conta inativa: ID ${usuario.id} (${emailSanitizado})`);
       res.status(403).json({ erro: 'Usuário inativo. Entre em contato com o gerente.' });
       return;
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senhaHash);
+    const senhaValida = await bcrypt.compare(String(senha), usuario.senhaHash);
 
     if (!senhaValida) {
+      console.warn(`[SEGURANÇA] Tentativa de login com senha incorreta para: ${emailSanitizado}`);
       res.status(401).json({ erro: 'Credenciais inválidas.' });
       return;
     }
 
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, perfil: usuario.perfil },
+      { id: usuario.id, email: usuario.email, perfil: usuario.perfil, nome: usuario.nome },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
     );
+
+    // Configurar Cookie httpOnly seguro para proteger contra ataques de XSS
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' permite cross-site no deploy com HTTPS na Vercel
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    });
 
     res.json({
       token,
@@ -53,4 +66,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.error('Erro no login:', error);
     res.status(500).json({ erro: 'Erro interno ao realizar login.' });
   }
+};
+
+export const logout = (req: Request, res: Response): void => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  });
+  res.json({ status: 'ok', message: 'Logout realizado com sucesso.' });
 };
