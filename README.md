@@ -387,3 +387,53 @@ npm install
 npm run dev
 ```
 Aplicação disponível em `http://localhost:5173`
+
+---
+
+## 🔐 Contas de Acesso Padrão
+
+Após executar o script de seed, utilize as credenciais padrão:
+
+| Perfil | E-mail | Senha |
+| :--- | :--- | :--- |
+| **Gerente** | `gerente@crediario.com` | `gerente123` |
+
+> Novos vendedores/cobradores podem ser cadastrados diretamente pelo painel administrativo do gerente.
+
+---
+
+## 🌐 Referência da API REST
+
+Todas as requisições protegidas exigem o cabeçalho `Authorization: Bearer <token_jwt>`.
+
+| Módulo | Método | Endpoint | Perfil | Descrição |
+| :--- | :---: | :--- | :---: | :--- |
+| **Auth** | `POST` | `/api/auth/login` | Público | Autentica usuário e retorna JWT de sessão |
+| **Usuários** | `GET` | `/api/users` | Gerente | Lista funcionários com contadores e status |
+| **Usuários** | `POST` | `/api/users` | Gerente | Cadastra novo funcionário |
+| **Usuários** | `PATCH` | `/api/users/:id/status` | Gerente | Altera status ativo/inativo |
+| **Clientes** | `GET` | `/api/clientes` | Todos | Lista clientes com busca preditiva |
+| **Clientes** | `POST` | `/api/clientes` | Todos | Cadastra um novo cliente |
+| **Clientes** | `GET` | `/api/clientes/:id` | Todos | Ficha detalhada, carnês e endereço |
+| **Produtos** | `GET` | `/api/produtos` | Todos | Catálogo com preços e estoque |
+| **Produtos** | `POST` | `/api/produtos` | Gerente | Cadastra novos produtos |
+| **Vendas** | `POST` | `/api/vendas` | Todos | Registra venda e gera parcelas |
+| **Vendas** | `GET` | `/api/vendas/:id` | Todos | Detalhes da venda e parcelamento |
+| **Parcelas** | `GET` | `/api/parcelas/cobrancas` | Cobrador | Lista cobranças do dia e atrasadas |
+| **Parcelas** | `POST` | `/api/parcelas/:id/pagar` | Cobrador | Baixa parcela com confirmação |
+| **Relatórios** | `GET` | `/api/relatorios/dashboard` | Gerente | KPIs macro, volume e inadimplência |
+| **Relatórios** | `GET` | `/api/relatorios/mensal` | Gerente | Desempenho e comissões |
+| **Prestação** | `GET` | `/api/prestacao-contas/resumo` | Todos | Prestação diária de caixa do operador |
+
+### 🚥 Códigos de Resposta HTTP Padronizados
+
+| Código | Significado | Exemplo de Aplicação |
+| :---: | :--- | :--- |
+| `200 OK` | Sucesso na requisição | Consulta de saldo ou baixa de parcela |
+| `201 Created` | Recurso criado com êxito | Nova venda registrada ou cliente cadastrado |
+| `400 Bad Request` | Dados inválidos no corpo da requisição | Campo obrigatório ausente ou valor zerado |
+| `401 Unauthorized` | Falha de autenticação | Token JWT ausente ou expirado |
+| `403 Forbidden` | Permissão insuficiente | Cobrador tentando acessar rota gerencial |
+| `404 Not Found` | Recurso não localizado | Parcela ou cliente inexistente |
+| `409 Conflict` | Conflito de estado | Parcela já quitada anteriormente |
+| `500 Server Error` | Erro interno do servidor | Falha de infraestrutura no banco de dados |
