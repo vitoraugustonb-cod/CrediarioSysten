@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crediario_backend
+    restart: unless-stopped
+    ports:
+      - "3300:3300"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=3300
+      - NODE_ENV=production
+    networks:
+      - crediario_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crediario_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - crediario_network
+
+networks:
+  crediario_network:
+    driver: bridge
