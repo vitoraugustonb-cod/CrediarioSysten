@@ -68,7 +68,25 @@ O **Crediário System** é uma solução full-stack moderna desenvolvida para di
 ### 🟢 A Solução Digital
 O sistema integra uma API REST em **Node.js/Express (preparada para Serverless e Docker)** a uma interface **React 19 SPA com Vite**, banco **PostgreSQL na nuvem (Supabase)** e deploy contínuo na **Vercel**.
 
+### 🎯 Para Quem é Este Sistema?
+
+| Perfil | Contexto de Uso |
+| :--- | :--- |
+| **Lojistas e Comerciantes** | Controle centralizado do crediário sem depender de planilhas ou cadernetas manuais |
+| **Equipes de Cobrança** | Interface mobile otimizada para registrar pagamentos em campo, sem precisar de laptop |
+| **Gerentes Financeiros** | Dashboard em tempo real com inadimplência, faturamento e projeções de recebimento |
+| **Desenvolvedores** | Base de código moderna (TypeScript fullstack) e arquitetura bem documentada como referência |
+
+### ⚡ Diferenciais Técnicos
+
+- **Dual-Platform nativo:** Uma única SPA detecta se o usuário está no mobile (cobrador) ou desktop (gerente) e renderiza interfaces completamente diferentes — sem apps separados.
+- **Segurança financeira de ponta:** Transações atômicas + concorrência segura impedem que dois cobradores registrem a mesma parcela simultaneamente.
+- **Pronto para escalar:** Arquitetura desacoplada suporta tanto deploy Serverless (Vercel) quanto containerização Docker em VPS sem mudança de código.
+- **Auditoria completa:** Toda alteração em parcelas gera um registro de auditoria com usuário, ação e timestamp.
+
 ---
+
+
 
 ## 💻 Stack Tecnológica & Justificativas
 
