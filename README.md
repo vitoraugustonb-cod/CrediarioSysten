@@ -448,6 +448,41 @@ Parcela ──────────────┤
 
 ---
 
+## ⚙️ Variáveis de Ambiente
+
+### Backend (`backend/.env`)
+
+| Variável | Obrigatória | Descrição | Exemplo |
+| :--- | :---: | :--- | :--- |
+| `PORT` | ✅ | Porta do servidor HTTP local | `3300` |
+| `DATABASE_URL` | ✅ | Connection string do Supabase via **Transaction Pooler** (porta 6543). Obrigatória em produção Serverless. | `postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true` |
+| `DIRECT_URL` | ✅ | Connection string **direta** do Supabase (porta 5432). Usada exclusivamente pelo Prisma para migrações. | `postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres` |
+| `JWT_SECRET` | ✅ | Chave secreta de 256 bits para assinatura e verificação dos tokens JWT. | `uma_string_longa_e_aleatoria_aqui` |
+| `NODE_ENV` | ⚠️ | Define o ambiente de execução. Afeta logs, CORS e modo de erro. | `development` \| `production` |
+| `FRONTEND_URL` | ⚠️ | URL da origem do frontend (para CORS com credenciais). | `http://localhost:5173` |
+
+> **Dica de Segurança:** Nunca comite o arquivo `.env` no repositório. Ele já está listado no `.gitignore`. Use um gerador de chaves como `openssl rand -base64 32` para o `JWT_SECRET`.
+
+### Frontend (`frontend/.env`)
+
+| Variável | Obrigatória | Descrição | Exemplo |
+| :--- | :---: | :--- | :--- |
+| `VITE_API_URL` | ✅ | URL base da API REST consumida pelo frontend. | `http://localhost:3300` |
+
+### Vercel (Painel de Variáveis)
+
+Configure as seguintes variáveis no painel da Vercel em **Settings → Environment Variables**:
+
+| Variável | Ambiente | Descrição |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Production | Connection string do Pooler do Supabase |
+| `DIRECT_URL` | Production | Connection string direta (para migrações de deploy) |
+| `JWT_SECRET` | Production | Chave JWT de produção (diferente do local) |
+| `NODE_ENV` | Production | Definir como `production` |
+
+---
+
 ## 📜 Licença
+
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
