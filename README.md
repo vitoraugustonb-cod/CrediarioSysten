@@ -393,7 +393,19 @@ npm run dev:frontend
 - `PATCH /parcelas/:id/ajuste` - Ajuste de valor (Apenas Gerente)
 - `PATCH /parcelas/:id/data-vencimento` - Prorrogação de vencimento
 
+### Produtos
+- `POST /produtos` - Cadastro de produto no catálogo (Apenas Gerente)
+- `GET /produtos` - Listagem do catálogo com filtro por categoria
+- `GET /produtos/:id` - Detalhes do produto
+- `PATCH /produtos/:id` - Atualização de nome, preço ou categoria (Apenas Gerente)
+
+### Usuários
+- `GET /usuarios` - Listagem de operadores cadastrados (Apenas Gerente)
+- `POST /usuarios` - Criação de novo operador (Apenas Gerente)
+- `PATCH /usuarios/:id/status` - Ativação/desativação instantânea de conta (Apenas Gerente)
+
 ---
+
 
 ## 🗃️ Modelo de Dados (Prisma Schema)
 
