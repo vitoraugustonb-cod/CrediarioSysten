@@ -232,6 +232,44 @@ main ─────────────────────● (Deploy 
 
 ---
 
+## 📐 Regras de Negócio Financeiras
+
+O sistema implementa lógica financeira robusta para garantir consistência das operações de crediário:
+
+### 🔢 Cálculo de Parcelas
+
+- O **valor de cada parcela** é calculado como: `(valorTotal - valorEntrada) / numParcelas`
+- O **valor de entrada** é registrado como um pagamento separado no momento da venda
+- As parcelas são geradas com **vencimentos mensais** a partir da data da venda
+- Parcelas com **pagamento parcial** ficam com status `PARCIAL` e o saldo restante é registrado
+
+### 💰 Lógica de Pagamento (Amortização)
+
+Ao registrar um pagamento, o sistema aplica a seguinte lógica em ordem de prioridade:
+
+1. **Quitação completa:** Se `valorPago >= valorParcela`, a parcela é marcada como `PAGA`
+2. **Pagamento parcial:** Se `0 < valorPago < valorParcela`, status muda para `PARCIAL`
+3. **Excedente automático:** Se `valorPago > valorParcela`, o excedente é aplicado na próxima parcela em aberto da mesma venda (amortização em cascata)
+4. **Concorrência segura:** A transação é bloqueada via `prisma.$transaction` para evitar quitações duplicadas simultâneas
+
+### 📅 Atualização Automática de Status
+
+Um job de atualização verifica parcelas `PENDENTE` e `PARCIAL` com `dataVencimento < hoje` e as marca automaticamente como `ATRASADA`, garantindo que o dashboard de inadimplência reflita a realidade em tempo real.
+
+### 🧾 Saldo Devedor do Cliente
+
+O **saldo devedor consolidado** de um cliente é calculado como:
+```
+Saldo = Σ(valor de todas as parcelas PENDENTE, ATRASADA e PARCIAL) - Σ(valorPago das PARCIAL)
+```
+
+### 🔒 Regra de Dupla Digitação (Anti-Erro Mobile)
+
+Na interface mobile, o cobrador precisa **confirmar o valor digitado duas vezes** antes de registrar um pagamento — prevenindo lançamentos errados por toque acidental em campo.
+
+
+
+
 ## 🛠️ Como Executar Localmente
 
 ### 1. Clonar o repositório
