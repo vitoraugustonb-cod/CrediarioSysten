@@ -523,7 +523,34 @@ Configure as seguintes variáveis no painel da Vercel em **Settings → Environm
 
 ---
 
+## ⚡ Performance e Otimizações
+
+O sistema foi projetado com foco em eficiência tanto no backend quanto no frontend:
+
+### Backend
+
+| Otimização | Implementação | Impacto |
+| :--- | :--- | :--- |
+| **Connection Pooling** | PgBouncer via Supabase (porta 6543) | Elimina gargalos de conexão em ambiente Serverless com múltiplas invocações simultâneas |
+| **Singleton Prisma** | Instância única via `lib/prisma.ts` | Reutilização da pool de conexões entre requisições — evita overhead de reconexão |
+| **Serverless Cold Start** | Build compacto separado (`api/index.ts`) | Inicialização rápida das Serverless Functions na Vercel |
+| **Índices no Banco** | `@unique` em emails, `@id` com `autoincrement` | Consultas rápidas em lookups frequentes de usuários e clientes |
+| **Queries Seletivas** | `select: {}` no Prisma | Retorna apenas os campos necessários — reduz payload e processamento |
+
+### Frontend
+
+| Otimização | Implementação | Impacto |
+| :--- | :--- | :--- |
+| **Code Splitting** | Vite + Rollup automático | Bundle separado por rota — carrega apenas o código necessário |
+| **HMR (Dev)** | Vite Hot Module Replacement | Atualização instantânea em desenvolvimento sem recarregar a página |
+| **Build Otimizado** | `vite build` com tree-shaking | Remoção de código morto e minificação do bundle de produção |
+| **Edge CDN** | Vercel Edge Network | Assets estáticos distribuídos globalmente com latência mínima |
+| **Favicon SVG** | Ícone vetorial escalável | Carregamento ultra-rápido e qualidade perfeita em qualquer resolução |
+
+---
+
 ## 🧪 Testes e Qualidade de Código
+
 
 ### Estratégia de Testes
 
