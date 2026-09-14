@@ -610,7 +610,56 @@ Funcionalidades planejadas para as próximas versões do sistema:
 
 ---
 
+## 🤝 Contribuição
+
+Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o fluxo abaixo:
+
+### Como Contribuir
+
+1. **Fork** o repositório no GitHub
+2. **Clone** seu fork localmente:
+   ```bash
+   git clone https://github.com/SEU_USUARIO/CrediarioSysten.git
+   ```
+3. **Crie uma branch** a partir de `develop`:
+   ```bash
+   git checkout develop
+   git checkout -b feature/minha-nova-funcionalidade
+   ```
+4. **Faça suas alterações** seguindo os padrões do projeto
+5. **Commit** suas mudanças com mensagens descritivas:
+   ```bash
+   git commit -m "feat: adiciona notificação push para parcelas vencidas"
+   ```
+6. **Push** para seu fork:
+   ```bash
+   git push origin feature/minha-nova-funcionalidade
+   ```
+7. **Abra um Pull Request** apontando de sua branch para `develop` neste repositório
+
+### Convenção de Commits
+
+O projeto usa [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Prefixo | Quando Usar |
+| :--- | :--- |
+| `feat:` | Nova funcionalidade |
+| `fix:` | Correção de bug |
+| `docs:` | Alteração em documentação |
+| `refactor:` | Refatoração sem mudança de comportamento |
+| `chore:` | Tarefas de manutenção (configs, deps) |
+
+### Reportar Bugs
+
+Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) descrevendo:
+- **Comportamento esperado** vs **comportamento atual**
+- **Passos para reproduzir** o problema
+- **Ambiente** (SO, browser, versão do Node.js)
+
+---
+
 ## 📜 Licença
+
 
 
 
