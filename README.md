@@ -59,6 +59,10 @@
 - [🌐 Referência da API REST](#-referência-da-api-rest)
 - [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
+- [⚡ Performance e Otimizações](#-performance-e-otimizações)
+- [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
+- [🗺️ Roadmap](#️-roadmap)
+- [🤝 Contribuição](#-contribuição)
 - [📜 Licença](#-licença)
 
 ---
