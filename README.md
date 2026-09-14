@@ -505,7 +505,44 @@ Configure as seguintes variáveis no painel da Vercel em **Settings → Environm
 
 ---
 
+## 🧪 Testes e Qualidade de Código
+
+### Estratégia de Testes
+
+O projeto adota uma abordagem de qualidade em camadas, priorizando confiabilidade nas operações financeiras:
+
+| Camada | Ferramentas | Cobertura Alvo |
+| :--- | :--- | :--- |
+| **Validação de Contratos** | Zod Schemas | 100% dos endpoints |
+| **Tipagem Estática** | TypeScript (strict) | 100% do codebase |
+| **Testes de Integração** | Jest + Supertest (planejado) | Controllers críticos |
+| **Testes E2E** | Playwright (planejado) | Fluxos principais |
+
+### Qualidade de Código
+
+O projeto aplica boas práticas de engenharia de software para garantir manutenibilidade:
+
+- **TypeScript Strict Mode:** Ativado no `tsconfig.json` — sem `any` implícito, sem variáveis não tipadas.
+- **Validação em Whitelist (Zod):** Todo dado externo é validado e transformado antes de tocar o banco.
+- **Tratamento de Erros Centralizado:** Middleware global de erros com mensagens genéricas em produção para evitar vazamento de informações sensíveis.
+- **Transações Atômicas:** Operações críticas de múltiplos passos usam `prisma.$transaction` — nunca deixam o banco em estado inconsistente.
+- **Singleton do Prisma:** Previne o esgotamento de conexões em ambiente Serverless (apenas uma instância do `PrismaClient` por process).
+- **Git Flow:** Código só chega à `main` via Pull Request revisado — sem commits diretos na branch de produção.
+
+### Como Rodar Verificações
+
+```bash
+# Verificação de tipos TypeScript
+npm --prefix backend run tsc -- --noEmit
+
+# Verificação de tipos TypeScript (Frontend)
+npm --prefix frontend run tsc -- --noEmit
+```
+
+---
+
 ## 🗺️ Roadmap
+
 
 Funcionalidades planejadas para as próximas versões do sistema:
 
