@@ -306,6 +306,59 @@ npm run dev:frontend
 
 ---
 
+## 🗃️ Modelo de Dados (Prisma Schema)
+
+O banco de dados é modelado com **Prisma ORM** e possui as seguintes entidades principais:
+
+### Entidades e Relacionamentos
+
+```
+Usuario ──────────────┐
+  ├── id, nome, email │  (GERENTE | VENDEDOR_COBRADOR)
+  ├── perfil (enum)   │
+  └── ativo (bool)    │
+                      │ 1:N
+Cliente ──────────────┤
+  ├── id, nome        │
+  ├── telefone        │
+  └── referencias     │
+                      │
+Produto ──────────────┤
+  ├── id, nome        │
+  ├── preco (Decimal) │
+  └── categoria (enum)│  (MOVEIS | VARIEDADES)
+                      │
+Venda ────────────────┤
+  ├── clienteId       │
+  ├── vendedorId      │
+  ├── valorTotal      │
+  ├── valorEntrada    │
+  ├── numParcelas     │
+  └── tipoVenda (enum)│
+        │
+        ├── ItemVenda[] (produtos da venda)
+        ├── Parcela[]  (carnê de cobrança)
+        └── Pagamento[] (histórico financeiro)
+
+Parcela ──────────────┤
+  ├── numero, valor   │
+  ├── valorPago       │
+  ├── dataVencimento  │
+  └── status (enum)   │  (PENDENTE | PAGA | ATRASADA | PARCIAL)
+        └── Auditoria[] (rastreio de alterações)
+```
+
+### Enums do Schema
+
+| Enum | Valores |
+| :--- | :--- |
+| `PerfilUsuario` | `GERENTE`, `VENDEDOR_COBRADOR` |
+| `StatusParcela` | `PENDENTE`, `PAGA`, `ATRASADA`, `PARCIAL` |
+| `CategoriaProduto` | `MOVEIS`, `VARIEDADES` |
+| `TipoVenda` | `MOVEIS`, `VARIEDADES` |
+
+---
+
 ## 📜 Licença
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
