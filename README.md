@@ -31,6 +31,14 @@
   <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença">
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?logo=github&logoColor=white" alt="PRs Welcome">
+  <img src="https://img.shields.io/github/last-commit/vitoraugustonb-cod/CrediarioSysten/develop?label=Último%20Commit&logo=git&logoColor=white&color=7c3aed" alt="Last Commit">
+  <img src="https://img.shields.io/github/languages/top/vitoraugustonb-cod/CrediarioSysten?label=Linguagem%20Principal&logo=typescript&logoColor=white&color=3178C6" alt="Top Language">
+  <img src="https://img.shields.io/github/repo-size/vitoraugustonb-cod/CrediarioSysten?label=Tamanho%20do%20Repo&color=0ea5e9" alt="Repo Size">
+</p>
+
+
 ---
 
 ## 📑 Sumário
@@ -51,6 +59,10 @@
 - [🌐 Referência da API REST](#-referência-da-api-rest)
 - [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
+- [⚡ Performance e Otimizações](#-performance-e-otimizações)
+- [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
+- [🗺️ Roadmap](#️-roadmap)
+- [🤝 Contribuição](#-contribuição)
 - [📜 Licença](#-licença)
 
 ---
@@ -68,7 +80,25 @@ O **Crediário System** é uma solução full-stack moderna desenvolvida para di
 ### 🟢 A Solução Digital
 O sistema integra uma API REST em **Node.js/Express (preparada para Serverless e Docker)** a uma interface **React 19 SPA com Vite**, banco **PostgreSQL na nuvem (Supabase)** e deploy contínuo na **Vercel**.
 
+### 🎯 Para Quem é Este Sistema?
+
+| Perfil | Contexto de Uso |
+| :--- | :--- |
+| **Lojistas e Comerciantes** | Controle centralizado do crediário sem depender de planilhas ou cadernetas manuais |
+| **Equipes de Cobrança** | Interface mobile otimizada para registrar pagamentos em campo, sem precisar de laptop |
+| **Gerentes Financeiros** | Dashboard em tempo real com inadimplência, faturamento e projeções de recebimento |
+| **Desenvolvedores** | Base de código moderna (TypeScript fullstack) e arquitetura bem documentada como referência |
+
+### ⚡ Diferenciais Técnicos
+
+- **Dual-Platform nativo:** Uma única SPA detecta se o usuário está no mobile (cobrador) ou desktop (gerente) e renderiza interfaces completamente diferentes — sem apps separados.
+- **Segurança financeira de ponta:** Transações atômicas + concorrência segura impedem que dois cobradores registrem a mesma parcela simultaneamente.
+- **Pronto para escalar:** Arquitetura desacoplada suporta tanto deploy Serverless (Vercel) quanto containerização Docker em VPS sem mudança de código.
+- **Auditoria completa:** Toda alteração em parcelas gera um registro de auditoria com usuário, ação e timestamp.
+
 ---
+
+
 
 ## 💻 Stack Tecnológica & Justificativas
 
@@ -232,7 +262,96 @@ main ─────────────────────● (Deploy 
 
 ---
 
+## 📐 Regras de Negócio Financeiras
+
+O sistema implementa lógica financeira robusta para garantir consistência das operações de crediário:
+
+### 🔢 Cálculo de Parcelas
+
+- O **valor de cada parcela** é calculado como: `(valorTotal - valorEntrada) / numParcelas`
+- O **valor de entrada** é registrado como um pagamento separado no momento da venda
+- As parcelas são geradas com **vencimentos mensais** a partir da data da venda
+- Parcelas com **pagamento parcial** ficam com status `PARCIAL` e o saldo restante é registrado
+
+### 💰 Lógica de Pagamento (Amortização)
+
+Ao registrar um pagamento, o sistema aplica a seguinte lógica em ordem de prioridade:
+
+1. **Quitação completa:** Se `valorPago >= valorParcela`, a parcela é marcada como `PAGA`
+2. **Pagamento parcial:** Se `0 < valorPago < valorParcela`, status muda para `PARCIAL`
+3. **Excedente automático:** Se `valorPago > valorParcela`, o excedente é aplicado na próxima parcela em aberto da mesma venda (amortização em cascata)
+4. **Concorrência segura:** A transação é bloqueada via `prisma.$transaction` para evitar quitações duplicadas simultâneas
+
+### 📅 Atualização Automática de Status
+
+Um job de atualização verifica parcelas `PENDENTE` e `PARCIAL` com `dataVencimento < hoje` e as marca automaticamente como `ATRASADA`, garantindo que o dashboard de inadimplência reflita a realidade em tempo real.
+
+### 🧾 Saldo Devedor do Cliente
+
+O **saldo devedor consolidado** de um cliente é calculado como:
+```
+Saldo = Σ(valor de todas as parcelas PENDENTE, ATRASADA e PARCIAL) - Σ(valorPago das PARCIAL)
+```
+
+### 🔒 Regra de Dupla Digitação (Anti-Erro Mobile)
+
+Na interface mobile, o cobrador precisa **confirmar o valor digitado duas vezes** antes de registrar um pagamento — prevenindo lançamentos errados por toque acidental em campo.
+
+
+
+
+## 🗂️ Estrutura do Projeto
+
+```
+CrediarioSysten/
+├── 📁 backend/                     # API REST (Node.js + Express + TypeScript)
+│   ├── 📁 prisma/
+│   │   └── schema.prisma           # Definição do banco de dados
+│   └── 📁 src/
+│       ├── app.ts                  # Configuração do Express (middlewares, rotas)
+│       ├── server.ts               # Servidor HTTP (modo local/Docker)
+│       ├── 📁 controllers/         # Lógica de negócio por domínio
+│       │   ├── authController.ts
+│       │   ├── clienteController.ts
+│       │   ├── vendaController.ts
+│       │   ├── parcelaController.ts
+│       │   ├── pagamentoController.ts
+│       │   ├── produtoController.ts
+│       │   ├── userController.ts
+│       │   ├── relatorioController.ts
+│       │   └── prestacaoContasController.ts
+│       ├── 📁 routes/              # Mapeamento de endpoints HTTP
+│       ├── 📁 middlewares/         # Auth, Role e tratamento de erros
+│       ├── 📁 validators/          # Schemas Zod de validação
+│       ├── 📁 lib/                 # Cliente Prisma singleton
+│       ├── 📁 config/              # Variáveis de ambiente e configurações
+│       └── 📁 scripts/             # Scripts de migração e backfill
+│
+├── 📁 frontend/                    # SPA React 19 + Vite + TypeScript
+│   └── 📁 src/
+│       ├── App.tsx                 # Roteamento principal e detecção de plataforma
+│       ├── 📁 components/
+│       │   ├── 📁 desktop/         # Painel gerencial (Dashboard, Relatórios, etc.)
+│       │   ├── 📁 mobile/          # Interface do cobrador de rua
+│       │   ├── 📁 auth/            # Tela de login
+│       │   ├── 📁 common/          # Componentes compartilhados
+│       │   └── 📁 layout/          # Estrutura de layout
+│       ├── 📁 services/            # Funções de chamada à API (fetch)
+│       ├── 📁 hooks/               # Custom hooks React
+│       ├── 📁 context/             # Context API (autenticação global)
+│       └── 📁 types/               # Tipos TypeScript compartilhados
+│
+├── 📁 api/                         # Entry point Serverless (Vercel)
+├── 📁 scripts/                     # Scripts auxiliares de infraestrutura
+├── docker-compose.yml              # Orquestração dos containers
+├── vercel.json                     # Configuração de rotas da Vercel
+└── package.json                    # Scripts raiz (dev, build, prisma)
+```
+
+---
+
 ## 🛠️ Como Executar Localmente
+
 
 ### 1. Clonar o repositório
 ```bash
@@ -304,8 +423,256 @@ npm run dev:frontend
 - `PATCH /parcelas/:id/ajuste` - Ajuste de valor (Apenas Gerente)
 - `PATCH /parcelas/:id/data-vencimento` - Prorrogação de vencimento
 
+### Produtos
+- `POST /produtos` - Cadastro de produto no catálogo (Apenas Gerente)
+- `GET /produtos` - Listagem do catálogo com filtro por categoria
+- `GET /produtos/:id` - Detalhes do produto
+- `PATCH /produtos/:id` - Atualização de nome, preço ou categoria (Apenas Gerente)
+
+### Usuários
+- `GET /usuarios` - Listagem de operadores cadastrados (Apenas Gerente)
+- `POST /usuarios` - Criação de novo operador (Apenas Gerente)
+- `PATCH /usuarios/:id/status` - Ativação/desativação instantânea de conta (Apenas Gerente)
+
+### Dashboard & Relatórios
+- `GET /relatorios/dashboard` - KPIs financeiros em tempo real (faturamento, inadimplência, projeções)
+- `GET /relatorios/mensal` - Relatório consolidado por mês com totais e médias
+- `GET /pagamentos` - Histórico completo de pagamentos recebidos
+
+### Prestação de Contas
+- `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
+- `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
+
+---
+
+
+
+
+## 🗃️ Modelo de Dados (Prisma Schema)
+
+O banco de dados é modelado com **Prisma ORM** e possui as seguintes entidades principais:
+
+### Entidades e Relacionamentos
+
+```
+Usuario ──────────────┐
+  ├── id, nome, email │  (GERENTE | VENDEDOR_COBRADOR)
+  ├── perfil (enum)   │
+  └── ativo (bool)    │
+                      │ 1:N
+Cliente ──────────────┤
+  ├── id, nome        │
+  ├── telefone        │
+  └── referencias     │
+                      │
+Produto ──────────────┤
+  ├── id, nome        │
+  ├── preco (Decimal) │
+  └── categoria (enum)│  (MOVEIS | VARIEDADES)
+                      │
+Venda ────────────────┤
+  ├── clienteId       │
+  ├── vendedorId      │
+  ├── valorTotal      │
+  ├── valorEntrada    │
+  ├── numParcelas     │
+  └── tipoVenda (enum)│
+        │
+        ├── ItemVenda[] (produtos da venda)
+        ├── Parcela[]  (carnê de cobrança)
+        └── Pagamento[] (histórico financeiro)
+
+Parcela ──────────────┤
+  ├── numero, valor   │
+  ├── valorPago       │
+  ├── dataVencimento  │
+  └── status (enum)   │  (PENDENTE | PAGA | ATRASADA | PARCIAL)
+        └── Auditoria[] (rastreio de alterações)
+```
+
+### Enums do Schema
+
+| Enum | Valores |
+| :--- | :--- |
+| `PerfilUsuario` | `GERENTE`, `VENDEDOR_COBRADOR` |
+| `StatusParcela` | `PENDENTE`, `PAGA`, `ATRASADA`, `PARCIAL` |
+| `CategoriaProduto` | `MOVEIS`, `VARIEDADES` |
+| `TipoVenda` | `MOVEIS`, `VARIEDADES` |
+
+---
+
+## ⚙️ Variáveis de Ambiente
+
+### Backend (`backend/.env`)
+
+| Variável | Obrigatória | Descrição | Exemplo |
+| :--- | :---: | :--- | :--- |
+| `PORT` | ✅ | Porta do servidor HTTP local | `3300` |
+| `DATABASE_URL` | ✅ | Connection string do Supabase via **Transaction Pooler** (porta 6543). Obrigatória em produção Serverless. | `postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true` |
+| `DIRECT_URL` | ✅ | Connection string **direta** do Supabase (porta 5432). Usada exclusivamente pelo Prisma para migrações. | `postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres` |
+| `JWT_SECRET` | ✅ | Chave secreta de 256 bits para assinatura e verificação dos tokens JWT. | `uma_string_longa_e_aleatoria_aqui` |
+| `NODE_ENV` | ⚠️ | Define o ambiente de execução. Afeta logs, CORS e modo de erro. | `development` \| `production` |
+| `FRONTEND_URL` | ⚠️ | URL da origem do frontend (para CORS com credenciais). | `http://localhost:5173` |
+
+> **Dica de Segurança:** Nunca comite o arquivo `.env` no repositório. Ele já está listado no `.gitignore`. Use um gerador de chaves como `openssl rand -base64 32` para o `JWT_SECRET`.
+
+### Frontend (`frontend/.env`)
+
+| Variável | Obrigatória | Descrição | Exemplo |
+| :--- | :---: | :--- | :--- |
+| `VITE_API_URL` | ✅ | URL base da API REST consumida pelo frontend. | `http://localhost:3300` |
+
+### Vercel (Painel de Variáveis)
+
+Configure as seguintes variáveis no painel da Vercel em **Settings → Environment Variables**:
+
+| Variável | Ambiente | Descrição |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Production | Connection string do Pooler do Supabase |
+| `DIRECT_URL` | Production | Connection string direta (para migrações de deploy) |
+| `JWT_SECRET` | Production | Chave JWT de produção (diferente do local) |
+| `NODE_ENV` | Production | Definir como `production` |
+
+---
+
+## ⚡ Performance e Otimizações
+
+O sistema foi projetado com foco em eficiência tanto no backend quanto no frontend:
+
+### Backend
+
+| Otimização | Implementação | Impacto |
+| :--- | :--- | :--- |
+| **Connection Pooling** | PgBouncer via Supabase (porta 6543) | Elimina gargalos de conexão em ambiente Serverless com múltiplas invocações simultâneas |
+| **Singleton Prisma** | Instância única via `lib/prisma.ts` | Reutilização da pool de conexões entre requisições — evita overhead de reconexão |
+| **Serverless Cold Start** | Build compacto separado (`api/index.ts`) | Inicialização rápida das Serverless Functions na Vercel |
+| **Índices no Banco** | `@unique` em emails, `@id` com `autoincrement` | Consultas rápidas em lookups frequentes de usuários e clientes |
+| **Queries Seletivas** | `select: {}` no Prisma | Retorna apenas os campos necessários — reduz payload e processamento |
+
+### Frontend
+
+| Otimização | Implementação | Impacto |
+| :--- | :--- | :--- |
+| **Code Splitting** | Vite + Rollup automático | Bundle separado por rota — carrega apenas o código necessário |
+| **HMR (Dev)** | Vite Hot Module Replacement | Atualização instantânea em desenvolvimento sem recarregar a página |
+| **Build Otimizado** | `vite build` com tree-shaking | Remoção de código morto e minificação do bundle de produção |
+| **Edge CDN** | Vercel Edge Network | Assets estáticos distribuídos globalmente com latência mínima |
+| **Favicon SVG** | Ícone vetorial escalável | Carregamento ultra-rápido e qualidade perfeita em qualquer resolução |
+
+---
+
+## 🧪 Testes e Qualidade de Código
+
+
+### Estratégia de Testes
+
+O projeto adota uma abordagem de qualidade em camadas, priorizando confiabilidade nas operações financeiras:
+
+| Camada | Ferramentas | Cobertura Alvo |
+| :--- | :--- | :--- |
+| **Validação de Contratos** | Zod Schemas | 100% dos endpoints |
+| **Tipagem Estática** | TypeScript (strict) | 100% do codebase |
+| **Testes de Integração** | Jest + Supertest (planejado) | Controllers críticos |
+| **Testes E2E** | Playwright (planejado) | Fluxos principais |
+
+### Qualidade de Código
+
+O projeto aplica boas práticas de engenharia de software para garantir manutenibilidade:
+
+- **TypeScript Strict Mode:** Ativado no `tsconfig.json` — sem `any` implícito, sem variáveis não tipadas.
+- **Validação em Whitelist (Zod):** Todo dado externo é validado e transformado antes de tocar o banco.
+- **Tratamento de Erros Centralizado:** Middleware global de erros com mensagens genéricas em produção para evitar vazamento de informações sensíveis.
+- **Transações Atômicas:** Operações críticas de múltiplos passos usam `prisma.$transaction` — nunca deixam o banco em estado inconsistente.
+- **Singleton do Prisma:** Previne o esgotamento de conexões em ambiente Serverless (apenas uma instância do `PrismaClient` por process).
+- **Git Flow:** Código só chega à `main` via Pull Request revisado — sem commits diretos na branch de produção.
+
+### Como Rodar Verificações
+
+```bash
+# Verificação de tipos TypeScript
+npm --prefix backend run tsc -- --noEmit
+
+# Verificação de tipos TypeScript (Frontend)
+npm --prefix frontend run tsc -- --noEmit
+```
+
+---
+
+## 🗺️ Roadmap
+
+
+Funcionalidades planejadas para as próximas versões do sistema:
+
+### 🚀 Em Desenvolvimento
+- [ ] **Notificações Push (PWA):** Alertas automáticos para o cobrador sobre parcelas vencidas no dia
+- [ ] **Filtros Avançados no Dashboard:** Segmentação de KPIs por cobrador, período e categoria de produto
+- [ ] **Exportação de Relatórios (PDF/Excel):** Geração de relatórios financeiros mensais para download
+
+### 📋 Planejado (Próximas Sprints)
+- [ ] **Modo Offline (Service Worker):** Cache local de cobranças do dia para uso sem internet em campo
+- [ ] **Histórico de Auditoria Detalhado:** Log completo de todas as alterações por usuário com visualização no painel
+- [ ] **Renegociação de Dívidas:** Fluxo guiado para reestruturação de carnês com novos prazos e condições
+- [ ] **Foto de Comprovante:** Upload de imagem do comprovante no ato do pagamento via câmera mobile
+- [ ] **Integração PIX:** Geração de QR Code Pix no momento da cobrança
+
+### 💡 Ideias Futuras
+- [ ] **App Nativo (React Native / Expo):** Versão mobile nativa para iOS e Android
+- [ ] **Multi-empresa (SaaS):** Suporte a múltiplos comércios na mesma instância com isolamento de dados
+- [ ] **Análise de Crédito:** Score de inadimplência automático por cliente com base no histórico
+
+---
+
+## 🤝 Contribuição
+
+Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o fluxo abaixo:
+
+### Como Contribuir
+
+1. **Fork** o repositório no GitHub
+2. **Clone** seu fork localmente:
+   ```bash
+   git clone https://github.com/SEU_USUARIO/CrediarioSysten.git
+   ```
+3. **Crie uma branch** a partir de `develop`:
+   ```bash
+   git checkout develop
+   git checkout -b feature/minha-nova-funcionalidade
+   ```
+4. **Faça suas alterações** seguindo os padrões do projeto
+5. **Commit** suas mudanças com mensagens descritivas:
+   ```bash
+   git commit -m "feat: adiciona notificação push para parcelas vencidas"
+   ```
+6. **Push** para seu fork:
+   ```bash
+   git push origin feature/minha-nova-funcionalidade
+   ```
+7. **Abra um Pull Request** apontando de sua branch para `develop` neste repositório
+
+### Convenção de Commits
+
+O projeto usa [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Prefixo | Quando Usar |
+| :--- | :--- |
+| `feat:` | Nova funcionalidade |
+| `fix:` | Correção de bug |
+| `docs:` | Alteração em documentação |
+| `refactor:` | Refatoração sem mudança de comportamento |
+| `chore:` | Tarefas de manutenção (configs, deps) |
+
+### Reportar Bugs
+
+Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) descrevendo:
+- **Comportamento esperado** vs **comportamento atual**
+- **Passos para reproduzir** o problema
+- **Ambiente** (SO, browser, versão do Node.js)
+
 ---
 
 ## 📜 Licença
+
+
+
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
