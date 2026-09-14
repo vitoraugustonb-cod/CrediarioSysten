@@ -505,7 +505,31 @@ Configure as seguintes variáveis no painel da Vercel em **Settings → Environm
 
 ---
 
+## 🗺️ Roadmap
+
+Funcionalidades planejadas para as próximas versões do sistema:
+
+### 🚀 Em Desenvolvimento
+- [ ] **Notificações Push (PWA):** Alertas automáticos para o cobrador sobre parcelas vencidas no dia
+- [ ] **Filtros Avançados no Dashboard:** Segmentação de KPIs por cobrador, período e categoria de produto
+- [ ] **Exportação de Relatórios (PDF/Excel):** Geração de relatórios financeiros mensais para download
+
+### 📋 Planejado (Próximas Sprints)
+- [ ] **Modo Offline (Service Worker):** Cache local de cobranças do dia para uso sem internet em campo
+- [ ] **Histórico de Auditoria Detalhado:** Log completo de todas as alterações por usuário com visualização no painel
+- [ ] **Renegociação de Dívidas:** Fluxo guiado para reestruturação de carnês com novos prazos e condições
+- [ ] **Foto de Comprovante:** Upload de imagem do comprovante no ato do pagamento via câmera mobile
+- [ ] **Integração PIX:** Geração de QR Code Pix no momento da cobrança
+
+### 💡 Ideias Futuras
+- [ ] **App Nativo (React Native / Expo):** Versão mobile nativa para iOS e Android
+- [ ] **Multi-empresa (SaaS):** Suporte a múltiplos comércios na mesma instância com isolamento de dados
+- [ ] **Análise de Crédito:** Score de inadimplência automático por cliente com base no histórico
+
+---
+
 ## 📜 Licença
+
 
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
