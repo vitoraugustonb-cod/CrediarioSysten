@@ -404,7 +404,18 @@ npm run dev:frontend
 - `POST /usuarios` - Criação de novo operador (Apenas Gerente)
 - `PATCH /usuarios/:id/status` - Ativação/desativação instantânea de conta (Apenas Gerente)
 
+### Dashboard & Relatórios
+- `GET /relatorios/dashboard` - KPIs financeiros em tempo real (faturamento, inadimplência, projeções)
+- `GET /relatorios/mensal` - Relatório consolidado por mês com totais e médias
+- `GET /pagamentos` - Histórico completo de pagamentos recebidos
+
+### Prestação de Contas
+- `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
+- `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
+
 ---
+
+
 
 
 ## 🗃️ Modelo de Dados (Prisma Schema)
