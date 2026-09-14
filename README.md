@@ -270,7 +270,58 @@ Na interface mobile, o cobrador precisa **confirmar o valor digitado duas vezes*
 
 
 
+## 🗂️ Estrutura do Projeto
+
+```
+CrediarioSysten/
+├── 📁 backend/                     # API REST (Node.js + Express + TypeScript)
+│   ├── 📁 prisma/
+│   │   └── schema.prisma           # Definição do banco de dados
+│   └── 📁 src/
+│       ├── app.ts                  # Configuração do Express (middlewares, rotas)
+│       ├── server.ts               # Servidor HTTP (modo local/Docker)
+│       ├── 📁 controllers/         # Lógica de negócio por domínio
+│       │   ├── authController.ts
+│       │   ├── clienteController.ts
+│       │   ├── vendaController.ts
+│       │   ├── parcelaController.ts
+│       │   ├── pagamentoController.ts
+│       │   ├── produtoController.ts
+│       │   ├── userController.ts
+│       │   ├── relatorioController.ts
+│       │   └── prestacaoContasController.ts
+│       ├── 📁 routes/              # Mapeamento de endpoints HTTP
+│       ├── 📁 middlewares/         # Auth, Role e tratamento de erros
+│       ├── 📁 validators/          # Schemas Zod de validação
+│       ├── 📁 lib/                 # Cliente Prisma singleton
+│       ├── 📁 config/              # Variáveis de ambiente e configurações
+│       └── 📁 scripts/             # Scripts de migração e backfill
+│
+├── 📁 frontend/                    # SPA React 19 + Vite + TypeScript
+│   └── 📁 src/
+│       ├── App.tsx                 # Roteamento principal e detecção de plataforma
+│       ├── 📁 components/
+│       │   ├── 📁 desktop/         # Painel gerencial (Dashboard, Relatórios, etc.)
+│       │   ├── 📁 mobile/          # Interface do cobrador de rua
+│       │   ├── 📁 auth/            # Tela de login
+│       │   ├── 📁 common/          # Componentes compartilhados
+│       │   └── 📁 layout/          # Estrutura de layout
+│       ├── 📁 services/            # Funções de chamada à API (fetch)
+│       ├── 📁 hooks/               # Custom hooks React
+│       ├── 📁 context/             # Context API (autenticação global)
+│       └── 📁 types/               # Tipos TypeScript compartilhados
+│
+├── 📁 api/                         # Entry point Serverless (Vercel)
+├── 📁 scripts/                     # Scripts auxiliares de infraestrutura
+├── docker-compose.yml              # Orquestração dos containers
+├── vercel.json                     # Configuração de rotas da Vercel
+└── package.json                    # Scripts raiz (dev, build, prisma)
+```
+
+---
+
 ## 🛠️ Como Executar Localmente
+
 
 ### 1. Clonar o repositório
 ```bash
