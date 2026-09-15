@@ -68,6 +68,7 @@
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
+- [📋 Changelog](#-changelog)
 - [📜 Licença](#-licença)
 
 ---
@@ -709,9 +710,19 @@ Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) d
 
 ---
 
+## 📋 Changelog
+
+Histórico de lançamentos e versões do **Crediário System**:
+
+### [1.0.0] - 2026-03-10
+- **Lançamento Inicial:** Arquitetura unificada React 19 + Vite e backend Express TypeScript.
+- **Dual-Platform:** Detecção automática de dispositivos e telas dedicadas para gerentes e cobradores.
+- **Segurança Financeira:** Rate limit, cookies httpOnly e validação rígida via Zod.
+- **Concorrência Segura:** Transações atômicas com Prisma para baixas de pagamentos sem duplicidade.
+- **Suporte a Nuvem:** Integração nativa com Vercel Serverless e Supabase PostgreSQL.
+
+---
+
 ## 📜 Licença
-
-
-
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
