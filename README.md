@@ -519,22 +519,22 @@ Parcela ──────────────┤
 
 ### Backend (`backend/.env`)
 
-| Variável | Obrigatória | Descrição | Exemplo |
-| :--- | :---: | :--- | :--- |
-| `PORT` | ✅ | Porta do servidor HTTP local | `3300` |
-| `DATABASE_URL` | ✅ | Connection string do Supabase via **Transaction Pooler** (porta 6543). Obrigatória em produção Serverless. | `postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true` |
-| `DIRECT_URL` | ✅ | Connection string **direta** do Supabase (porta 5432). Usada exclusivamente pelo Prisma para migrações. | `postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres` |
-| `JWT_SECRET` | ✅ | Chave secreta de 256 bits para assinatura e verificação dos tokens JWT. | `uma_string_longa_e_aleatoria_aqui` |
-| `NODE_ENV` | ⚠️ | Define o ambiente de execução. Afeta logs, CORS e modo de erro. | `development` \| `production` |
-| `FRONTEND_URL` | ⚠️ | URL da origem do frontend (para CORS com credenciais). | `http://localhost:5173` |
+| Variável | Obrigatória | Padrão | Descrição | Exemplo |
+| :--- | :---: | :---: | :--- | :--- |
+| `PORT` | ✅ | `3300` | Porta local para o servidor HTTP Express | `3300` |
+| `DATABASE_URL` | ✅ | — | Connection string do Supabase via **Transaction Pooler** (porta 6543). | `postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true` |
+| `DIRECT_URL` | ✅ | — | Connection string **direta** do Supabase (porta 5432) para migrações Prisma. | `postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres` |
+| `JWT_SECRET` | ✅ | — | Chave de assinatura e decodificação dos tokens JWT (mínimo 32 caracteres). | `uma_string_longa_e_aleatoria_aqui` |
+| `NODE_ENV` | ⚠️ | `development` | Ambiente de execução (`development`, `production` ou `test`). | `production` |
+| `FRONTEND_URL` | ⚠️ | `http://localhost:5173` | Origem do frontend autorizada pelo CORS para tráfego com cookies. | `https://meudominio.com` |
 
 > **Dica de Segurança:** Nunca comite o arquivo `.env` no repositório. Ele já está listado no `.gitignore`. Use um gerador de chaves como `openssl rand -base64 32` para o `JWT_SECRET`.
 
 ### Frontend (`frontend/.env`)
 
-| Variável | Obrigatória | Descrição | Exemplo |
-| :--- | :---: | :--- | :--- |
-| `VITE_API_URL` | ✅ | URL base da API REST consumida pelo frontend. | `http://localhost:3300` |
+| Variável | Obrigatória | Padrão | Descrição | Exemplo |
+| :--- | :---: | :---: | :--- | :--- |
+| `VITE_API_URL` | ✅ | `http://localhost:3300` | URL base da API REST consumida pelo cliente React SPA. | `https://crediario-systen-mu.vercel.app` |
 
 ### Vercel (Painel de Variáveis)
 
