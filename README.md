@@ -67,7 +67,7 @@
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
-- [🤝 Contribuição](#-contribuição)
+- [🤝 Contribuição & Convenções](#-contribuição--convenções)
 - [📜 Licença](#-licença)
 
 ---
@@ -659,7 +659,7 @@ Cronograma e metas de evolução das próximas versões do sistema:
 
 ---
 
-## 🤝 Contribuição
+## 🤝 Contribuição & Convenções
 
 Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o fluxo abaixo:
 
@@ -678,7 +678,7 @@ Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o flu
 4. **Faça suas alterações** seguindo os padrões do projeto
 5. **Commit** suas mudanças com mensagens descritivas:
    ```bash
-   git commit -m "feat: adiciona notificação push para parcelas vencidas"
+   git commit -m "feat(cobranca): adiciona notificacao push para parcelas vencidas"
    ```
 6. **Push** para seu fork:
    ```bash
@@ -688,15 +688,17 @@ Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o flu
 
 ### Convenção de Commits
 
-O projeto usa [Conventional Commits](https://www.conventionalcommits.org/):
+O projeto adota o padrão [Conventional Commits](https://www.conventionalcommits.org/):
 
-| Prefixo | Quando Usar |
-| :--- | :--- |
-| `feat:` | Nova funcionalidade |
-| `fix:` | Correção de bug |
-| `docs:` | Alteração em documentação |
-| `refactor:` | Refatoração sem mudança de comportamento |
-| `chore:` | Tarefas de manutenção (configs, deps) |
+| Prefixo | Quando Usar | Exemplo Prático |
+| :--- | :--- | :--- |
+| `feat:` | Nova funcionalidade para o usuário | `feat(auth): adiciona suporte a login biometrico` |
+| `fix:` | Correção de bug no sistema | `fix(parcelas): corrige arredondamento de centavos no rateio` |
+| `docs:` | Alteração ou adição em documentações | `docs(readme): adiciona guia de deploy e diagrama de arquitetura` |
+| `refactor:` | Refatoração sem alteração de comportamento externo | `refactor(db): otimiza queries de agregacao no relatorio mensal` |
+| `perf:` | Mudança de código voltada a ganho de desempenho | `perf(frontend): implementa lazy loading de rotas desktop` |
+| `test:` | Adição ou ajuste de testes automatizados | `test(api): adiciona testes de integracao para o fluxo de quitação` |
+| `chore:` | Ajustes de manutenção de build, pacotes ou CI/CD | `chore(deps): atualiza versao do prisma orm para 6.4` |
 
 ### Reportar Bugs
 
