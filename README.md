@@ -65,6 +65,7 @@
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
 - [⚡ Performance e Otimizações](#-performance-e-otimizações)
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
+- [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap](#️-roadmap)
 - [🤝 Contribuição](#-contribuição)
 - [📜 Licença](#-licença)
@@ -609,6 +610,30 @@ npm --prefix backend run tsc -- --noEmit
 # Verificação de tipos TypeScript (Frontend)
 npm --prefix frontend run tsc -- --noEmit
 ```
+
+---
+
+## ❓ Perguntas Frequentes (FAQ)
+
+<details>
+<summary><strong>1. Como o sistema lida com pagamentos concorrentes na mesma parcela?</strong></summary>
+<p>Utilizamos blocos de transações atômicas nativas do Prisma (<code>prisma.$transaction</code>). Durante a liquidação, o registro da parcela é bloqueado e verificado novamente para assegurar que nenhuma outra requisição tenha alterado o saldo remanescente entre a leitura e a escrita.</p>
+</details>
+
+<details>
+<summary><strong>2. O sistema funciona offline no celular do cobrador?</strong></summary>
+<p>Atualmente a aplicação exige conectividade com a internet para garantir a sincronização em tempo real das cobranças. O suporte offline completo via Service Workers e IndexedDB está listado em nosso Roadmap para a versão v1.2.</p>
+</details>
+
+<details>
+<summary><strong>3. É possível rodar a aplicação em um VPS tradicional sem depender da Vercel?</strong></summary>
+<p>Sim! O repositório inclui configuração completa do <code>docker-compose.yml</code> com Nginx e Node.js Alpine, permitindo deploy autônomo com um único comando em instâncias AWS EC2, DigitalOcean, Hetzner ou servidores locais.</p>
+</details>
+
+<details>
+<summary><strong>4. Como é calculada a prestação de contas dos cobradores?</strong></summary>
+<p>O sistema agrega todos os pagamentos baixados pelo operador no dia corrente, filtrando por data e identificador do usuário autenticado. O gerente obtém tanto o fechamento individual quanto consolidado da equipe.</p>
+</details>
 
 ---
 
