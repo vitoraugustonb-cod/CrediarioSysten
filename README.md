@@ -11,6 +11,8 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Status-Operacional-brightgreen?logo=statuspage&logoColor=white" alt="Status">
+  <img src="https://img.shields.io/badge/Uptime-99.9%25-success?logo=apache&logoColor=white" alt="Uptime">
   <img src="https://img.shields.io/badge/Node.js-20.x%20%2F%2022.x-339933?logo=nodedotjs&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white" alt="Express">
   <img src="https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=black" alt="React">
