@@ -46,6 +46,7 @@
 ## 📑 Sumário
 
 - [📱 Sobre o Projeto](#-sobre-o-projeto)
+  - [📊 O Mercado de Crediário no Brasil](#-o-mercado-de-crediário-no-brasil)
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
 - [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
@@ -72,6 +73,9 @@
 ## 📱 Sobre o Projeto
 
 O **Crediário System** é uma solução full-stack moderna desenvolvida para digitalizar e otimizar operações de crediário próprio para comércios locais, confecções, óticas, lojas de móveis e equipes de cobrança de rua.
+
+### 📊 O Mercado de Crediário no Brasil
+No varejo tradicional brasileiro, o crediário próprio ou modelo "carnê" segue como um motor essencial de inclusão financeira e retenção de clientes. Milhões de consumidores ainda operam prioritariamente com renda informal ou limites de cartão insuficientes. O **Crediário System** preenche essa lacuna fornecendo às empresas o mesmo rigor técnico e inteligência de risco de grandes financeiras, mas com a agilidade e simplicidade exigidas no comércio de proximidade e na cobrança de porta em porta.
 
 ### 🔴 O Cenário Tradicional e suas Dores
 - **Inadimplência Desconhecida:** Falta de clareza sobre parcelas vencidas no dia;
