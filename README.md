@@ -66,7 +66,7 @@
 - [⚡ Performance e Otimizações](#-performance-e-otimizações)
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
-- [🗺️ Roadmap](#️-roadmap)
+- [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição](#-contribuição)
 - [📜 Licença](#-licença)
 
@@ -637,27 +637,25 @@ npm --prefix frontend run tsc -- --noEmit
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap & Milestones
 
+Cronograma e metas de evolução das próximas versões do sistema:
 
-Funcionalidades planejadas para as próximas versões do sistema:
-
-### 🚀 Em Desenvolvimento
+### 🚀 v1.1 — Produtividade e Relatórios (Q2 2026)
 - [ ] **Notificações Push (PWA):** Alertas automáticos para o cobrador sobre parcelas vencidas no dia
 - [ ] **Filtros Avançados no Dashboard:** Segmentação de KPIs por cobrador, período e categoria de produto
 - [ ] **Exportação de Relatórios (PDF/Excel):** Geração de relatórios financeiros mensais para download
 
-### 📋 Planejado (Próximas Sprints)
+### 📋 v1.2 — Resiliência Operacional (Q3 2026)
 - [ ] **Modo Offline (Service Worker):** Cache local de cobranças do dia para uso sem internet em campo
 - [ ] **Histórico de Auditoria Detalhado:** Log completo de todas as alterações por usuário com visualização no painel
 - [ ] **Renegociação de Dívidas:** Fluxo guiado para reestruturação de carnês com novos prazos e condições
-- [ ] **Foto de Comprovante:** Upload de imagem do comprovante no ato do pagamento via câmera mobile
-- [ ] **Integração PIX:** Geração de QR Code Pix no momento da cobrança
 
-### 💡 Ideias Futuras
-- [ ] **App Nativo (React Native / Expo):** Versão mobile nativa para iOS e Android
+### 💳 v2.0 — Integração Financeira & Mobilidade (Q4 2026)
+- [ ] **Foto de Comprovante:** Upload de imagem do comprovante no ato do pagamento via câmera mobile
+- [ ] **Integração PIX Dinâmico:** Geração de QR Code Pix no momento da cobrança com baixa automática
 - [ ] **Multi-empresa (SaaS):** Suporte a múltiplos comércios na mesma instância com isolamento de dados
-- [ ] **Análise de Crédito:** Score de inadimplência automático por cliente com base no histórico
+- [ ] **Score de Crédito Automático:** Análise preditiva de risco e pontualidade por histórico do cliente
 
 ---
 
