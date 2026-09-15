@@ -54,6 +54,7 @@
 - [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
 - [🌿 Estratégia de Branching (Git Flow)](#-estratégia-de-branching-git-flow)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
+  - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
 - [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
@@ -247,6 +248,13 @@ main ─────────────────────● (Deploy 
 - **Interface Dual-Platform:** Detecção automática de desktop (painel gerencial) e mobile (foco em agilidade de rua).
 - **Favicon & PWA Ready:** Ícone vetorial SVG premium em squircle com suporte a `apple-touch-icon` e `theme-color` para instalação como atalho no celular.
 - **Conferência de Dupla Digitação:** Prevenção de toques acidentais em telas mobile na baixa de parcelas.
+
+### 📸 Demonstração Visual das Interfaces
+
+| Plataforma Desktop (Administração) | Plataforma Mobile (Cobrador de Rua) |
+| :---: | :---: |
+| ![Desktop Dashboard](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=60) | ![Mobile Cobrança](https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=300&auto=format&fit=crop&q=60) |
+| *Controle unificado de clientes, inadimplência e projeções mensais* | *Rotas ágeis de cobrança com quitação rápida e dupla conferência* |
 
 ---
 
