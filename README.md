@@ -40,6 +40,14 @@
   <img src="https://img.shields.io/github/repo-size/vitoraugustonb-cod/CrediarioSysten?label=Tamanho%20do%20Repo&color=0ea5e9" alt="Repo Size">
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Code_Style-Prettier-ff69b4?logo=prettier&logoColor=white" alt="Prettier">
+  <img src="https://img.shields.io/badge/Linter-ESLint-4B32C3?logo=eslint&logoColor=white" alt="ESLint">
+  <img src="https://img.shields.io/badge/OWASP-Top_10_Aligned-brightgreen?logo=owasp&logoColor=white" alt="OWASP">
+  <img src="https://img.shields.io/badge/Architecture-Clean_MVC-informational?logoColor=white" alt="Clean MVC">
+  <img src="https://img.shields.io/badge/Database_Engine-PostgreSQL_15+-4169E1?logo=postgresql&logoColor=white" alt="Postgres Engine">
+</p>
+
 
 ---
 
@@ -47,24 +55,34 @@
 
 - [📱 Sobre o Projeto](#-sobre-o-projeto)
   - [📊 O Mercado de Crediário no Brasil](#-o-mercado-de-crediário-no-brasil)
+  - [⚡ Diferenciais Técnicos](#-diferenciais-técnicos)
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
 - [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
 - [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
+  - [💾 Backup, Restauração e Resiliência de Dados](#3-backup-restauração-e-resiliência-de-dados)
 - [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
+  - [🛡️ Ciclo de Vida da Sessão & Autenticação Segura](#️-ciclo-de-vida-da-sessão--autenticação-segura)
 - [🌿 Estratégia de Branching (Git Flow)](#-estratégia-de-branching-git-flow)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
   - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
+  - [⌨️ Acessibilidade & Atalhos no Painel Desktop](#️-acessibilidade--atalhos-no-painel-desktop)
+  - [📱 Matriz de Compatibilidade de Dispositivos & Browsers](#-matriz-de-compatibilidade-de-dispositivos--browsers)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
+  - [🔄 Fluxo de Liquidação Atômica de Parcela](#-fluxo-de-liquidação-atômica-de-parcela)
 - [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [🛠️ Como Executar Localmente](#️-como-executar-localmente)
+  - [🔧 Troubleshooting (Resolução de Problemas Comuns)](#-troubleshooting-resolução-de-problemas-comuns)
 - [🔐 Contas de Acesso Padrão](#-contas-de-acesso-padrão)
 - [🌐 Referência da API REST](#-referência-da-api-rest)
+  - [📦 Exemplos de Payloads (Request & Response)](#-exemplos-de-payloads-request--response)
+  - [⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro](#️-padronização-de-códigos-de-status-http--respostas-de-erro)
 - [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
 - [⚡ Performance e Otimizações](#-performance-e-otimizações)
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
+- [📊 Observabilidade, Logs e Monitoramento](#-observabilidade-logs-e-monitoramento)
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
@@ -206,6 +224,23 @@ Variáveis de ambiente necessárias no painel da Vercel:
 - `JWT_SECRET`: Chave secreta de assinatura JWT.
 - `NODE_ENV`: `production`.
 
+### 3. Backup, Restauração e Resiliência de Dados
+
+Para garantir a integridade patrimonial das cobranças e continuidade do negócio:
+
+- **Backups Automáticos Diários:** O Supabase realiza snapshots automáticos diários com retenção e integridade física.
+- **Exportação Manual (Dump Completo via `pg_dump`):**
+  ```bash
+  # Gerar dump comprimido contendo dados e schema
+  pg_dump -h db.[REF].supabase.co -U postgres -p 5432 -d postgres -F c -b -v -f crediario_backup_$(date +%Y%m%d).dump
+  ```
+- **Restauração em Banco de Contingência:**
+  ```bash
+  # Restaurar dump em uma nova base
+  pg_restore -h db.[REF_NOVO].supabase.co -U postgres -p 5432 -d postgres -v -c crediario_backup_20260315.dump
+  ```
+- **Point-in-Time Recovery (PITR):** Suporte à restauração para qualquer segundo dos últimos 7 dias através dos registros de WAL (Write-Ahead Logging) do PostgreSQL.
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
@@ -227,6 +262,37 @@ O projeto implementa camadas estritas de segurança em profundidade:
    Injeção automática de HSTS, CSP, X-Frame-Options, X-Content-Type-Options e bloqueio de MIME sniffing.
 7. **Tratamento Global de Erros:**
    Stack traces e detalhes internos do banco são omitidos das respostas em ambiente de produção.
+
+### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant FE as Frontend React (SPA)
+    participant RL as Rate Limiter (IP Guard)
+    participant API as Auth Controller & Middleware
+    participant DB as Supabase PostgreSQL
+
+    U->>FE: Fornece e-mail e senha
+    FE->>RL: POST /login (credenciais)
+    alt Tentativas excedidas (> 5 em 15 min)
+        RL-->>FE: 429 Too Many Requests
+    else Taxa permitida
+        RL->>API: Encaminha requisição
+        API->>DB: Consulta usuário por e-mail
+        DB-->>API: Retorna hash e status ativo
+        API->>API: Compara senha e valida se ativo === true
+        API-->>FE: 200 OK (Cookie httpOnly com JWT + perfil)
+    end
+
+    Note over FE,API: Requisições subsequentes autenticadas
+    FE->>API: GET /clientes (Cookie enviado pelo browser)
+    API->>API: authMiddleware decodifica e valida JWT
+    API->>DB: Checa status ativo instantâneo
+    DB-->>API: Usuário ativo confirmado
+    API-->>FE: Resposta com dados autorizados
+```
 
 ---
 
@@ -257,6 +323,34 @@ main ─────────────────────● (Deploy 
 | :---: | :---: |
 | ![Desktop Dashboard](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=60) | ![Mobile Cobrança](https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=300&auto=format&fit=crop&q=60) |
 | *Controle unificado de clientes, inadimplência e projeções mensais* | *Rotas ágeis de cobrança com quitação rápida e dupla conferência* |
+
+### ⌨️ Acessibilidade & Atalhos no Painel Desktop
+
+Para operadores de caixa e gerentes que buscam agilidade na rotina de escritório, o painel desktop oferece atalhos de teclado e conformidade com padrões de acessibilidade:
+
+| Combinação de Teclas | Ação no Sistema |
+| :---: | :--- |
+| <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> | Foco imediato na barra de busca global de clientes |
+| <kbd>Esc</kbd> | Fechar modais ativos, gavetas de detalhes ou limpar filtros |
+| <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd> | Navegação sequencial acessível entre formulários e tabelas |
+| <kbd>Alt</kbd> + <kbd>V</kbd> | Acesso direto ao fluxo de emissão de Nova Venda |
+| <kbd>Enter</kbd> | Submissão rápida de pesquisas e confirmação de diálogos |
+
+- **Contraste Visual AA:** Paleta calibrada para legibilidade superior em ambientes com variação de luminosidade.
+- **Outline de Foco:** Marcadores de foco destacados (`focus-visible`) para operação 100% via teclado sem mouse.
+
+### 📱 Matriz de Compatibilidade de Dispositivos & Browsers
+
+O frontend responsivo é testado e homologado para os seguintes ambientes:
+
+| Navegador / Plataforma | Suporte | Versão Mínima | Modo Recomendado |
+| :--- | :---: | :---: | :--- |
+| **Google Chrome (Desktop)** | ✅ Homologado | 110+ | Painel Gerencial em alta resolução |
+| **Google Chrome (Android)** | ✅ Homologado | 115+ | Instalado como Atalho Web / PWA |
+| **Apple Safari (iOS)** | ✅ Homologado | 16.4+ | Adicionar à Tela de Início (Full Screen) |
+| **Mozilla Firefox** | ✅ Homologado | 115+ (ESR) | Modo Navegador Desktop |
+| **Microsoft Edge** | ✅ Homologado | 110+ | Ambientes corporativos Windows |
+| **Samsung Internet** | ✅ Homologado | 22+ | Cobrança em campo em aparelhos Samsung |
 
 ---
 
@@ -297,6 +391,39 @@ Ao registrar um pagamento, o sistema aplica a seguinte lógica em ordem de prior
 2. **Pagamento parcial:** Se `0 < valorPago < valorParcela`, status muda para `PARCIAL`
 3. **Excedente automático:** Se `valorPago > valorParcela`, o excedente é aplicado na próxima parcela em aberto da mesma venda (amortização em cascata)
 4. **Concorrência segura:** A transação é bloqueada via `prisma.$transaction` para evitar quitações duplicadas simultâneas
+
+#### 🔄 Fluxo de Liquidação Atômica de Parcela
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Cobrador Mobile
+    participant API as Parcela Controller
+    participant TX as Prisma $transaction
+    participant DB as PostgreSQL (Supabase)
+
+    C->>API: PATCH /parcelas/:id/pagamento { valor: 150.00 }
+    API->>TX: Inicia transação atômica isolada
+    TX->>DB: SELECT parcela com bloqueio de concorrência
+    DB-->>TX: Estado atual (status, valorTotal, valorPago)
+    alt Parcela já se encontra PAGA
+        TX-->>API: Aborta transação (Rollback imediato)
+        API-->>C: 409 Conflict: Parcela já liquidada
+    else Saldo Pendente Válido
+        TX->>DB: INSERT Pagamento (valor, data, operadorId)
+        alt valor >= saldoRestante (Quitação / Excedente)
+            TX->>DB: UPDATE Parcela SET status = 'PAGA'
+            opt Existe valor excedente
+                TX->>DB: Amortiza sobra na próxima parcela pendente da venda
+            end
+        else Pagamento Parcial
+            TX->>DB: UPDATE Parcela SET status = 'PARCIAL', valorPago += valor
+        end
+        TX->>DB: INSERT Auditoria (usuário, ação, timestamp, saldoAnterior)
+        TX-->>API: Commit concluído com sucesso
+        API-->>C: 200 OK (Parcela atualizada + confirmação)
+    end
+```
 
 ### 📅 Atualização Automática de Status
 
@@ -402,6 +529,16 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
+### 🔧 Troubleshooting (Resolução de Problemas Comuns)
+
+| Sintoma / Erro | Causa Mais Comum | Solução Recomendada |
+| :--- | :--- | :--- |
+| `prepared statement does not exist` | Conexão via PgBouncer sem parâmetro | Adicione `?pgbouncer=true` ao final do `DATABASE_URL` |
+| `P1001: Can't reach database server` | Senha com caracteres especiais ou IP | Codifique caracteres da senha em URL encode ou use `DIRECT_URL` |
+| `CORS Error: Missing Allow Origin` | Frontend rodando em porta diferente do .env | Verifique se `FRONTEND_URL=http://localhost:5173` está no `backend/.env` |
+| `Cookie não persiste após login local` | Flag `secure: true` exigindo HTTPS | Configure `NODE_ENV=development` no `.env` para permitir cookies HTTP locais |
+| `prisma db push` trava ou falha | Tentativa de migrar via Pooler (6543) | Certifique-se de preencher a variável `DIRECT_URL` apontando para a porta 5432 |
+
 ---
 
 ## 🔐 Contas de Acesso Padrão
@@ -458,6 +595,127 @@ npm run dev:frontend
 ### Prestação de Contas
 - `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
 - `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
+
+### 📦 Exemplos de Payloads (Request & Response)
+
+<details>
+<summary><strong>POST /login — Autenticação de Operador</strong></summary>
+
+**Request Body:**
+```json
+{
+  "email": "gerente@crediario.com",
+  "senha": "suasenhaforte"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "usuario": {
+    "id": 1,
+    "nome": "Administrador Geral",
+    "email": "gerente@crediario.com",
+    "perfil": "GERENTE"
+  },
+  "message": "Autenticado com sucesso"
+}
+```
+> O token JWT é transmitido de forma transparente via header `Set-Cookie: token=...; HttpOnly; Secure; SameSite=Lax`.
+</details>
+
+<details>
+<summary><strong>POST /vendas — Emissão de Venda e Carnê Automático</strong></summary>
+
+**Request Body:**
+```json
+{
+  "clienteId": 4,
+  "tipoVenda": "MOVEIS",
+  "valorEntrada": 100.00,
+  "numParcelas": 6,
+  "itens": [
+    { "produtoId": 2, "quantidade": 1, "precoUnitario": 700.00 }
+  ]
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 12,
+  "clienteId": 4,
+  "valorTotal": 700.00,
+  "valorEntrada": 100.00,
+  "numParcelas": 6,
+  "parcelas": [
+    { "numero": 1, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-04-15T00:00:00.000Z" },
+    { "numero": 2, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-05-15T00:00:00.000Z" }
+  ]
+}
+```
+</details>
+
+<details>
+<summary><strong>PATCH /parcelas/:id/pagamento — Baixa com Dupla Conferência</strong></summary>
+
+**Request Body:**
+```json
+{
+  "valorPago": 100.00,
+  "confirmacaoValor": 100.00
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "sucesso": true,
+  "parcela": {
+    "id": 35,
+    "numero": 1,
+    "status": "PAGA",
+    "valor": 100.00,
+    "valorPago": 100.00
+  },
+  "excedenteAmortizado": 0.00,
+  "recibo": {
+    "codigoAutenticacao": "AUTH-7894-B6",
+    "dataPagamento": "2026-03-15T14:32:10.000Z",
+    "operador": "João Silva (Cobrador)"
+  }
+}
+```
+</details>
+
+### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
+
+A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tratamento padronizado no frontend e mensagens amigáveis em tela:
+
+```json
+{
+  "erro": "Saldo informado inválido para quitação",
+  "codigo": "FINANCIAL_VALIDATION_ERROR",
+  "detalhes": [
+    {
+      "campo": "valorPago",
+      "mensagem": "O valor informado não pode ser negativo ou nulo"
+    }
+  ]
+}
+```
+
+| Código HTTP | Significado | Aplicação no Sistema |
+| :---: | :--- | :--- |
+| **`200 OK`** | Sucesso | Leitura de dados, atualizações de parcelas e relatórios |
+| **`201 Created`** | Criado com Sucesso | Nova venda emitida, cliente cadastrado ou produto incluído |
+| **`400 Bad Request`** | Erro de Validação | Falha de validação no schema Zod ou valor contábil inconsistente |
+| **`401 Unauthorized`** | Não Autenticado | Ausência de cookie de sessão, token expirado ou inválido |
+| **`403 Forbidden`** | Acesso Negado | Cobrador tentando acessar endpoints exclusivos da gerência |
+| **`404 Not Found`** | Recurso Inexistente | Cliente, parcela ou produto não localizado pelo identificador |
+| **`409 Conflict`** | Conflito de Estado | Concorrência: tentativa de baixar parcela que já foi liquidada |
+| **`429 Too Many Requests`** | Taxa Excedida | Bloqueio de IP por exceder 5 tentativas de login em 15 minutos |
+| **`500 Internal Error`** | Erro de Servidor | Falha não prevista capturada pelo middleware global de tratamento |
 
 ---
 
@@ -614,6 +872,41 @@ npm --prefix frontend run tsc -- --noEmit
 
 ---
 
+## 📊 Observabilidade, Logs e Monitoramento
+
+A aplicação conta com padrões de telemetria e rastreabilidade para auditoria financeira e diagnóstico de operação:
+
+### 1. Health Checks Automatizados
+- Endpoint de monitoramento: `GET /health`
+- Resposta de disponibilidade:
+  ```json
+  {
+    "status": "ok",
+    "timestamp": "2026-03-15T21:00:00.000Z",
+    "database": "connected"
+  }
+  ```
+
+### 2. Logs Estruturados de Auditoria
+Operações financeiras críticas (baixas de cobrança, ajustes manuais e logins) emitem eventos estruturados em JSON para integração com ferramentas de análise (Vercel Logs, Logtail, Grafana Loki):
+
+```json
+{
+  "level": "info",
+  "timestamp": "2026-03-15T14:32:10.142Z",
+  "event": "PARCELA_PAGA",
+  "operadorId": 2,
+  "parcelaId": 35,
+  "valorRecebido": 100.00,
+  "ipOrigem": "177.18.xxx.xxx"
+}
+```
+
+### 3. Trilha de Auditoria Contábil (`Auditoria`)
+Toda mutação nas parcelas gera um registro permanente na tabela `Auditoria` com snapshot anterior, novo estado e operador responsável, prevenindo contestações financeiras.
+
+---
+
 ## ❓ Perguntas Frequentes (FAQ)
 
 <details>
@@ -634,6 +927,21 @@ npm --prefix frontend run tsc -- --noEmit
 <details>
 <summary><strong>4. Como é calculada a prestação de contas dos cobradores?</strong></summary>
 <p>O sistema agrega todos os pagamentos baixados pelo operador no dia corrente, filtrando por data e identificador do usuário autenticado. O gerente obtém tanto o fechamento individual quanto consolidado da equipe.</p>
+</details>
+
+<details>
+<summary><strong>5. Como funciona o estorno de um pagamento registrado incorretamente?</strong></summary>
+<p>Por diretrizes de compliance contábil, operadores de rua não possuem privilégio de exclusão ou estorno. Caso ocorra inconsistência, o perfil <strong>Gerente</strong> realiza a retificação pela rota gerencial <code>PATCH /parcelas/:id/ajuste</code>, gerando rastro indelével de auditoria.</p>
+</details>
+
+<details>
+<summary><strong>6. O sistema aplica juros ou encargos automáticos em parcelas vencidas?</strong></summary>
+<p>O sistema segue a prática de carnê de valor de parcela contratado no ato da venda. Encargos ou descontos pontuais podem ser concedidos pelo gerente ou ajustados no fechamento da renegociação, mantendo transparência com o consumidor.</p>
+</details>
+
+<details>
+<summary><strong>7. O que ocorre se a internet do cobrador oscilar durante a baixa de uma parcela?</strong></summary>
+<p>A transação opera sob bloco atômico no PostgreSQL. Se o pacote de rede for interrompido antes do commit, o banco executa rollback integral. Se o commit tiver ocorrido, nova tentativa retornará o status atualizado sem debitar ou duplicar a quitação.</p>
 </details>
 
 ---
