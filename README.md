@@ -337,6 +337,39 @@ Ao registrar um pagamento, o sistema aplica a seguinte lógica em ordem de prior
 3. **Excedente automático:** Se `valorPago > valorParcela`, o excedente é aplicado na próxima parcela em aberto da mesma venda (amortização em cascata)
 4. **Concorrência segura:** A transação é bloqueada via `prisma.$transaction` para evitar quitações duplicadas simultâneas
 
+#### 🔄 Fluxo de Liquidação Atômica de Parcela
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Cobrador Mobile
+    participant API as Parcela Controller
+    participant TX as Prisma $transaction
+    participant DB as PostgreSQL (Supabase)
+
+    C->>API: PATCH /parcelas/:id/pagamento { valor: 150.00 }
+    API->>TX: Inicia transação atômica isolada
+    TX->>DB: SELECT parcela com bloqueio de concorrência
+    DB-->>TX: Estado atual (status, valorTotal, valorPago)
+    alt Parcela já se encontra PAGA
+        TX-->>API: Aborta transação (Rollback imediato)
+        API-->>C: 409 Conflict: Parcela já liquidada
+    else Saldo Pendente Válido
+        TX->>DB: INSERT Pagamento (valor, data, operadorId)
+        alt valor >= saldoRestante (Quitação / Excedente)
+            TX->>DB: UPDATE Parcela SET status = 'PAGA'
+            opt Existe valor excedente
+                TX->>DB: Amortiza sobra na próxima parcela pendente da venda
+            end
+        else Pagamento Parcial
+            TX->>DB: UPDATE Parcela SET status = 'PARCIAL', valorPago += valor
+        end
+        TX->>DB: INSERT Auditoria (usuário, ação, timestamp, saldoAnterior)
+        TX-->>API: Commit concluído com sucesso
+        API-->>C: 200 OK (Parcela atualizada + confirmação)
+    end
+```
+
 ### 📅 Atualização Automática de Status
 
 Um job de atualização verifica parcelas `PENDENTE` e `PARCIAL` com `dataVencimento < hoje` e as marca automaticamente como `ATRASADA`, garantindo que o dashboard de inadimplência reflita a realidade em tempo real.
