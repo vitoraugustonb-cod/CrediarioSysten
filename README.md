@@ -769,6 +769,99 @@ A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tra
 
 O banco de dados é modelado com **Prisma ORM** e possui as seguintes entidades principais:
 
+### 📊 Diagrama Entidade-Relacionamento (ERD)
+
+O diagrama abaixo ilustra a modelagem relacional completa do banco de dados no PostgreSQL (Supabase), demonstrando cardinalidades, chaves e trilha de auditoria:
+
+```mermaid
+erDiagram
+    USUARIO {
+        int id PK
+        string nome
+        string email UK
+        string senha
+        PerfilUsuario perfil
+        boolean ativo
+        datetime criadoEm
+    }
+
+    CLIENTE {
+        int id PK
+        string nome
+        string telefone
+        string referencias
+        datetime criadoEm
+    }
+
+    PRODUTO {
+        int id PK
+        string nome
+        decimal preco
+        CategoriaProduto categoria
+        datetime criadoEm
+    }
+
+    VENDA {
+        int id PK
+        int clienteId FK
+        int vendedorId FK
+        decimal valorTotal
+        decimal valorEntrada
+        int numParcelas
+        TipoVenda tipoVenda
+        datetime dataVenda
+    }
+
+    ITEM_VENDA {
+        int id PK
+        int vendaId FK
+        int produtoId FK
+        int quantidade
+        decimal precoUnitario
+    }
+
+    PARCELA {
+        int id PK
+        int vendaId FK
+        int numero
+        decimal valor
+        decimal valorPago
+        date dataVencimento
+        StatusParcela status
+        datetime criadoEm
+    }
+
+    PAGAMENTO {
+        int id PK
+        int parcelaId FK
+        int vendaId FK
+        int operadorId FK
+        decimal valor
+        datetime dataPagamento
+    }
+
+    AUDITORIA {
+        int id PK
+        int parcelaId FK
+        int usuarioId FK
+        string acao
+        string dadosAnteriores
+        string dadosNovos
+        datetime timestamp
+    }
+
+    USUARIO ||--o{ VENDA : "emite"
+    USUARIO ||--o{ PAGAMENTO : "recebe"
+    USUARIO ||--o{ AUDITORIA : "registra"
+    CLIENTE ||--o{ VENDA : "compra"
+    VENDA ||--|{ ITEM_VENDA : "possui"
+    PRODUTO ||--o{ ITEM_VENDA : "compoe"
+    VENDA ||--|{ PARCELA : "gera carnet"
+    VENDA ||--o{ PAGAMENTO : "recebe amortizacoes"
+    PARCELA ||--o{ PAGAMENTO : "liquidada por"
+    PARCELA ||--o{ AUDITORIA : "possui trilha"
+```
+
 ### Entidades e Relacionamentos
 
 ```
