@@ -40,6 +40,14 @@
   <img src="https://img.shields.io/github/repo-size/vitoraugustonb-cod/CrediarioSysten?label=Tamanho%20do%20Repo&color=0ea5e9" alt="Repo Size">
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Code_Style-Prettier-ff69b4?logo=prettier&logoColor=white" alt="Prettier">
+  <img src="https://img.shields.io/badge/Linter-ESLint-4B32C3?logo=eslint&logoColor=white" alt="ESLint">
+  <img src="https://img.shields.io/badge/OWASP-Top_10_Aligned-brightgreen?logo=owasp&logoColor=white" alt="OWASP">
+  <img src="https://img.shields.io/badge/Architecture-Clean_MVC-informational?logoColor=white" alt="Clean MVC">
+  <img src="https://img.shields.io/badge/Database_Engine-PostgreSQL_15+-4169E1?logo=postgresql&logoColor=white" alt="Postgres Engine">
+</p>
+
 
 ---
 
