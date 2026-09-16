@@ -386,6 +386,26 @@ O sistema implementa controle rígido de autorização por perfil de acesso (Rol
 - Catálogo de Produtos e precificação.
 - Relatórios de prestação de contas diária da equipe.
 
+### 🛵 Guia Operacional: Rotina Diária de Cobrança em Campo
+
+Para garantir a eficiência operacional e a exatidão financeira na rotina de porta em porta, o cobrador segue um fluxo padronizado de 5 etapas:
+
+```mermaid
+flowchart LR
+    E1["1. Abertura do Dia & Sincronização"] --> E2["2. Filtragem de Vencidos & Hoje"]
+    E2 --> E3["3. Localização do Cliente na Rota"]
+    E3 --> E4["4. Baixa com Dupla Digitação"]
+    E4 --> E5["5. Fechamento de Caixa Diário"]
+```
+
+1. **Sincronização Matinal:** Ao efetuar login no aparelho mobile, a listagem inicial carrega automaticamente os títulos pendentes agrupados por prioridade (parcelas vencidas em destaque vermelho e vencendo no dia em amarelo).
+2. **Localização e Contato:** Cada registro exibe os dados essenciais de contato, referências de endereço e saldo consolidado do cliente, permitindo confirmação rápida da identidade antes de abordar a cobrança.
+3. **Liquidação Segura (Anti-Erro):** O cobrador informa o valor em dinheiro ou transferência e o sistema exige a **dupla digitação de conferência**, evitando erros por digitação rápida ou toques involuntários em tela sensível.
+4. **Tratamento de Excedentes:** Caso o cliente pague um valor superior ao da parcela atual, o motor do sistema calcula e distribui o excedente como amortização na próxima parcela vincenda automaticamente.
+5. **Fechamento e Prestação de Contas:** Ao final do expediente de cobrança, a tela de *Prestação de Contas Pessoal* exibe o total arrecadado no dia e a quantidade de parcelas recebidas para conferência física com a gerência.
+
+---
+
 ### 🛵 Perfil: Vendedor / Cobrador (Mobile)
 - Lista de cobranças diárias priorizada (Hoje e Atrasadas).
 - Baixa rápida com conferência de segurança.
