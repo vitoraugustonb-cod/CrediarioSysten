@@ -314,6 +314,21 @@ main ─────────────────────● (Deploy 
 | ![Desktop Dashboard](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=60) | ![Mobile Cobrança](https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=300&auto=format&fit=crop&q=60) |
 | *Controle unificado de clientes, inadimplência e projeções mensais* | *Rotas ágeis de cobrança com quitação rápida e dupla conferência* |
 
+### ⌨️ Acessibilidade & Atalhos no Painel Desktop
+
+Para operadores de caixa e gerentes que buscam agilidade na rotina de escritório, o painel desktop oferece atalhos de teclado e conformidade com padrões de acessibilidade:
+
+| Combinação de Teclas | Ação no Sistema |
+| :---: | :--- |
+| <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> | Foco imediato na barra de busca global de clientes |
+| <kbd>Esc</kbd> | Fechar modais ativos, gavetas de detalhes ou limpar filtros |
+| <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd> | Navegação sequencial acessível entre formulários e tabelas |
+| <kbd>Alt</kbd> + <kbd>V</kbd> | Acesso direto ao fluxo de emissão de Nova Venda |
+| <kbd>Enter</kbd> | Submissão rápida de pesquisas e confirmação de diálogos |
+
+- **Contraste Visual AA:** Paleta calibrada para legibilidade superior em ambientes com variação de luminosidade.
+- **Outline de Foco:** Marcadores de foco destacados (`focus-visible`) para operação 100% via teclado sem mouse.
+
 ---
 
 ## ⚙️ Funcionalidades Principais
