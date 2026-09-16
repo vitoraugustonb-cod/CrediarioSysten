@@ -519,6 +519,16 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
+### 🔧 Troubleshooting (Resolução de Problemas Comuns)
+
+| Sintoma / Erro | Causa Mais Comum | Solução Recomendada |
+| :--- | :--- | :--- |
+| `prepared statement does not exist` | Conexão via PgBouncer sem parâmetro | Adicione `?pgbouncer=true` ao final do `DATABASE_URL` |
+| `P1001: Can't reach database server` | Senha com caracteres especiais ou IP | Codifique caracteres da senha em URL encode ou use `DIRECT_URL` |
+| `CORS Error: Missing Allow Origin` | Frontend rodando em porta diferente do .env | Verifique se `FRONTEND_URL=http://localhost:5173` está no `backend/.env` |
+| `Cookie não persiste após login local` | Flag `secure: true` exigindo HTTPS | Configure `NODE_ENV=development` no `.env` para permitir cookies HTTP locais |
+| `prisma db push` trava ou falha | Tentativa de migrar via Pooler (6543) | Certifique-se de preencher a variável `DIRECT_URL` apontando para a porta 5432 |
+
 ---
 
 ## 🔐 Contas de Acesso Padrão
