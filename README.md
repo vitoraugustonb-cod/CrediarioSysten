@@ -214,6 +214,23 @@ Variáveis de ambiente necessárias no painel da Vercel:
 - `JWT_SECRET`: Chave secreta de assinatura JWT.
 - `NODE_ENV`: `production`.
 
+### 3. Backup, Restauração e Resiliência de Dados
+
+Para garantir a integridade patrimonial das cobranças e continuidade do negócio:
+
+- **Backups Automáticos Diários:** O Supabase realiza snapshots automáticos diários com retenção e integridade física.
+- **Exportação Manual (Dump Completo via `pg_dump`):**
+  ```bash
+  # Gerar dump comprimido contendo dados e schema
+  pg_dump -h db.[REF].supabase.co -U postgres -p 5432 -d postgres -F c -b -v -f crediario_backup_$(date +%Y%m%d).dump
+  ```
+- **Restauração em Banco de Contingência:**
+  ```bash
+  # Restaurar dump em uma nova base
+  pg_restore -h db.[REF_NOVO].supabase.co -U postgres -p 5432 -d postgres -v -c crediario_backup_20260315.dump
+  ```
+- **Point-in-Time Recovery (PITR):** Suporte à restauração para qualquer segundo dos últimos 7 dias através dos registros de WAL (Write-Ahead Logging) do PostgreSQL.
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
