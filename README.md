@@ -1015,6 +1015,27 @@ O projeto aplica boas práticas de engenharia de software para garantir manuteni
 - **Singleton do Prisma:** Previne o esgotamento de conexões em ambiente Serverless (apenas uma instância do `PrismaClient` por process).
 - **Git Flow:** Código só chega à `main` via Pull Request revisado — sem commits diretos na branch de produção.
 
+### 🔍 Pirâmide de Testes e Estratégia de Homologação
+
+O projeto adota uma matriz progressiva de testes para garantir que nenhuma alteração de código quebre as regras contábeis ou fluxos de tela:
+
+```
+       ▲
+      / \      [E2E: Playwright] - Fluxo completo de venda e baixa de parcela
+     /───\
+    /     \    [Integração: Supertest + Vitest] - Endpoints da API com banco de teste
+   /───────\
+  /         \  [Unitários: Zod + Cálculos] - Matemática de rateio e juros
+ /───────────\
+/             \ [Estático: TypeScript Strict + ESLint + Prettier]
+```
+
+- **Testes Unitários:** Foco em funções puras de cálculo de parcelas, validação de entradas financeiras e schemas Zod.
+- **Testes de Integração:** Validação da atomicidade das transações do Prisma (`$transaction`), garantindo rollback em caso de falha.
+- **Auditoria Contínua:** Verificação automática de integridade referencial e tipagem semântica antes de cada commit.
+
+---
+
 ### Como Rodar Verificações
 
 ```bash
