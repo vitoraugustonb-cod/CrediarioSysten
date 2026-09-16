@@ -531,6 +531,98 @@ npm run dev:frontend
 - `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
 - `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
 
+### 📦 Exemplos de Payloads (Request & Response)
+
+<details>
+<summary><strong>POST /login — Autenticação de Operador</strong></summary>
+
+**Request Body:**
+```json
+{
+  "email": "gerente@crediario.com",
+  "senha": "suasenhaforte"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "usuario": {
+    "id": 1,
+    "nome": "Administrador Geral",
+    "email": "gerente@crediario.com",
+    "perfil": "GERENTE"
+  },
+  "message": "Autenticado com sucesso"
+}
+```
+> O token JWT é transmitido de forma transparente via header `Set-Cookie: token=...; HttpOnly; Secure; SameSite=Lax`.
+</details>
+
+<details>
+<summary><strong>POST /vendas — Emissão de Venda e Carnê Automático</strong></summary>
+
+**Request Body:**
+```json
+{
+  "clienteId": 4,
+  "tipoVenda": "MOVEIS",
+  "valorEntrada": 100.00,
+  "numParcelas": 6,
+  "itens": [
+    { "produtoId": 2, "quantidade": 1, "precoUnitario": 700.00 }
+  ]
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 12,
+  "clienteId": 4,
+  "valorTotal": 700.00,
+  "valorEntrada": 100.00,
+  "numParcelas": 6,
+  "parcelas": [
+    { "numero": 1, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-04-15T00:00:00.000Z" },
+    { "numero": 2, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-05-15T00:00:00.000Z" }
+  ]
+}
+```
+</details>
+
+<details>
+<summary><strong>PATCH /parcelas/:id/pagamento — Baixa com Dupla Conferência</strong></summary>
+
+**Request Body:**
+```json
+{
+  "valorPago": 100.00,
+  "confirmacaoValor": 100.00
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "sucesso": true,
+  "parcela": {
+    "id": 35,
+    "numero": 1,
+    "status": "PAGA",
+    "valor": 100.00,
+    "valorPago": 100.00
+  },
+  "excedenteAmortizado": 0.00,
+  "recibo": {
+    "codigoAutenticacao": "AUTH-7894-B6",
+    "dataPagamento": "2026-03-15T14:32:10.000Z",
+    "operador": "João Silva (Cobrador)"
+  }
+}
+```
+</details>
+
 ---
 
 
