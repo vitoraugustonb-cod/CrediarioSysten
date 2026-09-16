@@ -852,6 +852,41 @@ npm --prefix frontend run tsc -- --noEmit
 
 ---
 
+## 📊 Observabilidade, Logs e Monitoramento
+
+A aplicação conta com padrões de telemetria e rastreabilidade para auditoria financeira e diagnóstico de operação:
+
+### 1. Health Checks Automatizados
+- Endpoint de monitoramento: `GET /health`
+- Resposta de disponibilidade:
+  ```json
+  {
+    "status": "ok",
+    "timestamp": "2026-03-15T21:00:00.000Z",
+    "database": "connected"
+  }
+  ```
+
+### 2. Logs Estruturados de Auditoria
+Operações financeiras críticas (baixas de cobrança, ajustes manuais e logins) emitem eventos estruturados em JSON para integração com ferramentas de análise (Vercel Logs, Logtail, Grafana Loki):
+
+```json
+{
+  "level": "info",
+  "timestamp": "2026-03-15T14:32:10.142Z",
+  "event": "PARCELA_PAGA",
+  "operadorId": 2,
+  "parcelaId": 35,
+  "valorRecebido": 100.00,
+  "ipOrigem": "177.18.xxx.xxx"
+}
+```
+
+### 3. Trilha de Auditoria Contábil (`Auditoria`)
+Toda mutação nas parcelas gera um registro permanente na tabela `Auditoria` com snapshot anterior, novo estado e operador responsável, prevenindo contestações financeiras.
+
+---
+
 ## ❓ Perguntas Frequentes (FAQ)
 
 <details>
