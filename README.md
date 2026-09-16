@@ -748,6 +748,25 @@ A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tra
 }
 ```
 
+### 📑 Catálogo Estruturado de Códigos de Negócio
+
+Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos padronizados no campo `codigo` do payload JSON de erro:
+
+| Código de Negócio | HTTP | Causa Raiz | Ação Recomendada pelo Frontend |
+| :--- | :---: | :--- | :--- |
+| `AUTH_INVALID_CREDENTIALS` | `401` | E-mail ou senha incorretos informados no login | Exibir alerta de credenciais e focar no campo e-mail |
+| `AUTH_TOKEN_EXPIRED` | `401` | Sessão expirada ou cookie httpOnly ausente | Redirecionar usuário para `/login` com aviso |
+| `USER_ACCOUNT_INACTIVE` | `403` | Operador desativado pela gerência | Bloquear acesso e orientar contato com a gerência |
+| `ACCESS_DENIED_ROLE` | `403` | Cobrador tentando acessar rota de administração | Exibir aviso de privilégio insuficiente |
+| `FINANCIAL_VALIDATION_ERROR` | `400` | Valor negativo, zero ou entrada maior que venda | Destacar campos com validação Zod no formulário |
+| `PARCELA_ALREADY_PAID` | `409` | Parcela já liquidada por outro operador | Atualizar status da parcela e notificar quitação prévia |
+| `CONCURRENCY_CONFLICT` | `409` | Duas baixas disparadas simultaneamente no mesmo registro | Solicitar recarregamento dos dados para checar novo saldo |
+| `CLIENTE_NOT_FOUND` | `404` | Identificador de cliente não localizado no banco | Informar que a ficha do cliente pode ter sido removida |
+| `RATE_LIMIT_EXCEEDED` | `429` | Mais de 5 tentativas erradas de login em 15min | Exibir cronômetro de espera antes de nova tentativa |
+| `DATABASE_CONNECTION_ERROR` | `500` | Timeout de conexão com o pooler PostgreSQL | Exibir modal de instabilidade temporária com retry |
+
+---
+
 | Código HTTP | Significado | Aplicação no Sistema |
 | :---: | :--- | :--- |
 | **`200 OK`** | Sucesso | Leitura de dados, atualizações de parcelas e relatórios |
