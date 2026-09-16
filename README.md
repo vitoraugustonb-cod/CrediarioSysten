@@ -1320,6 +1320,22 @@ Histórico de lançamentos e versões do **Crediário System**:
 
 ---
 
+## 👤 Autor & Agradecimentos
+
+<div align="center">
+  <p>Desenvolvido com dedicação por <strong>Vitor Augusto</strong>.</p>
+  <p>
+    <a href="https://github.com/vitoraugustonb-cod" target="_blank">
+      <img src="https://img.shields.io/badge/GitHub-vitoraugustonb--cod-181717?style=for-the-badge&logo=github" alt="GitHub Profile">
+    </a>
+  </p>
+  <p>
+    <em>Agradecimentos especiais à comunidade de código aberto pelo fornecimento das tecnologias fundamentais que compõem este ecossistema: React, TypeScript, Node.js, Express, Prisma ORM, Vite, Supabase, Vercel e Docker.</em>
+  </p>
+</div>
+
+---
+
 ## 📜 Licença
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
