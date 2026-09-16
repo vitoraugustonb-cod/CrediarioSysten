@@ -1285,6 +1285,19 @@ O projeto adota o padrão [Conventional Commits](https://www.conventionalcommits
 | `test:` | Adição ou ajuste de testes automatizados | `test(api): adiciona testes de integracao para o fluxo de quitação` |
 | `chore:` | Ajustes de manutenção de build, pacotes ou CI/CD | `chore(deps): atualiza versao do prisma orm para 6.4` |
 
+### ✅ Checklist para Abertura de Pull Request
+
+Antes de submeter o seu Pull Request apontando para a branch `develop`, confirme se todas as etapas abaixo foram cumpridas:
+
+- [ ] **Compilação Estática:** O código compila sem erros (`npm --prefix backend run tsc -- --noEmit` e `npm --prefix frontend run tsc -- --noEmit`).
+- [ ] **Conventional Commits:** Todas as mensagens de commit seguem estritamente o formato `tipo(escopo): descricao concisa`.
+- [ ] **Variáveis de Ambiente:** Nenhuma chave secreta, senha, token ou arquivo `.env` foi adicionado acidentalmente ao commit.
+- [ ] **Dual-Platform:** Modificações de interface foram testadas tanto no layout Desktop (gerência) quanto no Mobile (cobrador).
+- [ ] **Atomicidade de Transações:** Operações financeiras com múltiplos passos utilizam obrigatoriamente `prisma.$transaction`.
+- [ ] **Documentação Atualizada:** O [README.md](README.md) ou schemas associados foram atualizados refletindo as novas rotas ou regras.
+
+---
+
 ### Reportar Bugs
 
 Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) descrevendo:
