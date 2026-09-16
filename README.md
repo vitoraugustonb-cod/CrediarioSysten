@@ -23,6 +23,8 @@
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel">
   <img src="https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/Security-Helmet_%2B_Zod_%2B_RateLimit-red?logo=shield&logoColor=white" alt="Security">
+  <img src="https://img.shields.io/badge/Code_Quality-TypeScript_Strict-blue?logo=typescript&logoColor=white" alt="TS Strict">
+  <img src="https://img.shields.io/badge/Commits-Conventional%20Commits-yellow?logo=git&logoColor=white" alt="Conventional Commits">
 </p>
 
 <p align="center">
@@ -296,6 +298,29 @@ sequenceDiagram
 
 ---
 
+## 🛡️ Privacidade de Dados e Conformidade LGPD
+
+O **Crediário System** foi concebido em conformidade com as diretrizes da **Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD)**, garantindo a proteção dos dados cadastrais e financeiros de consumidores e colaboradores:
+
+1. **Princípio da Minimização:**
+   - Coleta restrita ao essencial para execução do contrato comercial de crediário: Nome, Telefone de Contato e Referências de Localização/Endereço.
+   - Nenhum dado biométrico, sensível ou prescindível é solicitado ou armazenado no banco de dados.
+
+2. **Segurança de Trânsito e Repouso:**
+   - Toda comunicação entre cliente, API e banco opera sob túneis criptografados **TLS 1.3 / HTTPS**.
+   - Conexão com o banco PostgreSQL no Supabase requer autenticação forte com credenciais protegidas em variáveis de ambiente isoladas.
+
+3. **Direito de Acesso e Retificação:**
+   - Clientes possuem direito de atualização facilitada de número telefônico e referências residenciais através do endpoint gerencial `PATCH /clientes/:id`.
+
+4. **Trilha de Auditoria e Transparência:**
+   - Cada modificação contábil ou cadastral registra a identidade do operador responsável, a estampa de tempo precisa (`timestamp`) e o histórico de estados (`dadosAnteriores` vs `dadosNovos`).
+
+5. **Isolamento de Credenciais:**
+   - Senhas de operadores são convertidas com função criptográfica de hashing unidirecional de alta complexidade (`bcrypt`) antes de serem gravadas no banco de dados.
+
+---
+
 ## 🌿 Estratégia de Branching (Git Flow)
 
 O repositório segue o fluxo profissional de branches:
@@ -356,12 +381,53 @@ O frontend responsivo é testado e homologado para os seguintes ambientes:
 
 ## ⚙️ Funcionalidades Principais
 
+### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
+
+O sistema implementa controle rígido de autorização por perfil de acesso (Role-Based Access Control) validado em cada requisição na camada de middleware:
+
+| Recurso / Ação Operacional | Gerente (`GERENTE`) | Cobrador de Rua (`VENDEDOR_COBRADOR`) | Justificativa de Compliance |
+| :--- | :---: | :---: | :--- |
+| **Login com Rate Limiter** | ✅ Permitido | ✅ Permitido | Acesso unificado com auditoria por IP |
+| **Consulta de Clientes & Saldo** | ✅ Total | ✅ Própria rota/geral | Necessário para atendimento em campo |
+| **Cadastro de Novo Cliente** | ✅ Permitido | ✅ Permitido | Agilidade para abertura de fichas na rua |
+| **Emissão de Nova Venda (Carnê)** | ✅ Permitido | ✅ Permitido | Fechamento imediato de negócios em visita |
+| **Baixa de Parcela com Dupla Digitação** | ✅ Permitido | ✅ Permitido | Operação central de liquidação |
+| **Ajuste Manual / Estorno de Parcela** | ✅ Exclusivo | ❌ Bloqueado | Prevenção de adulteração de valores |
+| **Prorrogação de Vencimento** | ✅ Exclusivo | ❌ Bloqueado | Política de risco e negociação contratual |
+| **Gestão de Operadores & Usuários** | ✅ Exclusivo | ❌ Bloqueado | Controle administrativo de credenciais |
+| **Ativação / Desativação de Contas** | ✅ Exclusivo | ❌ Bloqueado | Revogação instantânea de acesso à equipe |
+| **Dashboard Consolidado (KPIs)** | ✅ Total | ❌ Bloqueado | Dados estratégicos e financeiros globais |
+| **Prestação de Contas da Equipe** | ✅ Todos os cobradores | ❌ Bloqueado | Auditoria do montante total arrecadado |
+| **Prestação de Contas Individual** | ✅ Visualiza todos | ✅ Apenas o próprio dia | Conferência diária do dinheiro em espécie |
+
+---
+
 ### 👤 Perfil: Gerente (Desktop)
 - Dashboard financeiro em tempo real (Faturamento, Inadimplência, Projeções).
 - Gestão de Usuários (criação e desativação instantânea de operadores).
 - Gestão de Clientes e cálculo automático de Saldo Devedor.
 - Catálogo de Produtos e precificação.
 - Relatórios de prestação de contas diária da equipe.
+
+### 🛵 Guia Operacional: Rotina Diária de Cobrança em Campo
+
+Para garantir a eficiência operacional e a exatidão financeira na rotina de porta em porta, o cobrador segue um fluxo padronizado de 5 etapas:
+
+```mermaid
+flowchart LR
+    E1["1. Abertura do Dia & Sincronização"] --> E2["2. Filtragem de Vencidos & Hoje"]
+    E2 --> E3["3. Localização do Cliente na Rota"]
+    E3 --> E4["4. Baixa com Dupla Digitação"]
+    E4 --> E5["5. Fechamento de Caixa Diário"]
+```
+
+1. **Sincronização Matinal:** Ao efetuar login no aparelho mobile, a listagem inicial carrega automaticamente os títulos pendentes agrupados por prioridade (parcelas vencidas em destaque vermelho e vencendo no dia em amarelo).
+2. **Localização e Contato:** Cada registro exibe os dados essenciais de contato, referências de endereço e saldo consolidado do cliente, permitindo confirmação rápida da identidade antes de abordar a cobrança.
+3. **Liquidação Segura (Anti-Erro):** O cobrador informa o valor em dinheiro ou transferência e o sistema exige a **dupla digitação de conferência**, evitando erros por digitação rápida ou toques involuntários em tela sensível.
+4. **Tratamento de Excedentes:** Caso o cliente pague um valor superior ao da parcela atual, o motor do sistema calcula e distribui o excedente como amortização na próxima parcela vincenda automaticamente.
+5. **Fechamento e Prestação de Contas:** Ao final do expediente de cobrança, a tela de *Prestação de Contas Pessoal* exibe o total arrecadado no dia e a quantidade de parcelas recebidas para conferência física com a gerência.
+
+---
 
 ### 🛵 Perfil: Vendedor / Cobrador (Mobile)
 - Lista de cobranças diárias priorizada (Hoje e Atrasadas).
@@ -375,6 +441,23 @@ O frontend responsivo é testado e homologado para os seguintes ambientes:
 ## 📐 Regras de Negócio Financeiras
 
 O sistema implementa lógica financeira robusta para garantir consistência das operações de crediário:
+
+### 📖 Glossário Financeiro do Crediário
+
+Para facilitar o entendimento de desenvolvedores, contadores e administradores, apresentamos os termos técnicos aplicados na regra de negócio:
+
+| Termo | Definição no Sistema |
+| :--- | :--- |
+| **Carnê de Crediário** | Conjunto sequencial de parcelas geradas a partir de uma venda a prazo com vencimentos mensais programados. |
+| **Entrada (Down Payment)** | Valor inicial pago pelo cliente no ato da compra, abatido imediatamente do saldo total financiado. |
+| **Amortização em Cascata** | Aplicação automática de valores pagos a mais em relação ao valor da parcela atual diretamente sobre a parcela pendente subsequente. |
+| **Parcela Parcial (`PARCIAL`)** | Parcela cujo valor recebido foi menor que o valor total estipulado; permanece ativa com saldo remanescente em aberto. |
+| **Saldo Devedor Consolidado** | Soma total de todas as parcelas pendentes, atrasadas e saldos parciais de um cliente em todas as suas compras ativas. |
+| **Prestação de Contas** | Relatório diário de fechamento que concilia os pagamentos recebidos por cada cobrador com o dinheiro em caixa. |
+| **Liquidação Atômica** | Operação indivisível no banco de dados que garante a gravação do pagamento, atualização da parcela e criação da auditoria de forma inseparável. |
+| **Dupla Digitação** | Mecanismo de segurança na interface mobile exigindo digitar e confirmar o valor recebido antes de submeter a baixa. |
+
+---
 
 ### 🔢 Cálculo de Parcelas
 
@@ -495,6 +578,66 @@ CrediarioSysten/
 
 ## 🛠️ Como Executar Localmente
 
+
+### 🖥️ Pré-requisitos por Sistema Operacional
+
+Antes de iniciar, certifique-se de possuir os seguintes requisitos instalados de acordo com o seu sistema operacional:
+
+- **Node.js:** Versão 20.x LTS ou 22.x LTS ([Download](https://nodejs.org/))
+- **Git:** Versão 2.40+ ([Download](https://git-scm.com/))
+- **Docker & Docker Compose (Opcional):** Para execução em containers ([Download](https://www.docker.com/))
+
+<details>
+<summary><strong>Instruções para Windows (PowerShell)</strong></summary>
+
+```powershell
+# Verificar versões instaladas
+node -v
+npm -v
+git --version
+
+# Clonar e acessar diretório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+Set-Location CrediarioSysten
+git checkout develop
+```
+</details>
+
+<details>
+<summary><strong>Instruções para Linux (Ubuntu / Debian / Arch)</strong></summary>
+
+```bash
+# Atualizar repositórios e instalar dependências essenciais
+sudo apt update && sudo apt install -y curl git build-essential
+
+# Instalar Node.js via NVM (recomendado)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+
+# Clonar repositório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+cd CrediarioSysten
+git checkout develop
+```
+</details>
+
+<details>
+<summary><strong>Instruções para macOS (Homebrew / Zsh)</strong></summary>
+
+```zsh
+# Instalação via Homebrew
+brew install node git
+
+# Clonar repositório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+cd CrediarioSysten
+git checkout develop
+```
+</details>
+
+---
 
 ### 1. Clonar o repositório
 ```bash
@@ -705,6 +848,25 @@ A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tra
 }
 ```
 
+### 📑 Catálogo Estruturado de Códigos de Negócio
+
+Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos padronizados no campo `codigo` do payload JSON de erro:
+
+| Código de Negócio | HTTP | Causa Raiz | Ação Recomendada pelo Frontend |
+| :--- | :---: | :--- | :--- |
+| `AUTH_INVALID_CREDENTIALS` | `401` | E-mail ou senha incorretos informados no login | Exibir alerta de credenciais e focar no campo e-mail |
+| `AUTH_TOKEN_EXPIRED` | `401` | Sessão expirada ou cookie httpOnly ausente | Redirecionar usuário para `/login` com aviso |
+| `USER_ACCOUNT_INACTIVE` | `403` | Operador desativado pela gerência | Bloquear acesso e orientar contato com a gerência |
+| `ACCESS_DENIED_ROLE` | `403` | Cobrador tentando acessar rota de administração | Exibir aviso de privilégio insuficiente |
+| `FINANCIAL_VALIDATION_ERROR` | `400` | Valor negativo, zero ou entrada maior que venda | Destacar campos com validação Zod no formulário |
+| `PARCELA_ALREADY_PAID` | `409` | Parcela já liquidada por outro operador | Atualizar status da parcela e notificar quitação prévia |
+| `CONCURRENCY_CONFLICT` | `409` | Duas baixas disparadas simultaneamente no mesmo registro | Solicitar recarregamento dos dados para checar novo saldo |
+| `CLIENTE_NOT_FOUND` | `404` | Identificador de cliente não localizado no banco | Informar que a ficha do cliente pode ter sido removida |
+| `RATE_LIMIT_EXCEEDED` | `429` | Mais de 5 tentativas erradas de login em 15min | Exibir cronômetro de espera antes de nova tentativa |
+| `DATABASE_CONNECTION_ERROR` | `500` | Timeout de conexão com o pooler PostgreSQL | Exibir modal de instabilidade temporária com retry |
+
+---
+
 | Código HTTP | Significado | Aplicação no Sistema |
 | :---: | :--- | :--- |
 | **`200 OK`** | Sucesso | Leitura de dados, atualizações de parcelas e relatórios |
@@ -725,6 +887,99 @@ A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tra
 ## 🗃️ Modelo de Dados (Prisma Schema)
 
 O banco de dados é modelado com **Prisma ORM** e possui as seguintes entidades principais:
+
+### 📊 Diagrama Entidade-Relacionamento (ERD)
+
+O diagrama abaixo ilustra a modelagem relacional completa do banco de dados no PostgreSQL (Supabase), demonstrando cardinalidades, chaves e trilha de auditoria:
+
+```mermaid
+erDiagram
+    USUARIO {
+        int id PK
+        string nome
+        string email UK
+        string senha
+        PerfilUsuario perfil
+        boolean ativo
+        datetime criadoEm
+    }
+
+    CLIENTE {
+        int id PK
+        string nome
+        string telefone
+        string referencias
+        datetime criadoEm
+    }
+
+    PRODUTO {
+        int id PK
+        string nome
+        decimal preco
+        CategoriaProduto categoria
+        datetime criadoEm
+    }
+
+    VENDA {
+        int id PK
+        int clienteId FK
+        int vendedorId FK
+        decimal valorTotal
+        decimal valorEntrada
+        int numParcelas
+        TipoVenda tipoVenda
+        datetime dataVenda
+    }
+
+    ITEM_VENDA {
+        int id PK
+        int vendaId FK
+        int produtoId FK
+        int quantidade
+        decimal precoUnitario
+    }
+
+    PARCELA {
+        int id PK
+        int vendaId FK
+        int numero
+        decimal valor
+        decimal valorPago
+        date dataVencimento
+        StatusParcela status
+        datetime criadoEm
+    }
+
+    PAGAMENTO {
+        int id PK
+        int parcelaId FK
+        int vendaId FK
+        int operadorId FK
+        decimal valor
+        datetime dataPagamento
+    }
+
+    AUDITORIA {
+        int id PK
+        int parcelaId FK
+        int usuarioId FK
+        string acao
+        string dadosAnteriores
+        string dadosNovos
+        datetime timestamp
+    }
+
+    USUARIO ||--o{ VENDA : "emite"
+    USUARIO ||--o{ PAGAMENTO : "recebe"
+    USUARIO ||--o{ AUDITORIA : "registra"
+    CLIENTE ||--o{ VENDA : "compra"
+    VENDA ||--|{ ITEM_VENDA : "possui"
+    PRODUTO ||--o{ ITEM_VENDA : "compoe"
+    VENDA ||--|{ PARCELA : "gera carnet"
+    VENDA ||--o{ PAGAMENTO : "recebe amortizacoes"
+    PARCELA ||--o{ PAGAMENTO : "liquidada por"
+    PARCELA ||--o{ AUDITORIA : "possui trilha"
+```
 
 ### Entidades e Relacionamentos
 
@@ -859,6 +1114,27 @@ O projeto aplica boas práticas de engenharia de software para garantir manuteni
 - **Transações Atômicas:** Operações críticas de múltiplos passos usam `prisma.$transaction` — nunca deixam o banco em estado inconsistente.
 - **Singleton do Prisma:** Previne o esgotamento de conexões em ambiente Serverless (apenas uma instância do `PrismaClient` por process).
 - **Git Flow:** Código só chega à `main` via Pull Request revisado — sem commits diretos na branch de produção.
+
+### 🔍 Pirâmide de Testes e Estratégia de Homologação
+
+O projeto adota uma matriz progressiva de testes para garantir que nenhuma alteração de código quebre as regras contábeis ou fluxos de tela:
+
+```
+       ▲
+      / \      [E2E: Playwright] - Fluxo completo de venda e baixa de parcela
+     /───\
+    /     \    [Integração: Supertest + Vitest] - Endpoints da API com banco de teste
+   /───────\
+  /         \  [Unitários: Zod + Cálculos] - Matemática de rateio e juros
+ /───────────\
+/             \ [Estático: TypeScript Strict + ESLint + Prettier]
+```
+
+- **Testes Unitários:** Foco em funções puras de cálculo de parcelas, validação de entradas financeiras e schemas Zod.
+- **Testes de Integração:** Validação da atomicidade das transações do Prisma (`$transaction`), garantindo rollback em caso de falha.
+- **Auditoria Contínua:** Verificação automática de integridade referencial e tipagem semântica antes de cada commit.
+
+---
 
 ### Como Rodar Verificações
 
@@ -1009,6 +1285,19 @@ O projeto adota o padrão [Conventional Commits](https://www.conventionalcommits
 | `test:` | Adição ou ajuste de testes automatizados | `test(api): adiciona testes de integracao para o fluxo de quitação` |
 | `chore:` | Ajustes de manutenção de build, pacotes ou CI/CD | `chore(deps): atualiza versao do prisma orm para 6.4` |
 
+### ✅ Checklist para Abertura de Pull Request
+
+Antes de submeter o seu Pull Request apontando para a branch `develop`, confirme se todas as etapas abaixo foram cumpridas:
+
+- [ ] **Compilação Estática:** O código compila sem erros (`npm --prefix backend run tsc -- --noEmit` e `npm --prefix frontend run tsc -- --noEmit`).
+- [ ] **Conventional Commits:** Todas as mensagens de commit seguem estritamente o formato `tipo(escopo): descricao concisa`.
+- [ ] **Variáveis de Ambiente:** Nenhuma chave secreta, senha, token ou arquivo `.env` foi adicionado acidentalmente ao commit.
+- [ ] **Dual-Platform:** Modificações de interface foram testadas tanto no layout Desktop (gerência) quanto no Mobile (cobrador).
+- [ ] **Atomicidade de Transações:** Operações financeiras com múltiplos passos utilizam obrigatoriamente `prisma.$transaction`.
+- [ ] **Documentação Atualizada:** O [README.md](README.md) ou schemas associados foram atualizados refletindo as novas rotas ou regras.
+
+---
+
 ### Reportar Bugs
 
 Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) descrevendo:
@@ -1028,6 +1317,22 @@ Histórico de lançamentos e versões do **Crediário System**:
 - **Segurança Financeira:** Rate limit, cookies httpOnly e validação rígida via Zod.
 - **Concorrência Segura:** Transações atômicas com Prisma para baixas de pagamentos sem duplicidade.
 - **Suporte a Nuvem:** Integração nativa com Vercel Serverless e Supabase PostgreSQL.
+
+---
+
+## 👤 Autor & Agradecimentos
+
+<div align="center">
+  <p>Desenvolvido com dedicação por <strong>Vitor Augusto</strong>.</p>
+  <p>
+    <a href="https://github.com/vitoraugustonb-cod" target="_blank">
+      <img src="https://img.shields.io/badge/GitHub-vitoraugustonb--cod-181717?style=for-the-badge&logo=github" alt="GitHub Profile">
+    </a>
+  </p>
+  <p>
+    <em>Agradecimentos especiais à comunidade de código aberto pelo fornecimento das tecnologias fundamentais que compõem este ecossistema: React, TypeScript, Node.js, Express, Prisma ORM, Vite, Supabase, Vercel e Docker.</em>
+  </p>
+</div>
 
 ---
 
