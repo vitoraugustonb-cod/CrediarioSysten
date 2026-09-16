@@ -874,6 +874,21 @@ npm --prefix frontend run tsc -- --noEmit
 <p>O sistema agrega todos os pagamentos baixados pelo operador no dia corrente, filtrando por data e identificador do usuário autenticado. O gerente obtém tanto o fechamento individual quanto consolidado da equipe.</p>
 </details>
 
+<details>
+<summary><strong>5. Como funciona o estorno de um pagamento registrado incorretamente?</strong></summary>
+<p>Por diretrizes de compliance contábil, operadores de rua não possuem privilégio de exclusão ou estorno. Caso ocorra inconsistência, o perfil <strong>Gerente</strong> realiza a retificação pela rota gerencial <code>PATCH /parcelas/:id/ajuste</code>, gerando rastro indelével de auditoria.</p>
+</details>
+
+<details>
+<summary><strong>6. O sistema aplica juros ou encargos automáticos em parcelas vencidas?</strong></summary>
+<p>O sistema segue a prática de carnê de valor de parcela contratado no ato da venda. Encargos ou descontos pontuais podem ser concedidos pelo gerente ou ajustados no fechamento da renegociação, mantendo transparência com o consumidor.</p>
+</details>
+
+<details>
+<summary><strong>7. O que ocorre se a internet do cobrador oscilar durante a baixa de uma parcela?</strong></summary>
+<p>A transação opera sob bloco atômico no PostgreSQL. Se o pacote de rede for interrompido antes do commit, o banco executa rollback integral. Se o commit tiver ocorrido, nova tentativa retornará o status atualizado sem debitar ou duplicar a quitação.</p>
+</details>
+
 ---
 
 ## 🗺️ Roadmap & Milestones
