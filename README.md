@@ -298,6 +298,29 @@ sequenceDiagram
 
 ---
 
+## 🛡️ Privacidade de Dados e Conformidade LGPD
+
+O **Crediário System** foi concebido em conformidade com as diretrizes da **Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD)**, garantindo a proteção dos dados cadastrais e financeiros de consumidores e colaboradores:
+
+1. **Princípio da Minimização:**
+   - Coleta restrita ao essencial para execução do contrato comercial de crediário: Nome, Telefone de Contato e Referências de Localização/Endereço.
+   - Nenhum dado biométrico, sensível ou prescindível é solicitado ou armazenado no banco de dados.
+
+2. **Segurança de Trânsito e Repouso:**
+   - Toda comunicação entre cliente, API e banco opera sob túneis criptografados **TLS 1.3 / HTTPS**.
+   - Conexão com o banco PostgreSQL no Supabase requer autenticação forte com credenciais protegidas em variáveis de ambiente isoladas.
+
+3. **Direito de Acesso e Retificação:**
+   - Clientes possuem direito de atualização facilitada de número telefônico e referências residenciais através do endpoint gerencial `PATCH /clientes/:id`.
+
+4. **Trilha de Auditoria e Transparência:**
+   - Cada modificação contábil ou cadastral registra a identidade do operador responsável, a estampa de tempo precisa (`timestamp`) e o histórico de estados (`dadosAnteriores` vs `dadosNovos`).
+
+5. **Isolamento de Credenciais:**
+   - Senhas de operadores são convertidas com função criptográfica de hashing unidirecional de alta complexidade (`bcrypt`) antes de serem gravadas no banco de dados.
+
+---
+
 ## 🌿 Estratégia de Branching (Git Flow)
 
 O repositório segue o fluxo profissional de branches:
