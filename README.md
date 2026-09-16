@@ -358,6 +358,27 @@ O frontend responsivo é testado e homologado para os seguintes ambientes:
 
 ## ⚙️ Funcionalidades Principais
 
+### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
+
+O sistema implementa controle rígido de autorização por perfil de acesso (Role-Based Access Control) validado em cada requisição na camada de middleware:
+
+| Recurso / Ação Operacional | Gerente (`GERENTE`) | Cobrador de Rua (`VENDEDOR_COBRADOR`) | Justificativa de Compliance |
+| :--- | :---: | :---: | :--- |
+| **Login com Rate Limiter** | ✅ Permitido | ✅ Permitido | Acesso unificado com auditoria por IP |
+| **Consulta de Clientes & Saldo** | ✅ Total | ✅ Própria rota/geral | Necessário para atendimento em campo |
+| **Cadastro de Novo Cliente** | ✅ Permitido | ✅ Permitido | Agilidade para abertura de fichas na rua |
+| **Emissão de Nova Venda (Carnê)** | ✅ Permitido | ✅ Permitido | Fechamento imediato de negócios em visita |
+| **Baixa de Parcela com Dupla Digitação** | ✅ Permitido | ✅ Permitido | Operação central de liquidação |
+| **Ajuste Manual / Estorno de Parcela** | ✅ Exclusivo | ❌ Bloqueado | Prevenção de adulteração de valores |
+| **Prorrogação de Vencimento** | ✅ Exclusivo | ❌ Bloqueado | Política de risco e negociação contratual |
+| **Gestão de Operadores & Usuários** | ✅ Exclusivo | ❌ Bloqueado | Controle administrativo de credenciais |
+| **Ativação / Desativação de Contas** | ✅ Exclusivo | ❌ Bloqueado | Revogação instantânea de acesso à equipe |
+| **Dashboard Consolidado (KPIs)** | ✅ Total | ❌ Bloqueado | Dados estratégicos e financeiros globais |
+| **Prestação de Contas da Equipe** | ✅ Todos os cobradores | ❌ Bloqueado | Auditoria do montante total arrecadado |
+| **Prestação de Contas Individual** | ✅ Visualiza todos | ✅ Apenas o próprio dia | Conferência diária do dinheiro em espécie |
+
+---
+
 ### 👤 Perfil: Gerente (Desktop)
 - Dashboard financeiro em tempo real (Faturamento, Inadimplência, Projeções).
 - Gestão de Usuários (criação e desativação instantânea de operadores).
