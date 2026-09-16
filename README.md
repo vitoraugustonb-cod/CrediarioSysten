@@ -579,6 +579,66 @@ CrediarioSysten/
 ## 🛠️ Como Executar Localmente
 
 
+### 🖥️ Pré-requisitos por Sistema Operacional
+
+Antes de iniciar, certifique-se de possuir os seguintes requisitos instalados de acordo com o seu sistema operacional:
+
+- **Node.js:** Versão 20.x LTS ou 22.x LTS ([Download](https://nodejs.org/))
+- **Git:** Versão 2.40+ ([Download](https://git-scm.com/))
+- **Docker & Docker Compose (Opcional):** Para execução em containers ([Download](https://www.docker.com/))
+
+<details>
+<summary><strong>Instruções para Windows (PowerShell)</strong></summary>
+
+```powershell
+# Verificar versões instaladas
+node -v
+npm -v
+git --version
+
+# Clonar e acessar diretório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+Set-Location CrediarioSysten
+git checkout develop
+```
+</details>
+
+<details>
+<summary><strong>Instruções para Linux (Ubuntu / Debian / Arch)</strong></summary>
+
+```bash
+# Atualizar repositórios e instalar dependências essenciais
+sudo apt update && sudo apt install -y curl git build-essential
+
+# Instalar Node.js via NVM (recomendado)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+
+# Clonar repositório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+cd CrediarioSysten
+git checkout develop
+```
+</details>
+
+<details>
+<summary><strong>Instruções para macOS (Homebrew / Zsh)</strong></summary>
+
+```zsh
+# Instalação via Homebrew
+brew install node git
+
+# Clonar repositório
+git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
+cd CrediarioSysten
+git checkout develop
+```
+</details>
+
+---
+
 ### 1. Clonar o repositório
 ```bash
 git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
