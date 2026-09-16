@@ -640,6 +640,35 @@ npm run dev:frontend
 ```
 </details>
 
+### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
+
+A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tratamento padronizado no frontend e mensagens amigáveis em tela:
+
+```json
+{
+  "erro": "Saldo informado inválido para quitação",
+  "codigo": "FINANCIAL_VALIDATION_ERROR",
+  "detalhes": [
+    {
+      "campo": "valorPago",
+      "mensagem": "O valor informado não pode ser negativo ou nulo"
+    }
+  ]
+}
+```
+
+| Código HTTP | Significado | Aplicação no Sistema |
+| :---: | :--- | :--- |
+| **`200 OK`** | Sucesso | Leitura de dados, atualizações de parcelas e relatórios |
+| **`201 Created`** | Criado com Sucesso | Nova venda emitida, cliente cadastrado ou produto incluído |
+| **`400 Bad Request`** | Erro de Validação | Falha de validação no schema Zod ou valor contábil inconsistente |
+| **`401 Unauthorized`** | Não Autenticado | Ausência de cookie de sessão, token expirado ou inválido |
+| **`403 Forbidden`** | Acesso Negado | Cobrador tentando acessar endpoints exclusivos da gerência |
+| **`404 Not Found`** | Recurso Inexistente | Cliente, parcela ou produto não localizado pelo identificador |
+| **`409 Conflict`** | Conflito de Estado | Concorrência: tentativa de baixar parcela que já foi liquidada |
+| **`429 Too Many Requests`** | Taxa Excedida | Bloqueio de IP por exceder 5 tentativas de login em 15 minutos |
+| **`500 Internal Error`** | Erro de Servidor | Falha não prevista capturada pelo middleware global de tratamento |
+
 ---
 
 
