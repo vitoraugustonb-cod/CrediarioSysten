@@ -419,6 +419,23 @@ flowchart LR
 
 O sistema implementa lógica financeira robusta para garantir consistência das operações de crediário:
 
+### 📖 Glossário Financeiro do Crediário
+
+Para facilitar o entendimento de desenvolvedores, contadores e administradores, apresentamos os termos técnicos aplicados na regra de negócio:
+
+| Termo | Definição no Sistema |
+| :--- | :--- |
+| **Carnê de Crediário** | Conjunto sequencial de parcelas geradas a partir de uma venda a prazo com vencimentos mensais programados. |
+| **Entrada (Down Payment)** | Valor inicial pago pelo cliente no ato da compra, abatido imediatamente do saldo total financiado. |
+| **Amortização em Cascata** | Aplicação automática de valores pagos a mais em relação ao valor da parcela atual diretamente sobre a parcela pendente subsequente. |
+| **Parcela Parcial (`PARCIAL`)** | Parcela cujo valor recebido foi menor que o valor total estipulado; permanece ativa com saldo remanescente em aberto. |
+| **Saldo Devedor Consolidado** | Soma total de todas as parcelas pendentes, atrasadas e saldos parciais de um cliente em todas as suas compras ativas. |
+| **Prestação de Contas** | Relatório diário de fechamento que concilia os pagamentos recebidos por cada cobrador com o dinheiro em caixa. |
+| **Liquidação Atômica** | Operação indivisível no banco de dados que garante a gravação do pagamento, atualização da parcela e criação da auditoria de forma inseparável. |
+| **Dupla Digitação** | Mecanismo de segurança na interface mobile exigindo digitar e confirmar o valor recebido antes de submeter a baixa. |
+
+---
+
 ### 🔢 Cálculo de Parcelas
 
 - O **valor de cada parcela** é calculado como: `(valorTotal - valorEntrada) / numParcelas`
