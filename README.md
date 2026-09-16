@@ -23,6 +23,8 @@
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel">
   <img src="https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/Security-Helmet_%2B_Zod_%2B_RateLimit-red?logo=shield&logoColor=white" alt="Security">
+  <img src="https://img.shields.io/badge/Code_Quality-TypeScript_Strict-blue?logo=typescript&logoColor=white" alt="TS Strict">
+  <img src="https://img.shields.io/badge/Commits-Conventional%20Commits-yellow?logo=git&logoColor=white" alt="Conventional Commits">
 </p>
 
 <p align="center">
