@@ -236,6 +236,37 @@ O projeto implementa camadas estritas de segurança em profundidade:
 7. **Tratamento Global de Erros:**
    Stack traces e detalhes internos do banco são omitidos das respostas em ambiente de produção.
 
+### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant FE as Frontend React (SPA)
+    participant RL as Rate Limiter (IP Guard)
+    participant API as Auth Controller & Middleware
+    participant DB as Supabase PostgreSQL
+
+    U->>FE: Fornece e-mail e senha
+    FE->>RL: POST /login (credenciais)
+    alt Tentativas excedidas (> 5 em 15 min)
+        RL-->>FE: 429 Too Many Requests
+    else Taxa permitida
+        RL->>API: Encaminha requisição
+        API->>DB: Consulta usuário por e-mail
+        DB-->>API: Retorna hash e status ativo
+        API->>API: Compara senha e valida se ativo === true
+        API-->>FE: 200 OK (Cookie httpOnly com JWT + perfil)
+    end
+
+    Note over FE,API: Requisições subsequentes autenticadas
+    FE->>API: GET /clientes (Cookie enviado pelo browser)
+    API->>API: authMiddleware decodifica e valida JWT
+    API->>DB: Checa status ativo instantâneo
+    DB-->>API: Usuário ativo confirmado
+    API-->>FE: Resposta com dados autorizados
+```
+
 ---
 
 ## 🌿 Estratégia de Branching (Git Flow)
