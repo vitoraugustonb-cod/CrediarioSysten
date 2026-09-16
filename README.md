@@ -329,6 +329,19 @@ Para operadores de caixa e gerentes que buscam agilidade na rotina de escritóri
 - **Contraste Visual AA:** Paleta calibrada para legibilidade superior em ambientes com variação de luminosidade.
 - **Outline de Foco:** Marcadores de foco destacados (`focus-visible`) para operação 100% via teclado sem mouse.
 
+### 📱 Matriz de Compatibilidade de Dispositivos & Browsers
+
+O frontend responsivo é testado e homologado para os seguintes ambientes:
+
+| Navegador / Plataforma | Suporte | Versão Mínima | Modo Recomendado |
+| :--- | :---: | :---: | :--- |
+| **Google Chrome (Desktop)** | ✅ Homologado | 110+ | Painel Gerencial em alta resolução |
+| **Google Chrome (Android)** | ✅ Homologado | 115+ | Instalado como Atalho Web / PWA |
+| **Apple Safari (iOS)** | ✅ Homologado | 16.4+ | Adicionar à Tela de Início (Full Screen) |
+| **Mozilla Firefox** | ✅ Homologado | 115+ (ESR) | Modo Navegador Desktop |
+| **Microsoft Edge** | ✅ Homologado | 110+ | Ambientes corporativos Windows |
+| **Samsung Internet** | ✅ Homologado | 22+ | Cobrança em campo em aparelhos Samsung |
+
 ---
 
 ## ⚙️ Funcionalidades Principais
