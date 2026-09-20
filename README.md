@@ -576,8 +576,16 @@ Saldo = Σ(valor de todas as parcelas PENDENTE, ATRASADA e PARCIAL) - Σ(valorPa
 
 Na interface mobile, o cobrador precisa **confirmar o valor digitado duas vezes** antes de registrar um pagamento — prevenindo lançamentos errados por toque acidental em campo.
 
+### 💳 Pagamento Adiantado pela Ficha do Cliente
 
+Para proporcionar flexibilidade comercial quando o cliente deseja adiantar valores voluntariamente fora da rota diária:
 
+- **Acesso Rápido na Aba Clientes:** O operador pesquisa o cliente pelo nome ou telefone, independentemente de haver parcelas vencendo no dia ou em atraso.
+- **Liquidação por Ordem Cronológica (FIFO):** Caso o cliente pague um valor avulso sem especificar a parcela, o motor financeiro liquida a parcela pendente mais antiga em aberto, abatendo juros futuros se aplicável.
+- **Abatimento no Saldo Devedor Consolidado:** O valor pago reduz imediatamente o saldo devedor do cliente em todas as visões (Painel Desktop do Gerente e Mobile do Cobrador).
+- **Trilha de Auditoria:** O pagamento adiantado recebe tag `ORIGEM: FICHA_CLIENTE_ADIANTAMENTO` com ID do operador, data e hora exatas da transação.
+
+---
 
 ## 🗂️ Estrutura do Projeto
 
