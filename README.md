@@ -1110,6 +1110,16 @@ O sistema foi projetado com foco em eficiência tanto no backend quanto no front
 | **Índices no Banco** | `@unique` em emails, `@id` com `autoincrement` | Consultas rápidas em lookups frequentes de usuários e clientes |
 | **Queries Seletivas** | `select: {}` no Prisma | Retorna apenas os campos necessários — reduz payload e processamento |
 
+### 🗄️ Indexação e Otimização no PostgreSQL
+
+Para sustentar milhares de parcelas sem degradação de tempo de resposta em consultas de rua:
+
+- **Índices Estratégicos:**
+  - `idx_parcelas_status_vencimento`: Acelera a filtragem diária de parcelas `ATRASADA` e `PENDENTE` na rota matinal do cobrador.
+  - `idx_vendas_cliente_data`: Otimiza a consulta do histórico financeiro completo e consolidação do saldo devedor por cliente.
+  - `idx_pagamentos_operador_data`: Permite agregação instantânea para prestação de contas no fechamento do dia.
+- **Modo Transaction do PgBouncer:** Mantém as conexões ativas apenas durante a execução de transações SQL, liberando slots imediatamente após o commit, permitindo que dezenas de instâncias serverless compartilhem um pool compacto de 15 conexões sem rejeição de tráfego.
+
 ### Frontend
 
 | Otimização | Implementação | Impacto |
