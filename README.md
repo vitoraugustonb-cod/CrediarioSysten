@@ -331,6 +331,24 @@ sequenceDiagram
 
 ---
 
+### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
+
+O sistema adota o princípio do menor privilégio (*Least Privilege*), dividindo responsabilidades estritas entre os perfis:
+
+| Recurso / Ação Operacional | `GERENTE` (Desktop) | `VENDEDOR_COBRADOR` (Mobile) | Validação Backend |
+| :--- | :---: | :---: | :--- |
+| **Dashboard Consolidado & Projeções** | ✅ Total | ❌ Sem Acesso | `authMiddleware` + `perfil === GERENTE` |
+| **Criar / Desativar Operadores** | ✅ Total | ❌ Sem Acesso | Endpoint restrito `/usuarios` |
+| **Cadastrar Novos Clientes** | ✅ Total | ✅ Em Campo | Permissão mútua com Zod Whitelist |
+| **Emissão de Vendas e Carnês** | ✅ Total | ✅ No Ponto de Venda | Transação atômica vinculando o operador |
+| **Baixa de Parcelas e Quitações** | ✅ Total | ✅ Rota do Dia / Ficha | Dupla digitação e concorrência segura |
+| **Ajuste Manual de Valores / Descontos** | ✅ Total | ❌ Proibido | Apenas com justificativa em auditoria |
+| **Prorrogação de Vencimentos** | ✅ Total | ❌ Proibido | Evita adiamentos sem anuência gerencial |
+| **Visualizar Trilha de Auditoria** | ✅ Total | ❌ Sem Acesso | Acesso exclusivo ao log contábil |
+| **Prestação de Contas de Caixa** | ✅ Todos os Cobradores | ✅ Própria Arrecadação | Filtro automático por `operadorId` |
+
+---
+
 ## 🛡️ Privacidade de Dados e Conformidade LGPD
 
 O **Crediário System** foi concebido em conformidade com as diretrizes da **Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD)**, garantindo a proteção dos dados cadastrais e financeiros de consumidores e colaboradores:
