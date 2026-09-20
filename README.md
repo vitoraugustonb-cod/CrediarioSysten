@@ -436,6 +436,26 @@ flowchart LR
 - Cadastro e consulta instantânea de clientes em campo.
 - Resumo pessoal de arrecadação do dia.
 
+### 📲 Comunicação e Comprovantes via WhatsApp
+
+Para agilizar o atendimento em campo e reforçar a transparência com os clientes, o sistema oferece integração direta com a API de links do WhatsApp:
+
+- **Envio Imediato de Recibo Digital:** Ao confirmar uma baixa de parcela ou quitação adiantada, o cobrador pode disparar um comprovante com mensagem pré-formatada com apenas um clique.
+- **Lembrete de Vencimento:** Notificações amigáveis automáticas informando a data de vencimento da parcela e chave Pix para pagamento antecipado.
+- **Formatação do Comprovante:**
+  ```text
+  📄 *COMPROVANTE DE PAGAMENTO - CREDIÁRIO SYSTEM*
+  -----------------------------------------------
+  👤 Cliente: Maria Silva
+  📅 Data/Hora: 19/09/2026 às 14:32
+  🔢 Parcela: 03/10
+  💵 Valor Pago: R$ 150,00
+  📉 Saldo Devedor Restante: R$ 1.050,00
+  -----------------------------------------------
+  Cobrador: Carlos Vendedor | Autenticação: #TX-98412
+  Obrigado pela preferência!
+  ```
+
 ---
 
 ## 📐 Regras de Negócio Financeiras
