@@ -243,6 +243,18 @@ Para garantir a integridade patrimonial das cobranças e continuidade do negóci
   ```
 - **Point-in-Time Recovery (PITR):** Suporte à restauração para qualquer segundo dos últimos 7 dias através dos registros de WAL (Write-Ahead Logging) do PostgreSQL.
 
+### 4. Política de Retenção e Ciclo de Vida dos Registros
+
+Para atender a conformidades fiscais e garantir auditoria retroativa sem sobrecarregar o banco de dados:
+
+| Entidade / Registro | Período de Retenção | Política de Limpeza | Justificativa Regulatória |
+| :--- | :--- | :--- | :--- |
+| **Vendas & Carnês** | 5 Anos após quitação | Arquivamento histórico | Art. 174 do CTN (Prescrição tributária e fiscal) |
+| **Recibos de Pagamento** | Permanente | Imutável (Somente leitura) | Comprovação jurídica de quitação de títulos |
+| **Clientes Inativos** | Indefinido | Soft Delete (`ativo: false`) | Preservação da integridade referencial com vendas antigas |
+| **Logs de Tentativas de Login** | 90 Dias | Expiração automática (Cron) | Detecção forense de ataques sem acúmulo de dados |
+| **Sessões JWT / Cookies** | 8 Horas | Invalidação automática | Mitigação de sequestro de sessão em dispositivos móveis |
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
