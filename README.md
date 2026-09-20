@@ -255,6 +255,27 @@ Para atender a conformidades fiscais e garantir auditoria retroativa sem sobreca
 | **Logs de Tentativas de Login** | 90 Dias | Expiração automática (Cron) | Detecção forense de ataques sem acúmulo de dados |
 | **Sessões JWT / Cookies** | 8 Horas | Invalidação automática | Mitigação de sequestro de sessão em dispositivos móveis |
 
+### 5. Plano de Continuidade e Disaster Recovery (RPO & RTO)
+
+Para assegurar a operação contínua mesmo em caso de falhas severas na infraestrutura:
+
+| Métrica | Meta Operacional | Estratégia Adotada |
+| :--- | :--- | :--- |
+| **RPO (Recovery Point Objective)** | **< 15 minutos** | Gravação contínua em WAL (Write-Ahead Logging) no Supabase e transações atômicas síncronas. |
+| **RTO (Recovery Time Objective)** | **< 30 minutos** | Script de provisionamento rápido e restauração de schema via `prisma db push` + dump de contingência. |
+
+```mermaid
+flowchart TD
+    Incidente["🚨 Incidente Detectado (Falha de Região / Queda de Banco)"] --> Triagem["1. Diagnóstico de Conectividade"]
+    Triagem --> Decisao{"Supabase Operacional?"}
+    Decisao -- Sim --> Reparo["Restauração via PITR para minuto anterior à falha"]
+    Decisao -- Não --> Contingencia["2. Apontar DIRECT_URL / DATABASE_URL para Base Backup"]
+    Contingencia --> Restore["3. pg_restore do último snapshot consolidado"]
+    Restore --> Validacao["4. Validação de Integridade Contábil"]
+    Reparo --> Validacao
+    Validacao --> Normalizacao["✅ Operação Normalizada (Cobranças Liberadas)"]
+```
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
