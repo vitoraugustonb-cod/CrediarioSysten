@@ -1107,6 +1107,29 @@ Parcela ──────────────┤
 | `CategoriaProduto` | `MOVEIS`, `VARIEDADES` |
 | `TipoVenda` | `MOVEIS`, `VARIEDADES` |
 
+### 📜 Trilha de Auditoria e Imutabilidade Contábil
+
+Para prevenir fraudes, divergências de caixa e garantir rastreabilidade jurídica completa:
+
+- **Arquitetura Append-Only:** A tabela `Auditoria` opera em modo estritamente aditivo. Nenhuma operação via API possui permissão de `UPDATE` ou `DELETE` sobre registros de auditoria.
+- **Eventos Monitorados:**
+  - `BAIXA_PARCELA`: Quitação regular pelo cobrador na rota com valor e timestamp.
+  - `AMORTIZACAO_EXCEDENTE`: Aplicação automática de saldo remanescente na parcela seguinte.
+  - `AJUSTE_VALOR_GERENCIA`: Alteração excepcional de valor ou concessão de desconto pelo Gerente.
+  - `PRORROGACAO_DATA`: Adiamento acordado de vencimento com justificativa registrada.
+  - `ESTORNO_CONTABIL`: Cancelamento de baixa com reintegração do saldo devedor original.
+- **Formato dos Dados Gravados:**
+  ```json
+  {
+    "acao": "AJUSTE_VALOR_GERENCIA",
+    "usuarioId": 1,
+    "parcelaId": 42,
+    "dadosAnteriores": "{\"valor\": 180.00, \"status\": \"PENDENTE\"}",
+    "dadosNovos": "{\"valor\": 150.00, \"status\": \"PENDENTE\", \"motivo\": \"Desconto promocional autorizado\"}",
+    "timestamp": "2026-09-19T22:08:00.000Z"
+  }
+  ```
+
 ---
 
 ## ⚙️ Variáveis de Ambiente
