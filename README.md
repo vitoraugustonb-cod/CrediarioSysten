@@ -460,6 +460,18 @@ O sistema implementa controle rígido de autorização por perfil de acesso (Rol
 - Catálogo de Produtos e precificação.
 - Relatórios de prestação de contas diária da equipe.
 
+### 📊 Indicadores de Desempenho e Métricas Operacionais (KPIs)
+
+O Dashboard Gerencial consolida métricas estratégicas para monitorar a saúde da carteira de crédito:
+
+| Indicador (KPI) | Fórmula de Cálculo | Meta Operacional | Ação Recomendada em Desvio |
+| :--- | :--- | :---: | :--- |
+| **Taxa de Inadimplência** | `(Total Vencido > 5 dias / Carteira Ativa) * 100` | `< 8.0%` | Priorização de rota e renegociação amigável |
+| **Eficácia de Cobrança Diária** | `(Parcelas Recebidas / Parcelas Agendadas Hoje) * 100` | `> 85.0%` | Redistribuição de clientes por cobrador |
+| **Ticket Médio de Venda** | `Faturamento Total / Número de Vendas no Mês` | Monitoramento | Ajuste no limite de crédito por perfil de renda |
+| **Taxa de Adiantamento** | `Parcelas Liquidadas Antecipadamente / Total de Parcelas` | `> 12.0%` | Incentivo comercial com descontos pontuais |
+| **Aging da Carteira** | Distribuição em faixas: 1-15d, 16-30d, 31-60d e 60d+ | `< 5% em 60d+` | Encaminhamento para cobrança extrajudicial |
+
 ### 🛵 Guia Operacional: Rotina Diária de Cobrança em Campo
 
 Para garantir a eficiência operacional e a exatidão financeira na rotina de porta em porta, o cobrador segue um fluxo padronizado de 5 etapas:
