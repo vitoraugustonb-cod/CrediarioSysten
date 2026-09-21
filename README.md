@@ -276,6 +276,17 @@ flowchart TD
     Validacao --> Normalizacao["✅ Operação Normalizada (Cobranças Liberadas)"]
 ```
 
+### 6. Matriz de Resiliência e Tratamento de Falhas de Conexão
+
+Em rotas de cobrança em bairros periféricos com sinal 3G/4G oscilante, o sistema adota comportamentos específicos para prevenir inconsistências:
+
+| Cenário de Falha | Comportamento da Aplicação | Medida de Proteção aos Dados |
+| :--- | :--- | :--- |
+| **Queda de Conexão durante POST** | Timeout de 10s no client com botão de retentativa | Idempotência pelo código único da parcela, impedindo duplicidade |
+| **Latência Elevada (> 3000ms)** | Bloqueio temporário da interface com spinner de aguardo | Desativação imediata de múltiplos cliques acidentais no botão |
+| **Erro 503 / Vercel Cold Start** | Retry exponencial automático (máx 3 tentativas) | Reaquecimento suave da função serverless sem perda do formulário |
+| **Perda Total de Internet** | Alerta em banner vermelho no topo da tela mobile | Bloqueio de submissão para evitar perda de dados não sincronizados |
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
