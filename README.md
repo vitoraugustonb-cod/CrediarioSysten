@@ -1425,6 +1425,16 @@ Toda mutação nas parcelas gera um registro permanente na tabela `Auditoria` co
 <p>A transação opera sob bloco atômico no PostgreSQL. Se o pacote de rede for interrompido antes do commit, o banco executa rollback integral. Se o commit tiver ocorrido, nova tentativa retornará o status atualizado sem debitar ou duplicar a quitação.</p>
 </details>
 
+<details>
+<summary><strong>8. Como agir em caso de furto ou perda do celular do cobrador em campo?</strong></summary>
+<p>O gerente acessa imediatamente o painel desktop em <code>/usuarios</code> e clica em <strong>Desativar Operador</strong>. O middleware de autenticação revoga instantaneamente o token JWT na próxima requisição do dispositivo, impedindo qualquer acesso indevido à base de clientes.</p>
+</details>
+
+<details>
+<summary><strong>9. Como é realizada a renegociação de múltiplas parcelas em atraso?</strong></summary>
+<p>O gerente pode unificar as parcelas vencidas em um novo acordo comercial ajustando valores e prazos, mantendo o histórico de auditoria vinculado à venda original para preservar a idoneidade contábil.</p>
+</details>
+
 ---
 
 ## 🗺️ Roadmap & Milestones
