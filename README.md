@@ -381,6 +381,15 @@ O **Crediário System** foi concebido em conformidade com as diretrizes da **Lei
 5. **Isolamento de Credenciais:**
    - Senhas de operadores são convertidas com função criptográfica de hashing unidirecional de alta complexidade (`bcrypt`) antes de serem gravadas no banco de dados.
 
+### 🔐 Checklist de Boas Práticas para Operadores de Rua
+
+Para preservar o sigilo das informações de clientes e a integridade da arrecadação em trânsito:
+
+- [x] **Bloqueio de Tela Obrigatório:** Manter biometria ou PIN ativo no aparelho celular utilizado na rota de cobrança.
+- [x] **Encerramento de Sessão:** Efetuar logout no final do turno para expirar o cookie de autenticação `httpOnly`.
+- [x] **Não Compartilhamento de Credenciais:** Cada operador deve utilizar estritamente o seu usuário nominal para preservar o valor jurídico da auditoria.
+- [x] **Conferência Visual com o Cliente:** Sempre exibir o resumo da tela de quitação ao cliente antes de finalizar a baixa.
+
 ---
 
 ## 🌿 Estratégia de Branching (Git Flow)
