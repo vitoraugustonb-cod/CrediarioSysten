@@ -1329,6 +1329,18 @@ npm --prefix backend run tsc -- --noEmit
 npm --prefix frontend run tsc -- --noEmit
 ```
 
+### 📋 Roteiro de Testes Manuais e Homologação Operacional
+
+Para validação em ambiente de homologação (*staging*) antes de liberar novas versões aos cobradores:
+
+| # | Cenário Operacional | Entrada / Ação do Usuário | Resultado Esperado |
+| :-: | :--- | :--- | :--- |
+| **01** | Baixa Exata de Parcela | Informar o valor exato no mobile com dupla digitação | Parcela muda para `PAGA` e comprovante WhatsApp é liberado |
+| **02** | Pagamento Parcial | Informar valor menor que a parcela devida | Status muda para `PARCIAL`, exibindo saldo devedor restante |
+| **03** | Amortização Excedente | Pagar valor superior ao saldo da parcela | Parcela atual é quitada e sobra é abatida na próxima em aberto |
+| **04** | Bloqueio de Concorrência | Disparar duas baixas simultâneas na mesma parcela | Uma operação é confirmada e a segunda recebe HTTP `409 Conflict` |
+| **05** | Fechamento de Turno | Cobrador acessa resumo no final da rota | Somatório confere com o total em espécie e Pix recolhidos |
+
 ---
 
 ## 📊 Observabilidade, Logs e Monitoramento
