@@ -519,6 +519,14 @@ Para agilizar o atendimento em campo e reforçar a transparência com os cliente
   Obrigado pela preferência!
   ```
 
+### 🖨️ Suporte a Mini-Impressoras Térmicas Bluetooth (ESC/POS)
+
+Para comércios onde o cliente final exige o comprovante físico impresso na porta de casa:
+
+- **Protocolo de Impressão:** Compatível com impressoras térmicas portáteis de bolso utilizando protocolo **ESC/POS** de **58mm** e **80mm** (ex: Goojprt, POS-5802, MPT-II).
+- **Conectividade Direta:** Comunicação via **Web Bluetooth API** em navegadores Chrome/Android sem necessidade de aplicativo auxiliar externo.
+- **Layout de Bobina Otimizado:** Recibo monocromático com largura compacta, corte automático de margens e QR Code de autenticação contábil impresso no rodapé.
+
 ---
 
 ## 📐 Regras de Negócio Financeiras
