@@ -1271,6 +1271,16 @@ Para sustentar milhares de parcelas sem degradação de tempo de resposta em con
 | **Edge CDN** | Vercel Edge Network | Assets estáticos distribuídos globalmente com latência mínima |
 | **Favicon SVG** | Ícone vetorial escalável | Carregamento ultra-rápido e qualidade perfeita em qualquer resolução |
 
+### 🚀 Métricas de Core Web Vitals e Compressão de Assets
+
+Para assegurar carregamento instantâneo em conexões de dados móveis 3G/4G:
+
+- **Compressão Brotli & Gzip:** Ativada por padrão na Edge da Vercel e Nginx local, reduzindo o payload JavaScript/CSS inicial em mais de 70%.
+- **Metas de Web Vitals:**
+  - **LCP (Largest Contentful Paint):** `< 1.5s` (Renderização ultra-rápida do painel e fichas de clientes).
+  - **INP (Interaction to Next Paint):** `< 100ms` (Feedback tátil imediato em cliques de baixa e seleção).
+  - **CLS (Cumulative Layout Shift):** `< 0.05` (Zero descolamento visual ao renderizar valores monetários).
+
 ---
 
 ## 🧪 Testes e Qualidade de Código
