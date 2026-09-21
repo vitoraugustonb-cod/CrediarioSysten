@@ -792,6 +792,24 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
+### 5. Comandos de Manutenção do Prisma e Dados de Teste
+
+Para gerenciar o banco de dados e popular dados fictícios para homologação:
+
+```bash
+# Sincronizar o schema com o banco sem criar arquivos de migração
+npm --prefix backend run prisma db push
+
+# Abrir o Prisma Studio para inspeção visual dos registros (Porta 5555)
+npm --prefix backend run prisma studio
+
+# Gerar novamente os tipos do Prisma Client após alterações no schema
+npm run prisma:generate
+
+# Popular banco com dados fictícios de teste (semeadura de clientes e vendas)
+npm --prefix backend run seed
+```
+
 ### 🔧 Troubleshooting (Resolução de Problemas Comuns)
 
 | Sintoma / Erro | Causa Mais Comum | Solução Recomendada |
