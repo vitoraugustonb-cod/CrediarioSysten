@@ -1171,6 +1171,18 @@ Para prevenir fraudes, divergências de caixa e garantir rastreabilidade jurídi
   }
   ```
 
+### ⚖️ Matriz de Severidade e Alertas de Auditoria
+
+Para auditoria rápida e triagem forense, cada ação do sistema possui uma classificação de impacto operacional:
+
+| Evento de Auditoria | Severidade | Notificação Gerencial | Ação de Conformidade |
+| :--- | :---: | :---: | :--- |
+| `BAIXA_PARCELA` | ⚪ Baixa | Registro silencioso | Conferência padrão na prestação de contas |
+| `AMORTIZACAO_EXCEDENTE` | 🔵 Informativa | Registro silencioso | Validação automática da ordem de vencimentos |
+| `PRORROGACAO_DATA` | 🟡 Média | Exibição em relatório | Justificativa comercial exigida no ato |
+| `AJUSTE_VALOR_GERENCIA` | 🟠 Alta | Destaque no dashboard | Exige anuência expressa da diretoria |
+| `ESTORNO_CONTABIL` | 🔴 Crítica | Alerta imediato no painel | Abertura de protocolo de averiguação interna |
+
 ---
 
 ## ⚙️ Variáveis de Ambiente
