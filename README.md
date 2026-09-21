@@ -615,6 +615,16 @@ Para proporcionar flexibilidade comercial quando o cliente deseja adiantar valor
 - **Abatimento no Saldo Devedor Consolidado:** O valor pago reduz imediatamente o saldo devedor do cliente em todas as visões (Painel Desktop do Gerente e Mobile do Cobrador).
 - **Trilha de Auditoria:** O pagamento adiantado recebe tag `ORIGEM: FICHA_CLIENTE_ADIANTAMENTO` com ID do operador, data e hora exatas da transação.
 
+### 🏦 Conciliação Diária de Caixa e Gestão de Sangria
+
+Para garantir a acurácia dos valores físicos arrecadados em campo versus os registros no sistema:
+
+- **Conferência Cega de Fechamento:** No final do expediente, o cobrador apresenta o montante físico arrecadado antes de visualizar o relatório consolidado do sistema, reduzindo desvios operacionais.
+- **Segregação por Meio de Pagamento:**
+  - **Espécie (Dinheiro físico):** Depositado ou repassado diretamente no cofre gerencial mediante termo de entrega assinado.
+  - **Chave Pix / Transferência:** Conciliado automaticamente com o extrato bancário corporativo por conferência de comprovante digital e código autenticador.
+- **Sangria Preventiva de Rota:** Cobradores em rotas de alto volume realizam repasses intermediários ao longo do dia, mitigando risco patrimonial e mantendo o limite operacional de caixa seguro.
+
 ---
 
 ## 🗂️ Estrutura do Projeto
