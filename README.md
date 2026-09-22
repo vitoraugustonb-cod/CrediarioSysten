@@ -295,6 +295,24 @@ Em rotas de cobrança em bairros periféricos com sinal 3G/4G oscilante, o siste
 | **Erro 503 / Vercel Cold Start** | Retry exponencial automático (máx 3 tentativas) | Reaquecimento suave da função serverless sem perda do formulário |
 | **Perda Total de Internet** | Alerta em banner vermelho no topo da tela mobile | Bloqueio de submissão para evitar perda de dados não sincronizados |
 
+### 7. Pipeline de CI/CD e Automação de Deploys
+
+O repositório adota um fluxo de integração e entrega contínua estruturado em etapas sequenciais:
+
+```mermaid
+flowchart LR
+    Push["1. Git Push (develop)"] --> Lint["2. Lint & TypeScript Strict"]
+    Lint --> PrismaVal["3. Validação do Prisma Schema"]
+    PrismaVal --> Preview["4. Preview Deployment (Vercel)"]
+    Preview --> PR["5. PR Homologado para main"]
+    PR --> Prod["6. Deploy Automático em Produção"]
+```
+
+1. **Validação Estática e Tipagem:** Cada push na branch `develop` dispara a checagem rigorosa de tipos no frontend e backend (`tsc --noEmit`), assegurando ausência de inconsistências.
+2. **Auditoria de Schema:** O Prisma Schema é verificado com `prisma validate` para garantir que modelos, relações e enums estejam íntegros.
+3. **Deploy Preview na Vercel:** Pull Requests recebem automaticamente uma URL de pré-visualização isolada para homologação de layout e fluxos antes de tocar a branch `main`.
+4. **Deploy Contínuo em Produção:** Ao mesclar na `main`, a Vercel compila o frontend e atualiza as Serverless Functions sem interrupção de serviço.
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
