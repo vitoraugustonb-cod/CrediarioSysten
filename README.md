@@ -498,6 +498,15 @@ O frontend responsivo é testado e homologado para os seguintes ambientes:
 | **Microsoft Edge** | ✅ Homologado | 110+ | Ambientes corporativos Windows |
 | **Samsung Internet** | ✅ Homologado | 22+ | Cobrança em campo em aparelhos Samsung |
 
+### 📱 Guia de Usabilidade Tátil e Otimização para Cobradores de Rua
+
+A interface mobile foi projetada especificamente para o ritmo dinâmico de cobrança em campo, sob condições adversas de iluminação e mobilidade:
+
+- **Alvos de Toque Ampliados:** Botões de ação primária (baixa, confirmação, WhatsApp) possuem altura mínima de **48px** com espaçamento generoso, prevenindo cliques acidentais mesmo com uso de luvas ou em trânsito.
+- **Teclado Numérico Direto:** Campos de entrada de valores monetários utilizam `inputMode="decimal"` com `pattern="[0-9]*"`, acionando o teclado numérico direto no smartphone sem necessidade de alternar abas no teclado virtual.
+- **Prevenção de Zoom Indesejado:** Aplicação de `touch-action: manipulation` e fontes com tamanho mínimo de `16px` em inputs para desativar o duplo toque de zoom involuntário no iOS Safari e Android Chrome.
+- **Visibilidade sob Sol Forte:** Uso de contraste tipográfico elevado (preto puro e fundos claros) nas listas de títulos para permitir leitura clara sob luz solar direta em áreas abertas.
+
 ---
 
 ## ⚙️ Funcionalidades Principais
