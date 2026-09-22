@@ -703,6 +703,15 @@ Para garantir a acurácia dos valores físicos arrecadados em campo versus os re
   - **Chave Pix / Transferência:** Conciliado automaticamente com o extrato bancário corporativo por conferência de comprovante digital e código autenticador.
 - **Sangria Preventiva de Rota:** Cobradores em rotas de alto volume realizam repasses intermediários ao longo do dia, mitigando risco patrimonial e mantendo o limite operacional de caixa seguro.
 
+### 🔄 Fluxo de Estorno Contábil e Protocolo de Retificação
+
+Em situações excepcionais onde um pagamento foi registrado incorretamente (ex: digitação de valor divergente ou baixa na ficha errada), a retificação segue um protocolo contábil blindado:
+
+1. **Restrição por Privilégio:** Apenas usuários com perfil `GERENTE` possuem autorização para disparar o estorno. Cobradores de rua não possuem visibilidade nem rota para exclusão de pagamentos.
+2. **Reversão Atômica de Estado:** A operação reverte o status da parcela de `PAGA` para `PENDENTE` (ou `PARCIAL`, recalculando o saldo pago) e reajusta o saldo devedor consolidado do cliente de forma indivisível.
+3. **Imutabilidade e Registro de Auditoria:** O registro original de pagamento é mantido com anotação de cancelamento e uma entrada imutável de evento `ESTORNO_CONTABIL` é gravada na tabela `Auditoria`, exigindo justificativa textual obrigatória.
+4. **Impacto na Prestação de Contas:** O valor estornado é automaticamente deduzido da prestação de contas do cobrador no dia de referência, evitando divergência no fechamento físico de caixa.
+
 ---
 
 ## 🗂️ Estrutura do Projeto
