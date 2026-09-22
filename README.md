@@ -61,22 +61,30 @@
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
 - [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
+  - [📊 Matriz de Dimensionamento de Infraestrutura para VPS](#-matriz-de-dimensionamento-de-infraestrutura-para-vps)
 - [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
   - [💾 Backup, Restauração e Resiliência de Dados](#3-backup-restauração-e-resiliência-de-dados)
   - [⚡ Resiliência e Falhas de Rede](#6-matriz-de-resiliência-e-tratamento-de-falhas-de-conexão)
+  - [🔄 Pipeline de CI/CD e Automação de Deploys](#7-pipeline-de-cicd-e-automação-de-deploys)
+  - [🚀 Checklist Operacional de Pré e Pós-Deploy](#8-checklist-operacional-de-pré-deploy-e-pós-deploy)
 - [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
   - [🛡️ Ciclo de Vida da Sessão & Autenticação Segura](#️-ciclo-de-vida-da-sessão--autenticação-segura)
+  - [🔐 Política de Gestão e Rotação de Segredos JWT](#-política-de-gestão-e-rotação-de-segredos-jwt)
   - [🔐 Checklist de Segurança para Operadores](#-checklist-de-boas-práticas-para-operadores-de-rua)
+  - [🔒 Mascaramento e Sanitização de Dados para Homologação](#-procedimento-de-mascaramento-e-sanitização-de-dados-para-homologação)
 - [🌿 Estratégia de Branching (Git Flow)](#-estratégia-de-branching-git-flow)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
   - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
   - [⌨️ Acessibilidade & Atalhos no Painel Desktop](#️-acessibilidade--atalhos-no-painel-desktop)
   - [📱 Matriz de Compatibilidade de Dispositivos & Browsers](#-matriz-de-compatibilidade-de-dispositivos--browsers)
+  - [📱 Guia de Usabilidade Tátil no Campo Mobile](#-guia-de-usabilidade-tátil-e-otimização-para-cobradores-de-rua)
   - [🖨️ Impressoras Térmicas Bluetooth](#️-suporte-a-mini-impressoras-térmicas-bluetooth-escpos)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
+  - [⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks](#-arquitetura-de-conciliação-pix-dinâmico-e-webhooks-baas)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
   - [🔄 Fluxo de Liquidação Atômica de Parcela](#-fluxo-de-liquidação-atômica-de-parcela)
   - [🏦 Conciliação Diária de Caixa & Sangria](#-conciliação-diária-de-caixa-e-gestão-de-sangria)
+  - [🔄 Fluxo de Estorno Contábil e Retificação](#-fluxo-de-estorno-contábil-e-protocolo-de-retificação)
 - [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [🛠️ Como Executar Localmente](#️-como-executar-localmente)
   - [📦 Comandos Prisma & Seeds](#5-comandos-de-manutenção-do-prisma-e-dados-de-teste)
@@ -97,6 +105,7 @@
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
 - [📋 Changelog](#-changelog)
+- [📞 Matriz de SLAs Operacionais e Canais de Suporte](#-matriz-de-slas-operacionais-e-canais-de-suporte)
 - [📜 Licença](#-licença)
 
 ---
@@ -1663,6 +1672,19 @@ Histórico de lançamentos e versões do **Crediário System**:
 - **Segurança Financeira:** Rate limit, cookies httpOnly e validação rígida via Zod.
 - **Concorrência Segura:** Transações atômicas com Prisma para baixas de pagamentos sem duplicidade.
 - **Suporte a Nuvem:** Integração nativa com Vercel Serverless e Supabase PostgreSQL.
+
+---
+
+## 📞 Matriz de SLAs Operacionais e Canais de Suporte
+
+Para assegurar a continuidade ininterrupta das equipes de cobrança em campo e conciliação contábil:
+
+| Nível de Severidade | Definição de Impacto | Tempo Máximo de Resposta | Resolução Alvo (RTO) | Canal de Acionamento |
+| :---: | :--- | :---: | :---: | :--- |
+| **S1 (Crítico)** | Sistema indisponível, falha geral de login ou erro em transações atômicas | < 15 minutos | < 1 hora | Plantão de Infraestrutura / Pager |
+| **S2 (Alto)** | Lentidão severa no mobile ou falha na integração com banco de dados | < 1 hora | < 4 horas | Canal prioritário de suporte interno |
+| **S3 (Médio)** | Falha pontual em impressão térmica ESC/POS ou exportação de relatórios | < 4 horas | < 24 horas | Abertura de chamado técnico |
+| **S4 (Baixo)** | Dúvidas operacionais, sugestões de melhorias visuais ou ajustes cosméticos | < 24 horas | Próxima sprint | Fórum de Issues do GitHub |
 
 ---
 
