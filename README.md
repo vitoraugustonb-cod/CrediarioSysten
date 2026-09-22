@@ -366,6 +366,18 @@ sequenceDiagram
     API-->>FE: Resposta com dados autorizados
 ```
 
+### 🔐 Política de Gestão e Rotação de Segredos JWT
+
+Para mitigar riscos de sequestro de credenciais e garantir a segurança criptográfica da autenticação:
+
+1. **Tempo de Vida do Token:** Cada token JWT emitido possui validade máxima estrita de **8 horas**, cobrindo o turno operacional padrão de cobrança e forçando nova autenticação diária.
+2. **Armazenamento Seguro em Produção:** A variável `JWT_SECRET` é injetada exclusivamente em tempo de execução via painel seguro da Vercel, nunca sendo versionada no repositório.
+3. **Procedimento de Rotação Periódica:** Em caso de rotação preventiva de chaves ou suspeita de comprometimento:
+   - A nova chave é atualizada nas variáveis de ambiente da Vercel.
+   - O redeploy automático invalida instantaneamente todos os cookies legados assinados com a chave anterior.
+   - Operadores em campo são redirecionados de forma transparente à tela de login para renovar a sessão.
+4. **Higienização de Logs:** Middlwares e interceptores omitem explicitamente qualquer menção ao conteúdo bruto de cookies ou tokens em saídas de erro ou monitoramento.
+
 ---
 
 ### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
