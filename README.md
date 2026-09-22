@@ -454,6 +454,15 @@ Para preservar o sigilo das informações de clientes e a integridade da arrecad
 - [x] **Não Compartilhamento de Credenciais:** Cada operador deve utilizar estritamente o seu usuário nominal para preservar o valor jurídico da auditoria.
 - [x] **Conferência Visual com o Cliente:** Sempre exibir o resumo da tela de quitação ao cliente antes de finalizar a baixa.
 
+### 🔒 Procedimento de Mascaramento e Sanitização de Dados para Homologação
+
+Para cumprir os preceitos de privacidade da LGPD ao restaurar dumps de produção em ambientes de desenvolvimento ou homologação local:
+
+1. **Anonimização Cadastral:** Scripts de sanitização substituem nomes reais por pseudônimos randômicos e geram telefones fictícios válidos.
+2. **Ofuscação de Referências Residenciais:** Endereços e referências de cobrança são substituídos por marcadores sintéticos (*"Rua Homologação, 100"*).
+3. **Preservação da Integridade Contábil:** Relações de chave estrangeira (`clienteId`, `vendaId`, `parcelaId`), valores monetários e datas históricas de vencimento são rigorosamente mantidos para validar cálculos matemáticos reais sem expor dados pessoais sensíveis.
+4. **Vedação de Cópia Bruta:** É terminantemente proibido transferir dumps de produção diretamente para máquinas pessoais sem a execução prévia do script de mascaramento.
+
 ---
 
 ## 🌿 Estratégia de Branching (Git Flow)
