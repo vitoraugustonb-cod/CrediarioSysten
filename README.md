@@ -325,6 +325,20 @@ flowchart LR
 3. **Deploy Preview na Vercel:** Pull Requests recebem automaticamente uma URL de pré-visualização isolada para homologação de layout e fluxos antes de tocar a branch `main`.
 4. **Deploy Contínuo em Produção:** Ao mesclar na `main`, a Vercel compila o frontend e atualiza as Serverless Functions sem interrupção de serviço.
 
+### 8. Checklist Operacional de Pré-Deploy e Pós-Deploy
+
+Para assegurar lançamentos em produção com zero indisponibilidade (*zero-downtime*) e proteção contábil:
+
+#### 📋 Pré-Deploy
+- [x] **Compatibilidade de Schema:** Validar se alterações no Prisma Schema mantêm compatibilidade retroativa com a API em execução.
+- [x] **Variáveis de Ambiente:** Garantir que novas variáveis estejam cadastradas nos ambientes `Preview` e `Production` da Vercel.
+- [x] **Verificação de Build:** Executar compilação local completa (`npm run build:frontend` e `npm run build:backend`).
+
+#### 🚀 Pós-Deploy
+- [x] **Sonda de Integridade:** Testar endpoint de health check (`GET /health`) confirmando status `connected` do PostgreSQL.
+- [x] **Fluxo Crítico de Login:** Realizar login de teste com operador homologado verificando a emissão do cookie `httpOnly`.
+- [x] **Pooling de Conexões:** Verificar métricas no Supabase Dashboard para checar uso saudável de conexões na porta 6543 (PgBouncer).
+
 ---
 
 ## 🔒 Segurança & Hardening Avançado
