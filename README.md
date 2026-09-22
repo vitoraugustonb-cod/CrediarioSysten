@@ -606,6 +606,33 @@ Para comércios onde o cliente final exige o comprovante físico impresso na por
 - **Conectividade Direta:** Comunicação via **Web Bluetooth API** em navegadores Chrome/Android sem necessidade de aplicativo auxiliar externo.
 - **Layout de Bobina Otimizado:** Recibo monocromático com largura compacta, corte automático de margens e QR Code de autenticação contábil impresso no rodapé.
 
+### ⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks (BaaS)
+
+Para comércios integrados a Provedores de Serviços de Pagamento (PSPs / BaaS), o sistema está preparado para conciliação instantânea via Pix Dinâmico:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente
+    actor Cobrador
+    participant App as App Mobile
+    participant API as Backend Express
+    participant PSP as Gateway / Banco Pix
+
+    Cobrador->>App: Solicita pagamento via Pix
+    App->>API: POST /parcelas/:id/pix-qrcode
+    API->>PSP: Emissão de Cobrança Pix com TxID único
+    PSP-->>API: Copia e Cola + QR Code Dinâmico
+    API-->>App: Exibe QR Code na tela do celular
+    Cliente->>PSP: Efetua pagamento via app bancário
+    PSP->>API: Webhook assíncrono (HMAC validado)
+    API->>API: Baixa atômica de parcela e log de auditoria
+    API-->>App: Notificação em tempo real de confirmação
+```
+
+- **Idempotência por TxID:** Cada cobrança gerada possui identificador único `txid`, garantindo que retentativas de webhook não dupliquem quitações contábeis.
+- **Validação de Assinatura Criptográfica:** Payloads recebidos nos webhooks são validados com `HMAC-SHA256` contra segredo compartilhado, impedindo fraudes ou injeção de pagamentos falsos.
+
 ---
 
 ## 📐 Regras de Negócio Financeiras
