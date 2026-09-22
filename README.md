@@ -937,6 +937,10 @@ npm --prefix backend run seed
 | `CORS Error: Missing Allow Origin` | Frontend rodando em porta diferente do .env | Verifique se `FRONTEND_URL=http://localhost:5173` está no `backend/.env` |
 | `Cookie não persiste após login local` | Flag `secure: true` exigindo HTTPS | Configure `NODE_ENV=development` no `.env` para permitir cookies HTTP locais |
 | `prisma db push` trava ou falha | Tentativa de migrar via Pooler (6543) | Certifique-se de preencher a variável `DIRECT_URL` apontando para a porta 5432 |
+| `Bluetooth Device NotFoundError` | Mini-impressora desligada ou sem pareamento | Ligue a impressora térmica, ative o Bluetooth do Android e autorize a permissão no Chrome |
+| `429 Too Many Requests (Login)` | Excedido limite de 5 tentativas em 15min | Aguarde a janela do rate limiter expirar ou reinicie a sessão a partir de outro IP seguro |
+| `NetworkError / Failed to fetch` | Queda momentânea de conexão 3G/4G na rua | O app exibe alerta no topo da tela preservando os dados digitados para reenvio seguro |
+| `Vercel Cold Start Delay (> 3s)` | Inicialização a frio da função Serverless | Ocorre apenas na 1ª requisição após ociosidade; chamadas subsequentes respondem em < 150ms |
 
 ---
 
