@@ -214,6 +214,18 @@ docker compose up --build -d
 docker compose down
 ```
 
+### 📊 Matriz de Dimensionamento de Infraestrutura para VPS
+
+Para operações que optarem por hospedar os containers em VPS própria (ex: AWS Lightsail, DigitalOcean Droplet ou Hetzner), utilize a matriz de dimensionamento de recursos:
+
+| Perfil da Operação | Volume de Clientes | Cobradores Simultâneos | Especificação Recomendada | Memória Containers (Node / Nginx) |
+| :--- | :---: | :---: | :--- | :--- |
+| **Pequeno Comércio** | Até 500 | 1 a 3 | 1 vCPU, 2 GB RAM, 25 GB SSD | 512 MB Node / 128 MB Nginx |
+| **Médio Varejo** | 500 a 3.000 | 4 a 10 | 2 vCPUs, 4 GB RAM, 50 GB SSD | 1024 MB Node / 256 MB Nginx |
+| **Alta Densidade (Redes)** | Mais de 3.000 | Mais de 10 | 4 vCPUs, 8 GB RAM, 100 GB NVMe | 2048 MB Node / 512 MB Nginx |
+
+> **Dica Operacional:** Ative sempre ao menos 2 GB de memória *Swap* no Linux para prevenir falhas por esgotamento de memória (*OOM Killer*) durante picos matinais de sincronização de rotas.
+
 ---
 
 ## ☁️ Deploy e Infraestrutura (Vercel + Supabase)
