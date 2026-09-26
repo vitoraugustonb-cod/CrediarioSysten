@@ -1019,6 +1019,17 @@ npm --prefix backend run seed
 | `429 Too Many Requests (Login)` | Excedido limite de 5 tentativas em 15min | Aguarde a janela do rate limiter expirar ou reinicie a sessão a partir de outro IP seguro |
 | `NetworkError / Failed to fetch` | Queda momentânea de conexão 3G/4G na rua | O app exibe alerta no topo da tela preservando os dados digitados para reenvio seguro |
 | `Vercel Cold Start Delay (> 3s)` | Inicialização a frio da função Serverless | Ocorre apenas na 1ª requisição após ociosidade; chamadas subsequentes respondem em < 150ms |
+| `PrismaClientInitializationError` | Conexões esgotadas no pooler do Supabase | Reduza o `connection_limit` na connection string ou ative o PgBouncer Transaction Mode |
+
+#### ⚡ Procedimento de Mitigação de Cold Starts e Pool do Prisma
+
+1. **Keep-Alive Automatizado (Aquecimento):**
+   - Para manter a função serverless ativa durante o horário comercial de cobrança (08h às 18h), pode-se configurar um cron job externo gratuito (ex: Cron-Job.org ou GitHub Actions) fazendo `GET /health` a cada 10 minutos.
+2. **Flags Obrigatórias na Conexão do PgBouncer:**
+   - Para evitar conflito de *prepared statements* em instâncias serverless temporárias, certifique-se de usar a flag `pgbouncer=true` e timeout adequado:
+   ```env
+   DATABASE_URL="postgres://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+   ```
 
 ---
 
