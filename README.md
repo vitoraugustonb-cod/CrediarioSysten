@@ -1781,6 +1781,14 @@ Para assegurar a continuidade ininterrupta das equipes de cobrança em campo e c
 | **S3 (Médio)** | Falha pontual em impressão térmica ESC/POS ou exportação de relatórios | < 4 horas | < 24 horas | Abertura de chamado técnico |
 | **S4 (Baixo)** | Dúvidas operacionais, sugestões de melhorias visuais ou ajustes cosméticos | < 24 horas | Próxima sprint | Fórum de Issues do GitHub |
 
+### 🚨 Protocolo de Resposta a Incidentes de Cobrança em Campo
+
+Para manter o fluxo de arrecadação mesmo durante interrupções de serviço de nível S1 ou S2:
+
+1. **Procedimento de Contingência Física (Recibo Canhoto):** Caso o sistema apresente indisponibilidade de rede por mais de 10 minutos na rota, o cobrador deve emitir o recibo físico pré-impresso de contingência com assinatura mútua do cliente.
+2. **Sinalização Imediata:** Notificar o canal de plantão gerencial informando o bairro e o tipo de erro visualizado na tela do celular.
+3. **Sincronização Retroativa de Caixa:** Tão logo a conectividade seja restaurada, a gerência lança as baixas pendentes no modo de conferência retroativa mantendo a data e horário originais de quitação.
+
 ---
 
 ## 👤 Autor & Agradecimentos
