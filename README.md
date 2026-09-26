@@ -799,6 +799,22 @@ Para garantir a acurácia dos valores físicos arrecadados em campo versus os re
   - **Chave Pix / Transferência:** Conciliado automaticamente com o extrato bancário corporativo por conferência de comprovante digital e código autenticador.
 - **Sangria Preventiva de Rota:** Cobradores em rotas de alto volume realizam repasses intermediários ao longo do dia, mitigando risco patrimonial e mantendo o limite operacional de caixa seguro.
 
+```mermaid
+flowchart TD
+    Inicio["🌅 Início da Rota de Cobrança"] --> Arrecadacao["💵 Arrecadação de Parcelas (Espécie & Pix)"]
+    Arrecadacao --> ChecaLimite{"Saldo em Mãos > Limite?"}
+    ChecaLimite -- Sim --> Sangria["🏦 Sangria Preventiva (Repasse Parcial ao Gerente)"]
+    ChecaLimite -- Não --> Continua["🚶 Continuação da Rota"]
+    Sangria --> Continua
+    Continua --> FimRota["🏁 Fim do Expediente de Rua"]
+    FimRota --> ConfCega["📋 Cobrador Informa Total Físico (Conferência Cega)"]
+    ConfCega --> ValidaSistema{"Bate com Relatório do Sistema?"}
+    ValidaSistema -- Sim --> Fechamento["✅ Caixa Homologado & Termo Assinado"]
+    ValidaSistema -- Não --> Auditoria["🔍 Apuração de Divergência com Trilha de Auditoria"]
+    Auditoria --> Fechamento
+```
+
+
 ### 🔄 Fluxo de Estorno Contábil e Protocolo de Retificação
 
 Em situações excepcionais onde um pagamento foi registrado incorretamente (ex: digitação de valor divergente ou baixa na ficha errada), a retificação segue um protocolo contábil blindado:
