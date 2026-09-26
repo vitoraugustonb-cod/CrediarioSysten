@@ -135,6 +135,24 @@ O sistema integra uma API REST em **Node.js/Express (preparada para Serverless e
 | **Gerentes Financeiros** | Dashboard em tempo real com inadimplência, faturamento e projeções de recebimento |
 | **Desenvolvedores** | Base de código moderna (TypeScript fullstack) e arquitetura bem documentada como referência |
 
+### 👥 Jornada Detalhada das Personas Operacionais
+
+1. **Gerente de Loja (Desktop):**
+   - Inicia o expediente analisando o painel de inadimplência e metas do mês.
+   - Emite novos carnês de venda com cálculo automático de parcelas e datas de vencimento.
+   - Acompanha em tempo real os recebimentos que os cobradores registram na rua.
+   - Realiza o fechamento financeiro do dia e confere as sangrias de caixa da equipe.
+
+2. **Cobrador de Rota (Mobile):**
+   - Acessa o aplicativo diretamente pelo celular no início da rota.
+   - Filtra os clientes com parcelas vencidas ou com vencimento na data de hoje.
+   - Registra baixas com dupla confirmação para evitar erros de digitação.
+   - Envia comprovante instantâneo para o WhatsApp do cliente ou imprime em mini-impressora portátil.
+
+3. **Operador de Caixa de Balcão (Híbrido):**
+   - Atende clientes que comparecem à loja física para quitar parcelas antecipadas.
+   - Consulta rapidamente o saldo devedor consolidado e emite recibos de quitação total.
+
 ### ⚡ Diferenciais Técnicos
 
 - **Dual-Platform nativo:** Uma única SPA detecta se o usuário está no mobile (cobrador) ou desktop (gerente) e renderiza interfaces completamente diferentes — sem apps separados.
