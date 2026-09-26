@@ -262,6 +262,16 @@ O banco de dados opera em **PostgreSQL** com duas portas de conexão configurada
 - **`DATABASE_URL` (Porta 6543 - Transaction Pooler):** Utilizada pela API em produção para não esgotar as conexões simultâneas em Serverless.
 - **`DIRECT_URL` (Porta 5432 - Direct Connection):** Utilizada exclusivamente pelo Prisma para rodar migrações e comandos de schema (`prisma db push`).
 
+#### 📊 Matriz de Limites e Capacidade Supabase (Free vs Pro Tier)
+
+| Parâmetro / Recurso | Supabase Free Tier | Supabase Pro Tier | Comportamento no Sistema Crediário |
+| :--- | :---: | :---: | :--- |
+| **Conexões Diretas (Porta 5432)** | ~60 | ~200+ | Usado somente para migrations e seeds |
+| **Transaction Pooler (PgBouncer - 6543)** | Até 200 ativas | Até 1.000+ ativas | Suporta centenas de requisições simultâneas de cobradores |
+| **Capacidade de Armazenamento** | 500 MB | 8 GB inclusos | Comporta mais de 50.000 carnês com histórico completo |
+| **Pausa por Inatividade** | Após 7 dias sem requisições | Sem pausa (Always-on) | Em produção recomenda-se Pro Tier ou cron de health check |
+| **Backups PITR** | Não disponível | 7 dias contínuos | Permite restaurar o caixa ao minuto exato antes de falhas |
+
 ### 2. Deploy na Vercel
 A Vercel executa o script `vercel-build` pré-configurado na raiz:
 ```bash
