@@ -57,12 +57,14 @@
 
 - [📱 Sobre o Projeto](#-sobre-o-projeto)
   - [📊 O Mercado de Crediário no Brasil](#-o-mercado-de-crediário-no-brasil)
+  - [👥 Jornada Detalhada das Personas](#-jornada-detalhada-das-personas-operacionais)
   - [⚡ Diferenciais Técnicos](#-diferenciais-técnicos)
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
 - [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
   - [📊 Matriz de Dimensionamento de Infraestrutura para VPS](#-matriz-de-dimensionamento-de-infraestrutura-para-vps)
 - [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
+  - [📊 Matriz de Limites Supabase (Free vs Pro)](#-matriz-de-limites-e-capacidade-supabase-free-vs-pro-tier)
   - [💾 Backup, Restauração e Resiliência de Dados](#3-backup-restauração-e-resiliência-de-dados)
   - [⚡ Resiliência e Falhas de Rede](#6-matriz-de-resiliência-e-tratamento-de-falhas-de-conexão)
   - [🔄 Pipeline de CI/CD e Automação de Deploys](#7-pipeline-de-cicd-e-automação-de-deploys)
@@ -72,6 +74,8 @@
   - [🔐 Política de Gestão e Rotação de Segredos JWT](#-política-de-gestão-e-rotação-de-segredos-jwt)
   - [🔐 Checklist de Segurança para Operadores](#-checklist-de-boas-práticas-para-operadores-de-rua)
   - [🔒 Mascaramento e Sanitização de Dados para Homologação](#-procedimento-de-mascaramento-e-sanitização-de-dados-para-homologação)
+- [🛡️ Privacidade e Conformidade LGPD](#️-privacidade-de-dados-e-conformidade-lgpd)
+  - [🛡️ Política de Exportação de Dados e Expiração](#️-política-de-exportação-de-dados-e-expiração-de-relatórios)
 - [🌿 Estratégia de Branching (Git Flow)](#-estratégia-de-branching-git-flow)
 - [🎨 Design & Usabilidade](#-design--usabilidade)
   - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
@@ -88,6 +92,7 @@
 - [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [🛠️ Como Executar Localmente](#️-como-executar-localmente)
   - [📦 Comandos Prisma & Seeds](#5-comandos-de-manutenção-do-prisma-e-dados-de-teste)
+  - [🪝 Automação com Pre-commit Hooks](#6-automação-de-verificações-com-pre-commit-hooks)
   - [🔧 Troubleshooting (Resolução de Problemas Comuns)](#-troubleshooting-resolução-de-problemas-comuns)
 - [🔐 Contas de Acesso Padrão](#-contas-de-acesso-padrão)
 - [🌐 Referência da API REST](#-referência-da-api-rest)
@@ -106,6 +111,7 @@
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
 - [📋 Changelog](#-changelog)
 - [📞 Matriz de SLAs Operacionais e Canais de Suporte](#-matriz-de-slas-operacionais-e-canais-de-suporte)
+  - [🚨 Protocolo de Resposta a Incidentes](#-protocolo-de-resposta-a-incidentes-de-cobrança-em-campo)
 - [📜 Licença](#-licença)
 
 ---
@@ -1760,6 +1766,17 @@ Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) d
 ## 📋 Changelog
 
 Histórico de lançamentos e versões do **Crediário System**:
+
+### [1.0.1] - 2026-03-26
+- **Jornada de Personas:** Detalhamento dos fluxos de trabalho de Gerente, Cobrador e Balcão.
+- **Capacidade e Escala Supabase:** Matriz de dimensionamento de conexões diretas vs PgBouncer (Free/Pro).
+- **Códigos de Erro Semânticos:** Expansão do catálogo de erros de domínio contábil da API.
+- **Conciliação e Sangria:** Diagrama Mermaid de conferência cega e sangria preventiva diária.
+- **Impressão Térmica ESC/POS:** Tabela de comandos de controle hexadecimais e conectividade BLE.
+- **Troubleshooting e Resiliência:** Procedimento de mitigação de cold starts e pooling do Prisma.
+- **Privacidade e LGPD:** Política de expiração de links assinados para relatórios e downloads.
+- **Qualidade Local:** Guia de checagens estáticas e automação com pre-commit hooks.
+- **Protocolo de Incidentes:** Procedimento operacional de contingência em campo para cobradores.
 
 ### [1.0.0] - 2026-03-10
 - **Lançamento Inicial:** Arquitetura unificada React 19 + Vite e backend Express TypeScript.
