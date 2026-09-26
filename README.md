@@ -666,6 +666,22 @@ Para comércios onde o cliente final exige o comprovante físico impresso na por
 - **Conectividade Direta:** Comunicação via **Web Bluetooth API** em navegadores Chrome/Android sem necessidade de aplicativo auxiliar externo.
 - **Layout de Bobina Otimizado:** Recibo monocromático com largura compacta, corte automático de margens e QR Code de autenticação contábil impresso no rodapé.
 
+#### ⚙️ Especificações Técnicas e Sequências de Comandos ESC/POS
+
+| Parâmetro Técnico | Valor Padrão | Descrição Operacional |
+| :--- | :---: | :--- |
+| **Baud Rate / Conexão** | 9600 bps / BLE GATT | Serviço serial padrão Bluetooth (SPP / UUID `0xFFE0` ou similar) |
+| **Tabela de Caracteres** | CP860 / ISO-8859-1 | Codificação para suporte a acentuação gráfica do Português |
+| **Largura de Colunas** | 32 cols (58mm) / 48 cols (80mm) | Formatação de texto monoespaçado em recibo de bobina |
+
+| Ação na Impressora | Sequência de Controle (Hex / ASCII) | Efeito no Papel |
+| :--- | :---: | :--- |
+| **Inicialização** | `0x1B 0x40` (`ESC @`) | Limpa o buffer e restaura configurações padrão |
+| **Centralizar Texto** | `0x1B 0x61 0x01` (`ESC a 1`) | Centraliza cabeçalho e título do recibo |
+| **Texto em Negrito** | `0x1B 0x45 0x01` (`ESC E 1`) | Destaque para o valor pago e nome do cliente |
+| **Avanço de Linhas** | `0x1B 0x64 0x03` (`ESC d 3`) | Alimenta 3 linhas vazias antes de rasgar o papel |
+| **Corte Parcial/Total** | `0x1D 0x56 0x00` (`GS V 0`) | Aciona a guilhotina em modelos com cortador automático |
+
 ### ⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks (BaaS)
 
 Para comércios integrados a Provedores de Serviços de Pagamento (PSPs / BaaS), o sistema está preparado para conciliação instantânea via Pix Dinâmico:
