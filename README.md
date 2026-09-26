@@ -1014,6 +1014,19 @@ npm run prisma:generate
 npm --prefix backend run seed
 ```
 
+### 6. Automação de Verificações com Pre-commit Hooks
+
+Para garantir que nenhum commit chegue quebrado à branch `develop`, recomenda-se rodar as validações estáticas antes de versionar:
+
+```bash
+# Executar checagem de tipos estáticos sem gerar arquivos
+npm --prefix backend run tsc -- --noEmit
+npm --prefix frontend run tsc -- --noEmit
+
+# Validar integridade dos modelos e relações do Prisma
+npx --prefix backend prisma validate
+```
+
 ### 🔧 Troubleshooting (Resolução de Problemas Comuns)
 
 | Sintoma / Erro | Causa Mais Comum | Solução Recomendada |
