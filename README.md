@@ -1169,6 +1169,9 @@ Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos pad
 | `CONCURRENCY_CONFLICT` | `409` | Duas baixas disparadas simultaneamente no mesmo registro | Solicitar recarregamento dos dados para checar novo saldo |
 | `CLIENTE_NOT_FOUND` | `404` | Identificador de cliente não localizado no banco | Informar que a ficha do cliente pode ter sido removida |
 | `RATE_LIMIT_EXCEEDED` | `429` | Mais de 5 tentativas erradas de login em 15min | Exibir cronômetro de espera antes de nova tentativa |
+| `VALOR_EXCEDE_SALDO` | `400` | Valor ofertado excede o total remanescente do carnê | Solicitar confirmação ou ajustar para liquidação total |
+| `PARCELA_BLOQUEADA_AUDITORIA` | `423` | Parcela em análise ou processo de conciliação | Aguardar conclusão do processo administrativo |
+| `ESTORNO_NAO_PERMITIDO` | `403` | Tentativa de estorno fora da janela permitida pelo gerente | Notificar necessidade de autorização da gerência |
 | `DATABASE_CONNECTION_ERROR` | `500` | Timeout de conexão com o pooler PostgreSQL | Exibir modal de instabilidade temporária com retry |
 
 ---
