@@ -500,6 +500,14 @@ Para cumprir os preceitos de privacidade da LGPD ao restaurar dumps de produçã
 3. **Preservação da Integridade Contábil:** Relações de chave estrangeira (`clienteId`, `vendaId`, `parcelaId`), valores monetários e datas históricas de vencimento são rigorosamente mantidos para validar cálculos matemáticos reais sem expor dados pessoais sensíveis.
 4. **Vedação de Cópia Bruta:** É terminantemente proibido transferir dumps de produção diretamente para máquinas pessoais sem a execução prévia do script de mascaramento.
 
+### 🛡️ Política de Exportação de Dados e Expiração de Relatórios
+
+Para relatórios gerenciais em PDF ou planilhas CSV exportadas do painel desktop:
+
+- **Expiração de Links Assinados:** Relatórios gerados para download utilizam URLs pré-assinadas temporárias com validade máxima de **15 minutos**.
+- **Registro em Trilha de Auditoria:** Cada exportação de carteira de clientes ou fechamento financeiro gera um evento indelével `RELATORIO_EXPORTADO` registrando o usuário solicitante, IP de origem e filtros aplicados.
+- **Marca d'Água Digital:** Relatórios gerados em PDF contêm no rodapé a identificação do operador responsável pela emissão e timestamp da geração para desencorajar vazamentos.
+
 ---
 
 ## 🌿 Estratégia de Branching (Git Flow)
