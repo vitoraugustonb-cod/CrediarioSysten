@@ -1899,6 +1899,22 @@ Antes de submeter o seu Pull Request apontando para a branch `develop`, confirme
 - [ ] **Atomicidade de Transações:** Operações financeiras com múltiplos passos utilizam obrigatoriamente `prisma.$transaction`.
 - [ ] **Documentação Atualizada:** O [README.md](README.md) ou schemas associados foram atualizados refletindo as novas rotas ou regras.
 
+### 🏷️ Política de Versionamento Semântico (SemVer) e Tags de Release
+
+O projeto segue as diretrizes do [Semantic Versioning 2.0.0](https://semver.org/lang/pt-BR/) (`MAJOR.MINOR.PATCH`):
+
+| Segmento | Quando Incrementar | Gatilho Típico no Crediário System | Exemplo |
+| :---: | :--- | :--- | :---: |
+| **`MAJOR`** | Modificações incompatíveis na API ou migrações que exigem intervenção manual no banco. | Mudança estrutural no modelo relacional ou quebra de contratos de autenticação. | `1.0.0 ➔ 2.0.0` |
+| **`MINOR`** | Adição de novas funcionalidades com total compatibilidade retroativa. | Novo endpoint de relatório, suporte a Pix dinâmico ou novo módulo de impressão. | `1.0.0 ➔ 1.1.0` |
+| **`PATCH`** | Correções de bugs, pequenas melhorias de performance ou ajustes de segurança sem quebra. | Ajuste no cálculo de rateio de centavos ou correção de layout em modais. | `1.0.1 ➔ 1.0.2` |
+
+- **Criação de Tags Git:** Lançamentos oficiais homologados recebem tags anotadas criadas a partir da branch `main`:
+  ```bash
+  git tag -a v1.0.2 -m "release: versao 1.0.2 com correcoes contabeis e melhorias de UI"
+  git push origin v1.0.2
+  ```
+
 ---
 
 ### Reportar Bugs
