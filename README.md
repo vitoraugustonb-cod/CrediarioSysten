@@ -227,6 +227,30 @@ flowchart TD
     NodeApp -.->|Conexão Externa| Pooler
 ```
 
+### 🏛️ Fluxo de Dados e Ciclo de Vida da Requisição (Clean MVC)
+
+A aplicação segue uma separação estrita de responsabilidades inspirada no padrão Clean MVC, garantindo manutenibilidade, testabilidade e desacoplamento do motor de execução (Serverless ou Container):
+
+```mermaid
+flowchart LR
+    Req["🌐 HTTP Request"] --> Sec["1. Middlewares de Segurança\n(Helmet, CORS, RateLimit)"]
+    Sec --> Auth["2. Auth & RBAC\n(JWT Cookie & Perfil)"]
+    Auth --> Val["3. Validação de Entrada\n(Zod Schemas)"]
+    Val --> Ctrl["4. Controller de Domínio\n(Regras Financeiras)"]
+    Ctrl --> Prism["5. Prisma ORM\n(Singleton / $transaction)"]
+    Prism --> DB[("6. Supabase PostgreSQL\n(PgBouncer :6543)")]
+    DB --> Resp["📤 Resposta Formatada JSON"]
+```
+
+| Camada | Arquivos / Diretório | Responsabilidade Exclusiva |
+| :--- | :--- | :--- |
+| **Ponto de Entrada** | `src/app.ts` / `api/index.ts` | Configuração de middlewares globais, parser de JSON e roteador Express. |
+| **Segurança & Guarda** | `src/middlewares/` | Extração de token JWT de cookies httpOnly, verificação de revogação de conta e rate limiting por IP. |
+| **Validação de Schemas** | `src/validators/` | Sanitização em whitelist estrita via Zod, coerção de tipos e bloqueio de payloads anômalos. |
+| **Controladores (Controllers)**| `src/controllers/` | Orquestração da regra de negócio, cálculos contábeis e formatação de envelopes HTTP. |
+| **Acesso a Dados (Prisma)** | `src/lib/prisma.ts` | Gerenciamento de conexões pooled, execução de transações atômicas e isolamento ACID. |
+| **Banco Relacional** | Supabase (PostgreSQL 15+) | Persistência íntegra, índices B-Tree e constraints de integridade referencial. |
+
 ---
 
 ## 🐳 Execução com Docker & Docker Compose
