@@ -797,6 +797,33 @@ Para facilitar o entendimento de desenvolvedores, contadores e administradores, 
 
 ---
 
+### 🔄 Emissão de Vendas e Carnê com Transação Atômica
+
+A emissão de novas vendas gera um carnê completo de cobrança executado dentro de uma transação atômica única (`prisma.$transaction`), garantindo integridade ACID:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Gerente as Operador / Gerente
+    participant API as Venda Controller
+    participant Zod as Venda Validator
+    participant TX as Prisma $transaction
+    participant DB as PostgreSQL (Supabase)
+
+    Gerente->>API: POST /vendas (clienteId, itens, parcelas, entrada)
+    API->>Zod: Valida regras e itens da venda
+    Zod-->>API: Dados sanitizados
+    API->>TX: Inicia transação atômica isolada
+    TX->>DB: INSERT Venda (clienteId, vendedorId, valorTotal, tipoVenda)
+    TX->>DB: INSERT ItemVenda (lote de produtos vinculados)
+    opt Valor de Entrada > 0
+        TX->>DB: INSERT Pagamento (registro da entrada à vista)
+    end
+    TX->>DB: INSERT Parcela[] (lote de parcelas com rateio exato)
+    TX-->>API: Commit concluído com sucesso
+    API-->>Gerente: 201 Created (Carnê emitido e parcelas indexadas)
+```
+
 ### 🔢 Cálculo de Parcelas
 
 - O **valor de cada parcela** é calculado como: `(valorTotal - valorEntrada) / numParcelas`
