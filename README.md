@@ -1307,6 +1307,18 @@ Todas as requisições enviadas ao backend devem seguir os cabeçalhos padroniza
 | **`Cookie`** | `token=<jwt>` | Automático | Enviado nativamente pelo navegador em requisições autenticadas (`credentials: 'include'`). |
 | **`X-Requested-With`** | `XMLHttpRequest` | ⚠️ Opcional | Auxilia na mitigação de requisições forjadas entre sites (CSRF). |
 
+### 🛡️ Catálogo de Schemas Zod de Validação de Entrada
+
+A integridade das entidades é garantida na camada de entrada através de schemas estritos com validação em whitelist via Zod:
+
+| Schema | Objeto Validado | Regras Principais de Validação |
+| :--- | :--- | :--- |
+| **`clienteSchema`** | Cadastro/Edição de Cliente | `nome` min 3 letras com trim, `telefone` formatado com DDD, `referencias` sanitizadas. |
+| **`vendaSchema`** | Emissão de Nova Venda | `clienteId` int positivo, `itens` array min 1, `valorEntrada` >= 0, `numParcelas` entre 1 e 36. |
+| **`pagamentoSchema`** | Baixa de Parcela | `valorPago` número positivo > 0, `confirmacaoValor` idêntico ao `valorPago` (dupla digitação). |
+| **`loginSchema`** | Autenticação | `email` válido formato RFC 5322, `senha` string min 6 caracteres. |
+| **`ajusteParcelaSchema`** | Ajuste Gerencial | `novoValor` > 0, `motivo` string obrigatória min 10 caracteres para trilha de auditoria. |
+
 ### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
 
 A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tratamento padronizado no frontend e mensagens amigáveis em tela:
