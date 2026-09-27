@@ -428,6 +428,19 @@ O projeto implementa camadas estritas de segurança em profundidade:
 7. **Tratamento Global de Erros:**
    Stack traces e detalhes internos do banco são omitidos das respostas em ambiente de produção.
 
+### 🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)
+
+A API e o frontend aplicam cabeçalhos de defesa ativa configurados via **Helmet.js** e regras de CORS restritivas:
+
+| Cabeçalho HTTP | Configuração Ativa | Propósito de Proteção |
+| :--- | :--- | :--- |
+| **`Content-Security-Policy`** | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.co` | Prevenção rigorosa de ataques de injeção de script (XSS) e carregamento de recursos maliciosos externos. |
+| **`Strict-Transport-Security`** | `max-age=31536000; includeSubDomains; preload` | Força tráfego criptografado exclusivo via HTTPS por 1 ano, prevenindo ataques de downgrade (SSL Stripping). |
+| **`X-Frame-Options`** | `DENY` | Impede inclusão do sistema em `<iframe>`, blindando interfaces contra sequestro de clique (*Clickjacking*). |
+| **`X-Content-Type-Options`** | `nosniff` | Desativa farejamento de MIME type pelo navegador, neutralizando execução indevida de arquivos anexos. |
+| **`Referrer-Policy`** | `strict-origin-when-cross-origin` | Limita o vazamento de caminhos e parâmetros internos da URL ao navegar para origens externas. |
+| **`Access-Control-Allow-Credentials`** | `true` | Autoriza o tráfego seguro de cookies `httpOnly` exclusivamente para as origens explicitamente listadas na whitelist. |
+
 ### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
 
 ```mermaid
