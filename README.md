@@ -1762,6 +1762,18 @@ Operações financeiras críticas (baixas de cobrança, ajustes manuais e logins
 ### 3. Trilha de Auditoria Contábil (`Auditoria`)
 Toda mutação nas parcelas gera um registro permanente na tabela `Auditoria` com snapshot anterior, novo estado e operador responsável, prevenindo contestações financeiras.
 
+### 4. Métricas de APM e Rastreamento de Latência por Rota (SLIs/SLOs)
+
+Para monitorar o desempenho da API em condições reais de tráfego móvel de rua, o sistema adota metas de nível de serviço (SLOs) estritas:
+
+| Rota / Endpoint | Método | SLO Latência (p95) | SLO Disponibilidade | Ação de Alerta em Desvio |
+| :--- | :---: | :---: | :---: | :--- |
+| `/login` | `POST` | `< 250ms` | `99.9%` | Investigação de ataque de força bruta ou lentidão de hashing bcrypt. |
+| `/parcelas` | `GET` | `< 120ms` | `99.95%` | Análise de explain-plan no índice `idx_parcelas_status_vencimento`. |
+| `/parcelas/:id/pagamento` | `PATCH` | `< 300ms` | `99.99%` | Verificação de contenção de locks na transação do PostgreSQL. |
+| `/relatorios/dashboard` | `GET` | `< 400ms` | `99.5%` | Avaliação de queries de agregação e consumo de conexões no PgBouncer. |
+| `/health` | `GET` | `< 50ms` | `99.99%` | Acionamento imediato do plantão de infraestrutura (Pager). |
+
 ---
 
 ## ❓ Perguntas Frequentes (FAQ)
