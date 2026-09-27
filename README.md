@@ -1296,6 +1296,17 @@ npx --prefix backend prisma validate
 ```
 </details>
 
+### 📨 Headers HTTP Globais e Convenção de Envelope REST
+
+Todas as requisições enviadas ao backend devem seguir os cabeçalhos padronizados:
+
+| Header HTTP | Valor / Formato | Obrigatório | Descrição |
+| :--- | :--- | :---: | :--- |
+| **`Content-Type`** | `application/json` | ✅ Em POST/PATCH | Indica que o payload do corpo está serializado em JSON. |
+| **`Accept`** | `application/json` | ✅ | Especifica que o cliente espera a resposta em formato JSON. |
+| **`Cookie`** | `token=<jwt>` | Automático | Enviado nativamente pelo navegador em requisições autenticadas (`credentials: 'include'`). |
+| **`X-Requested-With`** | `XMLHttpRequest` | ⚠️ Opcional | Auxilia na mitigação de requisições forjadas entre sites (CSRF). |
+
 ### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
 
 A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tratamento padronizado no frontend e mensagens amigáveis em tela:
