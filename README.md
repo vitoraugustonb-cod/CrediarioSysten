@@ -1684,6 +1684,25 @@ O projeto adota uma matriz progressiva de testes para garantir que nenhuma alter
 - **Testes de Integração:** Validação da atomicidade das transações do Prisma (`$transaction`), garantindo rollback em caso de falha.
 - **Auditoria Contínua:** Verificação automática de integridade referencial e tipagem semântica antes de cada commit.
 
+### 🧪 Automação de Testes de Integração com Vitest & Supertest
+
+Para certificar que as regras financeiras não sofram regressões, a suíte de testes valida os contratos de ponta a ponta:
+
+```bash
+# Executar suíte de testes de integração com Vitest
+npm --prefix backend run test
+
+# Executar testes em modo watch durante desenvolvimento
+npm --prefix backend run test:watch
+
+# Gerar relatório de cobertura de testes
+npm --prefix backend run test:coverage
+```
+
+- **Isolamento de Estado:** Cada bateria de testes executa contra um banco de testes descartável ou schema temporário isolado.
+- **Asserção de Rollback Atômico:** Testes injetam falhas deliberadas para assegurar que falhas parciais não deixem resíduos no banco.
+- **Simulação de Concorrência:** Disparo de `Promise.all()` simultâneo simulando duas baixas concorrentes para certificar retorno de HTTP 409 (`CONCURRENCY_CONFLICT`).
+
 ---
 
 ### Como Rodar Verificações
