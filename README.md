@@ -618,6 +618,20 @@ A interface mobile foi projetada especificamente para o ritmo dinâmico de cobra
 - **Prevenção de Zoom Indesejado:** Aplicação de `touch-action: manipulation` e fontes com tamanho mínimo de `16px` em inputs para desativar o duplo toque de zoom involuntário no iOS Safari e Android Chrome.
 - **Visibilidade sob Sol Forte:** Uso de contraste tipográfico elevado (preto puro e fundos claros) nas listas de títulos para permitir leitura clara sob luz solar direta em áreas abertas.
 
+### 📲 Arquitetura PWA e Otimizações de Viewport Mobile
+
+Para entregar uma experiência equivalente a um aplicativo nativo sem a fricção de lojas de aplicativos (App Store / Play Store):
+
+- **Modo Standalone Sem Barras do Navegador:** O arquivo `manifest.json` com `display: "standalone"` oculta a barra de endereço e controles de navegação padrão do browser, dedicando 100% da área útil do smartphone ao trabalho de cobrança.
+- **Suporte a Entalhes (Notch / Ilha Dinâmica):** Uso de `viewport-fit=cover` e variáveis CSS com funções de ambiente:
+  ```css
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  ```
+  Evitando que botões de quitação ou cabeçalhos fiquem obstruídos pela barra de navegação por gestos do sistema operacional.
+- **Ícones Adaptativos (Maskable Icons):** Suporte a ícones vetoriais SVG e PNGs em múltiplas resoluções (192x192 e 512x512) com preenchimento seguro para recorte circular no Android.
+- **Tema de Barra de Status Dinâmico:** Meta tag `<meta name="theme-color" content="#2563eb">` harmonizada com o azul institucional do Crediário System.
+
 ---
 
 ## ⚙️ Funcionalidades Principais
