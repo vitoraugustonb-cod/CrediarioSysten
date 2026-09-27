@@ -61,6 +61,7 @@
   - [⚡ Diferenciais Técnicos](#-diferenciais-técnicos)
 - [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
 - [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
+  - [🏛️ Fluxo de Dados e Ciclo de Vida da Requisição (Clean MVC)](#️-fluxo-de-dados-e-ciclo-de-vida-da-requisição-clean-mvc)
 - [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
   - [📊 Matriz de Dimensionamento de Infraestrutura para VPS](#-matriz-de-dimensionamento-de-infraestrutura-para-vps)
 - [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
@@ -70,6 +71,7 @@
   - [🔄 Pipeline de CI/CD e Automação de Deploys](#7-pipeline-de-cicd-e-automação-de-deploys)
   - [🚀 Checklist Operacional de Pré e Pós-Deploy](#8-checklist-operacional-de-pré-deploy-e-pós-deploy)
 - [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
+  - [🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)](#️-matriz-de-diretivas-de-segurança-http--content-security-policy-csp)
   - [🛡️ Ciclo de Vida da Sessão & Autenticação Segura](#️-ciclo-de-vida-da-sessão--autenticação-segura)
   - [🔐 Política de Gestão e Rotação de Segredos JWT](#-política-de-gestão-e-rotação-de-segredos-jwt)
   - [🔐 Checklist de Segurança para Operadores](#-checklist-de-boas-práticas-para-operadores-de-rua)
@@ -82,10 +84,13 @@
   - [⌨️ Acessibilidade & Atalhos no Painel Desktop](#️-acessibilidade--atalhos-no-painel-desktop)
   - [📱 Matriz de Compatibilidade de Dispositivos & Browsers](#-matriz-de-compatibilidade-de-dispositivos--browsers)
   - [📱 Guia de Usabilidade Tátil no Campo Mobile](#-guia-de-usabilidade-tátil-e-otimização-para-cobradores-de-rua)
+  - [📲 Arquitetura PWA e Otimizações de Viewport Mobile](#-arquitetura-pwa-e-otimizações-de-viewport-mobile)
   - [🖨️ Impressoras Térmicas Bluetooth](#️-suporte-a-mini-impressoras-térmicas-bluetooth-escpos)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
   - [⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks](#-arquitetura-de-conciliação-pix-dinâmico-e-webhooks-baas)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
+  - [🔄 Emissão de Vendas e Carnê com Transação Atômica](#-emissão-de-vendas-e-carnê-com-transação-atômica)
+  - [🔢 Cálculo de Parcelas e Algoritmo de Rateio Centesimal](#-cálculo-de-parcelas-e-algoritmo-de-rateio-centesimal)
   - [🔄 Fluxo de Liquidação Atômica de Parcela](#-fluxo-de-liquidação-atômica-de-parcela)
   - [🏦 Conciliação Diária de Caixa & Sangria](#-conciliação-diária-de-caixa-e-gestão-de-sangria)
   - [🔄 Fluxo de Estorno Contábil e Retificação](#-fluxo-de-estorno-contábil-e-protocolo-de-retificação)
@@ -97,18 +102,24 @@
 - [🔐 Contas de Acesso Padrão](#-contas-de-acesso-padrão)
 - [🌐 Referência da API REST](#-referência-da-api-rest)
   - [📦 Exemplos de Payloads (Request & Response)](#-exemplos-de-payloads-request--response)
+  - [📨 Headers HTTP Globais e Convenção de Envelope REST](#-headers-http-globais-e-convenção-de-envelope-rest)
+  - [🛡️ Catálogo de Schemas Zod de Validação de Entrada](#️-catálogo-de-schemas-zod-de-validação-de-entrada)
   - [⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro](#️-padronização-de-códigos-de-status-http--respostas-de-erro)
 - [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
   - [⚖️ Matriz de Severidade de Auditoria](#️-matriz-de-severidade-e-alertas-de-auditoria)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
 - [⚡ Performance e Otimizações](#-performance-e-otimizações)
+  - [🗄️ Indexação e Otimização no PostgreSQL](#️-indexação-e-otimização-no-postgresql)
   - [🚀 Core Web Vitals & Compressão](#-métricas-de-core-web-vitals-e-compressão-de-assets)
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
+  - [🧪 Automação de Testes de Integração com Vitest & Supertest](#-automação-de-testes-de-integração-com-vitest--supertest)
   - [📋 Roteiro de Testes Manuais & Homologação](#-roteiro-de-testes-manuais-e-homologação-operacional)
 - [📊 Observabilidade, Logs e Monitoramento](#-observabilidade-logs-e-monitoramento)
+  - [📈 Métricas de APM e Rastreamento de Latência por Rota (SLIs/SLOs)](#4-métricas-de-apm-e-rastreamento-de-latência-por-rota-slisslos)
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
+  - [🏷️ Política de Versionamento Semântico (SemVer) e Tags de Release](#️-política-de-versionamento-semântico-semver-e-tags-de-release)
 - [📋 Changelog](#-changelog)
 - [📞 Matriz de SLAs Operacionais e Canais de Suporte](#-matriz-de-slas-operacionais-e-canais-de-suporte)
   - [🚨 Protocolo de Resposta a Incidentes](#-protocolo-de-resposta-a-incidentes-de-cobrança-em-campo)
@@ -794,8 +805,6 @@ Para facilitar o entendimento de desenvolvedores, contadores e administradores, 
 | **Prestação de Contas** | Relatório diário de fechamento que concilia os pagamentos recebidos por cada cobrador com o dinheiro em caixa. |
 | **Liquidação Atômica** | Operação indivisível no banco de dados que garante a gravação do pagamento, atualização da parcela e criação da auditoria de forma inseparável. |
 | **Dupla Digitação** | Mecanismo de segurança na interface mobile exigindo digitar e confirmar o valor recebido antes de submeter a baixa. |
-
----
 
 ### 🔄 Emissão de Vendas e Carnê com Transação Atômica
 
