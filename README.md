@@ -824,12 +824,23 @@ sequenceDiagram
     API-->>Gerente: 201 Created (Carnê emitido e parcelas indexadas)
 ```
 
-### 🔢 Cálculo de Parcelas
+### 🔢 Cálculo de Parcelas e Algoritmo de Rateio Centesimal
 
-- O **valor de cada parcela** é calculado como: `(valorTotal - valorEntrada) / numParcelas`
-- O **valor de entrada** é registrado como um pagamento separado no momento da venda
-- As parcelas são geradas com **vencimentos mensais** a partir da data da venda
-- Parcelas com **pagamento parcial** ficam com status `PARCIAL` e o saldo restante é registrado
+- O **valor financiado** é determinado por `valorTotal - valorEntrada`.
+- O **valor de entrada** é registrado como um pagamento separado no momento da venda.
+- As parcelas são geradas com **vencimentos mensais** subsequentes a partir da data da venda.
+- Parcelas com **pagamento parcial** ficam com status `PARCIAL` e o saldo restante é registrado.
+
+Em divisões financeiras com dízima periódica (ex: parcelar R$ 100,00 em 3 vezes), o sistema implementa compensação de centavos na primeira parcela para garantir a igualdade contábil estrita `Σ(parcelas) === valorFinanciado`:
+
+```typescript
+// Exemplo do algoritmo de rateio centesimal:
+const valorFinanciado = valorTotal - valorEntrada;
+const valorBaseParcela = Math.floor((valorFinanciado / numParcelas) * 100) / 100;
+const centavosRestantes = Math.round((valorFinanciado - (valorBaseParcela * numParcelas)) * 100) / 100;
+
+// Parcela 1: R$ 33,34 | Parcela 2: R$ 33,33 | Parcela 3: R$ 33,33 | Total = R$ 100,00
+```
 
 ### 💰 Lógica de Pagamento (Amortização)
 
