@@ -1885,6 +1885,49 @@ npm --prefix backend run test:coverage
 - **Asserção de Rollback Atômico:** Testes injetam falhas deliberadas para assegurar que falhas parciais não deixem resíduos no banco.
 - **Simulação de Concorrência:** Disparo de `Promise.all()` simultâneo simulando duas baixas concorrentes para certificar retorno de HTTP 409 (`CONCURRENCY_CONFLICT`).
 
+### 🏋️ Testes de Carga e Estresse de Concorrência com k6
+
+Para certificar que a API Express e o PgBouncer suportam os picos de tráfego das equipes de cobrança em campo sem degradação:
+
+```javascript
+// Exemplo de cenário de teste de estresse (load-test.js)
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '30s', target: 20 }, // Rampa de subida para 20 cobradores simultâneos
+    { duration: '1m', target: 50 },  // Pico matinal com 50 cobradores registrando baixas
+    { duration: '30s', target: 0 },  // Desaceleração controlada
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<300'], // 95% das baixas devem responder em menos de 300ms
+    http_req_failed: ['rate<0.01'],    // Menos de 1% de falhas permitidas
+  },
+};
+
+export default function () {
+  const payload = JSON.stringify({
+    valorPago: 50.00,
+    formaPagamento: 'ESPECIE',
+    duplaConfirmacao: true,
+  });
+
+  const params = {
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token' },
+  };
+
+  const res = http.patch('http://localhost:3000/api/parcelas/1/pagar', payload, params);
+  check(res, { 'status is 200 or 409': (r) => r.status === 200 || r.status === 409 });
+  sleep(1);
+}
+```
+
+```bash
+# Execução do teste de carga
+k6 run tests/load/load-test.js
+```
+
 ---
 
 ### Como Rodar Verificações
