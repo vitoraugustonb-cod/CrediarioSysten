@@ -812,6 +812,27 @@ sequenceDiagram
 - **Idempotência por TxID:** Cada cobrança gerada possui identificador único `txid`, garantindo que retentativas de webhook não dupliquem quitações contábeis.
 - **Validação de Assinatura Criptográfica:** Payloads recebidos nos webhooks são validados com `HMAC-SHA256` contra segredo compartilhado, impedindo fraudes ou injeção de pagamentos falsos.
 
+#### 🛠️ Guia Operacional e Resiliência de Webhooks Pix
+
+Para manter a confiabilidade contábil mesmo em casos de indisponibilidade momentânea ou instabilidade de rota externa entre o PSP e a API:
+
+1. **Política de Retentativas com Backoff Exponencial (PSP ➔ API):**
+   | Tentativa | Intervalo Mínimo | Ação do Gateway BaaS | Ação da API Crediário |
+   | :---: | :---: | :--- | :--- |
+   | **1ª** | Imediato (0s) | Disparo síncrono do evento `pix.received` | Processamento e resposta `200 OK` em < 300ms |
+   | **2ª** | 5 segundos | Primeira retentativa automática em caso de timeout | Checagem de idempotência por `txid` |
+   | **3ª** | 30 segundos | Segunda retentativa com backoff | Log de aviso (*warning*) no monitoramento APM |
+   | **4ª** | 2 minutos | Terceira retentativa | Alerta de degradação temporária na fila de mensageria |
+   | **5ª** | 15 minutos | Quarta retentativa | Disparo de notificação para o canal de suporte |
+   | **Esgotado** | 1 hora | Envio para Dead-Letter Queue (DLQ) do PSP | Reconciliação sob demanda via endpoint gerencial |
+
+2. **Reconciliação Manual / Sob Demanda:**
+   - Caso um cliente comprove o pagamento na rua e a notificação push do webhook demore a propagar devido a oscilações da operadora de telefonia, o cobrador conta com o botão **"Verificar Pix Manualmente"** no app, disparando a checagem ativa contra o PSP via endpoint:
+     ```http
+     POST /api/parcelas/:id/pix-status-check
+     ```
+   - O backend consulta o status diretamente no endpoint do PSP e liquida a parcela imediatamente se confirmado.
+
 ---
 
 ## 📐 Regras de Negócio Financeiras
