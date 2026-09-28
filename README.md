@@ -66,11 +66,14 @@
   - [📊 Matriz de Dimensionamento de Infraestrutura para VPS](#-matriz-de-dimensionamento-de-infraestrutura-para-vps)
 - [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
   - [📊 Matriz de Limites Supabase (Free vs Pro)](#-matriz-de-limites-e-capacidade-supabase-free-vs-pro-tier)
+  - [🛡️ Arquitetura de Isolamento e Políticas RLS (Supabase)](#️-arquitetura-de-isolamento-e-políticas-rls-row-level-security)
   - [💾 Backup, Restauração e Resiliência de Dados](#3-backup-restauração-e-resiliência-de-dados)
+  - [🌐 Estratégia de Failover de DNS e Redundância de Borda](#-estratégia-de-failover-de-dns-e-redundância-de-borda-vercel)
   - [⚡ Resiliência e Falhas de Rede](#6-matriz-de-resiliência-e-tratamento-de-falhas-de-conexão)
   - [🔄 Pipeline de CI/CD e Automação de Deploys](#7-pipeline-de-cicd-e-automação-de-deploys)
   - [🚀 Checklist Operacional de Pré e Pós-Deploy](#8-checklist-operacional-de-pré-deploy-e-pós-deploy)
 - [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
+  - [⏱️ Matriz Detalhada de Rate Limiting por Rota](#️-matriz-detalhada-de-rate-limiting-e-prevenção-de-abuso-por-rota)
   - [🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)](#️-matriz-de-diretivas-de-segurança-http--content-security-policy-csp)
   - [🛡️ Ciclo de Vida da Sessão & Autenticação Segura](#️-ciclo-de-vida-da-sessão--autenticação-segura)
   - [🔐 Política de Gestão e Rotação de Segredos JWT](#-política-de-gestão-e-rotação-de-segredos-jwt)
@@ -82,13 +85,16 @@
 - [🎨 Design & Usabilidade](#-design--usabilidade)
   - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
   - [⌨️ Acessibilidade & Atalhos no Painel Desktop](#️-acessibilidade--atalhos-no-painel-desktop)
+  - [♿ Matriz de Acessibilidade Digital (WCAG 2.1 AA)](#-matriz-de-acessibilidade-digital-wcag-21-nível-aa)
   - [📱 Matriz de Compatibilidade de Dispositivos & Browsers](#-matriz-de-compatibilidade-de-dispositivos--browsers)
   - [📱 Guia de Usabilidade Tátil no Campo Mobile](#-guia-de-usabilidade-tátil-e-otimização-para-cobradores-de-rua)
   - [📲 Arquitetura PWA e Otimizações de Viewport Mobile](#-arquitetura-pwa-e-otimizações-de-viewport-mobile)
   - [🖨️ Impressoras Térmicas Bluetooth](#️-suporte-a-mini-impressoras-térmicas-bluetooth-escpos)
 - [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
   - [⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks](#-arquitetura-de-conciliação-pix-dinâmico-e-webhooks-baas)
+  - [🛠️ Guia Operacional e Resiliência de Webhooks Pix](#️-guia-operacional-e-resiliência-de-webhooks-pix)
 - [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
+  - [📊 Ciclo de Vida e Máquina de Estados de Parcelas](#-ciclo-de-vida-e-máquina-de-estados-de-parcelas)
   - [🔄 Emissão de Vendas e Carnê com Transação Atômica](#-emissão-de-vendas-e-carnê-com-transação-atômica)
   - [🔢 Cálculo de Parcelas e Algoritmo de Rateio Centesimal](#-cálculo-de-parcelas-e-algoritmo-de-rateio-centesimal)
   - [🔄 Fluxo de Liquidação Atômica de Parcela](#-fluxo-de-liquidação-atômica-de-parcela)
@@ -105,17 +111,21 @@
   - [📨 Headers HTTP Globais e Convenção de Envelope REST](#-headers-http-globais-e-convenção-de-envelope-rest)
   - [🛡️ Catálogo de Schemas Zod de Validação de Entrada](#️-catálogo-de-schemas-zod-de-validação-de-entrada)
   - [⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro](#️-padronização-de-códigos-de-status-http--respostas-de-erro)
+  - [🗄️ Mapeamento de Exceções do Prisma ORM](#️-mapeamento-de-exceções-do-prisma-orm-para-contratos-http)
 - [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
   - [⚖️ Matriz de Severidade de Auditoria](#️-matriz-de-severidade-e-alertas-de-auditoria)
 - [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
 - [⚡ Performance e Otimizações](#-performance-e-otimizações)
   - [🗄️ Indexação e Otimização no PostgreSQL](#️-indexação-e-otimização-no-postgresql)
+  - [🔬 Profiling de Memória e Monitoramento de Event Loop](#-profiling-de-memória-e-monitoramento-de-event-loop-no-nodejs)
   - [🚀 Core Web Vitals & Compressão](#-métricas-de-core-web-vitals-e-compressão-de-assets)
 - [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
   - [🧪 Automação de Testes de Integração com Vitest & Supertest](#-automação-de-testes-de-integração-com-vitest--supertest)
+  - [🏋️ Testes de Carga e Estresse de Concorrência com k6](#️-testes-de-carga-e-estresse-de-concorrência-com-k6)
   - [📋 Roteiro de Testes Manuais & Homologação](#-roteiro-de-testes-manuais-e-homologação-operacional)
 - [📊 Observabilidade, Logs e Monitoramento](#-observabilidade-logs-e-monitoramento)
   - [📈 Métricas de APM e Rastreamento de Latência por Rota (SLIs/SLOs)](#4-métricas-de-apm-e-rastreamento-de-latência-por-rota-slisslos)
+  - [🛡️ Esteira de Auditoria Forense e Sanitização de Logs](#5-esteira-de-auditoria-forense-e-sanitização-de-logs-lgpd)
 - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
 - [🤝 Contribuição & Convenções](#-contribuição--convenções)
@@ -2182,6 +2192,18 @@ Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) d
 ## 📋 Changelog
 
 Histórico de lançamentos e versões do **Crediário System**:
+
+### [1.0.2] - 2026-03-28
+- **Políticas RLS Supabase:** Documentação de isolamento e regras de Row Level Security no PostgreSQL.
+- **Webhooks Pix Dinâmico:** Guia operacional com retentativas, backoff exponencial e reconciliação ativa.
+- **Máquina de Estados de Parcelas:** Diagrama de estados Mermaid e regras de transição contábil.
+- **Profiling de Memória Node.js:** Monitoramento de event loop delay e dimensionamento de heap V8.
+- **Rate Limiting Granular:** Matriz de proteção contra abuso e força bruta por rota com headers RFC 6585.
+- **Mapeamento de Erros Prisma:** Tabela semântica de exceções da engine Prisma para códigos HTTP.
+- **Auditoria Forense & LGPD:** Padrão de logs estruturados JSON e políticas de expurgamento (*log redaction*).
+- **Acessibilidade Digital:** Matriz de conformidade com diretrizes internacionais WCAG 2.1 nível AA.
+- **Failover & Redundância DNS:** Protocolo de contingência estática e chaveamento com TTL reduzido.
+- **Testes de Carga com k6:** Script de simulação de alta concorrência com 50 usuários simultâneos.
 
 ### [1.0.1] - 2026-03-26
 - **Jornada de Personas:** Detalhamento dos fluxos de trabalho de Gerente, Cobrador e Balcão.
