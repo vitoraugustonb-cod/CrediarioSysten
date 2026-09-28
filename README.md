@@ -941,6 +941,34 @@ sequenceDiagram
     end
 ```
 
+### 📊 Ciclo de Vida e Máquina de Estados de Parcelas
+
+Cada parcela emitida transita por estados bem definidos e fiscalizados por regras estritas de integridade contábil:
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDENTE: Emissão da Venda
+    PENDENTE --> ATRASADA: Data Atual > Data Vencimento
+    PENDENTE --> PARCIAL: Pagamento Parcial (< Valor Total)
+    PENDENTE --> PAGA: Quitação Integral
+    ATRASADA --> PARCIAL: Pagamento Parcial
+    ATRASADA --> PAGA: Quitação Integral (+ Juros/Mora se houver)
+    PARCIAL --> PAGA: Amortização Residual Concluída
+    PAGA --> ESTORNADA: Estorno Contábil Autorizado (Gerente)
+    ESTORNADA --> PENDENTE: Reabertura de Cobrança
+    PENDENTE --> CANCELADA: Venda Desfeita / Devolução de Mercadoria
+    ATRASADA --> CANCELADA: Renegociação Total / Inadimplência Prescrita
+```
+
+| Estado | Significado Contábil | Atores Permitidos | Ação Geradora / Transição |
+| :--- | :--- | :--- | :--- |
+| **`PENDENTE`** | Parcela ativa no prazo legal de vencimento | Sistema / Gerente | Criação da venda e rateio centesimal de carnê |
+| **`ATRASADA`** | Parcela em aberto com data de vencimento expirada | Cron Job Diário | Job matinal de conferência temporal (`dataVencimento < hoje`) |
+| **`PARCIAL`** | Amortização parcial recebida; saldo residual ativo | Cobrador / Gerente | Baixa de valor inferior ao nominal; atualiza `valorPago` |
+| **`PAGA`** | Quitação financeira total realizada | Cobrador / Gerente | Baixa integral com dupla conferência e registro atômico |
+| **`ESTORNADA`** | Liquidação revertida por retificação de lançamento | Apenas Gerente | Reversão atômica com justificativa contábil em auditoria |
+| **`CANCELADA`** | Parcela invalidada por devolução ou renegociação | Apenas Gerente | Cancelamento da venda de origem com descarte de títulos futuros |
+
 ### 📅 Atualização Automática de Status
 
 Um job de atualização verifica parcelas `PENDENTE` e `PARCIAL` com `dataVencimento < hoje` e as marca automaticamente como `ATRASADA`, garantindo que o dashboard de inadimplência reflita a realidade em tempo real.
