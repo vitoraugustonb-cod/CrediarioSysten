@@ -313,6 +313,33 @@ O banco de dados opera em **PostgreSQL** com duas portas de conexão configurada
 | **Pausa por Inatividade** | Após 7 dias sem requisições | Sem pausa (Always-on) | Em produção recomenda-se Pro Tier ou cron de health check |
 | **Backups PITR** | Não disponível | 7 dias contínuos | Permite restaurar o caixa ao minuto exato antes de falhas |
 
+#### 🛡️ Arquitetura de Isolamento e Políticas RLS (Row Level Security)
+
+O PostgreSQL no Supabase implementa **Row Level Security (RLS)** para segregação profunda de privilégios. Embora o backend Express acesse o banco via connection pooling com a role `postgres`/`service_role` gerenciada pelo Prisma ORM, as tabelas críticas possuem diretivas declarativas RLS para prevenir vazamento acidental em acessos diretos via Supabase Studio, REST Data API ou integrações analíticas:
+
+- **Papéis de Acesso (Database Roles):**
+  - `anon`: Acesso estritamente bloqueado para leitura e escrita em tabelas financeiras (`Parcela`, `Venda`, `AuditLog`).
+  - `authenticated`: Permissão de leitura e escrita restrita aos registros pertencentes à rota ou escopo do operador autenticado.
+  - `service_role`: Privilégio irrestrito (*bypass RLS*), exclusivo da API Node.js/Express para execução de transações atômicas de liquidação contábil, rateio e auditoria.
+- **Políticas Declarativas de Exemplo:**
+  ```sql
+  -- Ativação do RLS na tabela de parcelas
+  ALTER TABLE "Parcela" ENABLE ROW LEVEL SECURITY;
+
+  -- Cobradores visualizam apenas parcelas da carteira atribuída ou gerência visualiza geral
+  CREATE POLICY "Segregação de cobrança por carteira"
+  ON "Parcela" FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM "Venda" v
+      JOIN "Cliente" c ON c.id = v."clienteId"
+      WHERE v.id = "Parcela"."vendaId"
+      AND (c."cobradorResponsavelId" = auth.uid() OR auth.jwt() ->> 'role' = 'GERENTE')
+    )
+  );
+  ```
+
 ### 2. Deploy na Vercel
 A Vercel executa o script `vercel-build` pré-configurado na raiz:
 ```bash
