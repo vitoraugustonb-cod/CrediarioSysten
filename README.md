@@ -401,6 +401,18 @@ flowchart TD
     Validacao --> Normalizacao["✅ Operação Normalizada (Cobranças Liberadas)"]
 ```
 
+#### 🌐 Estratégia de Failover de DNS e Redundância de Borda (Vercel)
+
+Para mitigar incidentes de indisponibilidade em massa na camada de borda (*Edge CDN*):
+
+- **Configuração de TTL Reduzido:** O domínio de produção utiliza **TTL de 300 segundos (5 minutos)** nos registros CNAME/A da zona DNS, permitindo redirecionamento veloz de tráfego em caso de falha regional.
+- **Página de Contingência Estática (Static Failover):**
+  - Hospedada em provedor alternativo geograficamente segregado (Cloudflare Pages / AWS S3 estático).
+  - Exibe instruções operacionais para os cobradores utilizarem o canhoto físico pré-impresso de contingência enquanto a sincronização digital é restabelecida.
+- **Sonda Automatizada de Chaveamento:**
+  - Monitores externos consultam o endpoint `/health` a cada 60 segundos a partir de múltiplas regiões.
+  - Três falhas consecutivas disparam webhook de alerta imediato no Telegram da gerência técnica.
+
 ### 6. Matriz de Resiliência e Tratamento de Falhas de Conexão
 
 Em rotas de cobrança em bairros periféricos com sinal 3G/4G oscilante, o sistema adota comportamentos específicos para prevenir inconsistências:
