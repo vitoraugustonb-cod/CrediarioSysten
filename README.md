@@ -1933,6 +1933,34 @@ Para monitorar o desempenho da API em condições reais de tráfego móvel de ru
 | `/relatorios/dashboard` | `GET` | `< 400ms` | `99.5%` | Avaliação de queries de agregação e consumo de conexões no PgBouncer. |
 | `/health` | `GET` | `< 50ms` | `99.99%` | Acionamento imediato do plantão de infraestrutura (Pager). |
 
+### 5. Esteira de Auditoria Forense e Sanitização de Logs (LGPD)
+
+Para conciliar a necessidade de rastreamento forense de incidentes com a conformidade estrita à LGPD:
+
+- **Contrato de Log Estruturado JSON:**
+  ```json
+  {
+    "timestamp": "2026-03-27T10:15:30.120Z",
+    "level": "INFO",
+    "traceId": "req_8f7b2c9a-1123-4b82",
+    "userId": 4,
+    "userRole": "COBRADOR",
+    "action": "LIQUIDACAO_PARCELA",
+    "resourceId": "parcela_1042",
+    "durationMs": 42,
+    "ip": "177.136.xxx.xxx",
+    "metadata": {
+      "valor": 150.00,
+      "formaPagamento": "PIX",
+      "cpfTitular": "***.***.789-00"
+    }
+  }
+  ```
+- **Regras de Expurgamento (*Log Redaction*):**
+  - **Credenciais:** O campo `password` ou `senha` é automaticamente excluído do payload antes de qualquer serialização de log.
+  - **Tokens & Cookies:** Headers `Authorization` e cookies `session` são substituídos pelo token literal `[REDACTED]`.
+  - **Dados Cadastrais Pessoais:** CPFs e chaves Pix passam por regex de mascaramento preservando apenas dígitos finais para auditoria de suporte.
+
 ---
 
 ## ❓ Perguntas Frequentes (FAQ)
