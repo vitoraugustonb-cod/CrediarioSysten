@@ -466,6 +466,25 @@ O projeto implementa camadas estritas de segurança em profundidade:
 7. **Tratamento Global de Erros:**
    Stack traces e detalhes internos do banco são omitidos das respostas em ambiente de produção.
 
+### ⏱️ Matriz Detalhada de Rate Limiting e Prevenção de Abuso por Rota
+
+Para proteger os recursos computacionais e conter ataques de negação de serviço (DoS) ou força bruta em credenciais e transações:
+
+| Rota / Escopo | Limite Máximo | Janela Temporal | Chave de Segmentação | Resposta em Violação |
+| :--- | :---: | :---: | :--- | :--- |
+| **`/api/auth/login`** | 5 requisições | 15 minutos | `IP + body.email` | `429 Too Many Requests` + Header `Retry-After: 900` |
+| **`/api/parcelas/:id/pagar`** | 30 requisições | 1 minuto | `JWT userId` + `IP` | `429 Too Many Requests` (Prevenção de spam de liquidação) |
+| **`/api/relatorios/*`** | 20 requisições | 1 minuto | `JWT userId` | `429 Too Many Requests` (Proteção de pool de banco de dados) |
+| **`/api/*` (Geral/Listagens)** | 120 requisições | 1 minuto | `IP` | `429 Too Many Requests` (Cota padrão de navegação operacional) |
+| **`/health` (Sonda de Uptime)** | 300 requisições | 1 minuto | `IP` | `429 Too Many Requests` (Proteção contra monitoramentos desregulados) |
+
+- **Padronização de Headers RFC 6585:**
+  - `RateLimit-Limit`: Cota máxima permitida na janela.
+  - `RateLimit-Remaining`: Requisições restantes antes do bloqueio.
+  - `RateLimit-Reset`: Timestamp UTC do desbloqueio da cota.
+  - `Retry-After`: Tempo restante em segundos para tentar novamente.
+- **Tratamento Reativo no Frontend:** Ao interceptar status `429`, o interceptor Axios exibe uma notificação amigável com contador regressivo de segundos, impedindo novos cliques desnecessários pelo cobrador.
+
 ### 🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)
 
 A API e o frontend aplicam cabeçalhos de defesa ativa configurados via **Helmet.js** e regras de CORS restritivas:
