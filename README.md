@@ -1460,6 +1460,33 @@ Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos pad
 | `ESTORNO_NAO_PERMITIDO` | `403` | Tentativa de estorno fora da janela permitida pelo gerente | Notificar necessidade de autorização da gerência |
 | `DATABASE_CONNECTION_ERROR` | `500` | Timeout de conexão com o pooler PostgreSQL | Exibir modal de instabilidade temporária com retry |
 
+### 🗄️ Mapeamento de Exceções do Prisma ORM para Contratos HTTP
+
+O middleware global de erros intercepta instâncias de `PrismaClientKnownRequestError` e as converte deterministicamente em respostas semânticas com código e status adequados:
+
+| Código Prisma | Descrição Nativa da Engine | Código Semântico API | Status HTTP | Causa Típica no Crediário System |
+| :--- | :--- | :--- | :---: | :--- |
+| **`P2002`** | Unique constraint failed | `DUPLICATE_ENTRY` | `409 Conflict` | Tentativa de cadastrar cliente com CPF ou e-mail já existente |
+| **`P2025`** | Record to update not found | `RECORD_NOT_FOUND` | `404 Not Found` | Operador tentando liquidar parcela que foi excluída ou inexistente |
+| **`P2003`** | Foreign key constraint failed | `RELATION_INTEGRITY_ERROR` | `400 Bad Request` | Tentativa de vincular venda a um `clienteId` inexistente |
+| **`P2034`** | Transaction failed due to write conflict | `CONCURRENCY_CONFLICT` | `409 Conflict` | Dois cobradores registraram pagamento da mesma parcela simultaneamente |
+| **`P1001`** | Can't reach database server | `DATABASE_UNAVAILABLE` | `503 Service Unavailable` | Queda momentânea ou manutenção no Supabase PostgreSQL |
+| **`P1008`** | Operations timed out | `DATABASE_TIMEOUT` | `504 Gateway Timeout` | Consulta massiva de relatório excedeu o timeout de 10s no pooler |
+
+```typescript
+// Exemplo de interceptação no middleware global de erros
+if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  switch (err.code) {
+    case 'P2002':
+      return res.status(409).json({ erro: 'Registro duplicado detectado', codigo: 'DUPLICATE_ENTRY' });
+    case 'P2025':
+      return res.status(404).json({ erro: 'Registro não localizado', codigo: 'RECORD_NOT_FOUND' });
+    case 'P2034':
+      return res.status(409).json({ erro: 'Conflito de concorrência na transação', codigo: 'CONCURRENCY_CONFLICT' });
+  }
+}
+```
+
 ---
 
 | Código HTTP | Significado | Aplicação no Sistema |
