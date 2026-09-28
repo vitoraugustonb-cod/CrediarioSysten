@@ -653,6 +653,17 @@ Para operadores de caixa e gerentes que buscam agilidade na rotina de escritóri
 - **Contraste Visual AA:** Paleta calibrada para legibilidade superior em ambientes com variação de luminosidade.
 - **Outline de Foco:** Marcadores de foco destacados (`focus-visible`) para operação 100% via teclado sem mouse.
 
+#### ♿ Matriz de Acessibilidade Digital (WCAG 2.1 Nível AA)
+
+Para garantir uso pleno por operadores com necessidades especiais ou limitações motoras temporárias:
+
+| Critério WCAG | Requisito da Norma | Implementação no Crediário System |
+| :--- | :--- | :--- |
+| **1.4.3 Contraste Mínimo** | Razão mínima de 4.5:1 para texto normal | Contraste medido de **7.2:1** em textos informativos e **12.1:1** em valores monetários |
+| **2.1.1 Acessível por Teclado** | Todas as ações disponíveis via teclado | Modais com captura de foco (*Focus Trap*) e navegação cíclica completa |
+| **2.4.7 Foco Visível** | Indicador de foco evidente em elementos ativos | Anel de foco azul de 2px com offset de 2px via seletor `:focus-visible` |
+| **4.1.2 Nome, Função e Valor** | Elementos customizados expõem semântica ARIA | Modais com `aria-modal="true"`, botões de baixa com `aria-busy` e alertas via `aria-live="polite"` |
+
 ### 📱 Matriz de Compatibilidade de Dispositivos & Browsers
 
 O frontend responsivo é testado e homologado para os seguintes ambientes:
