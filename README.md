@@ -1703,6 +1703,34 @@ Para sustentar milhares de parcelas sem degradação de tempo de resposta em con
 
 - **Modo Transaction do PgBouncer:** Mantém as conexões ativas apenas durante a execução de transações SQL, liberando slots imediatamente após o commit, permitindo que dezenas de instâncias serverless compartilhem um pool compacto de 15 conexões sem rejeição de tráfego.
 
+### 🔬 Profiling de Memória e Monitoramento de Event Loop no Node.js
+
+Para sustentar alta volumetria sem travamentos ou degradação progressiva de memória (*memory leaks*):
+
+- **Monitoramento de Latência do Event Loop:**
+  O backend utiliza a API nativa `perf_hooks.monitorEventLoopDelay()` para rastrear picos de bloqueio causados por serializações pesadas ou manipulação síncrona de dados:
+  ```typescript
+  import { monitorEventLoopDelay } from 'perf_hooks';
+  const histogram = monitorEventLoopDelay({ resolution: 10 });
+  histogram.enable();
+
+  // Alerta emitido caso o percentil 99 do delay supere 50ms
+  setInterval(() => {
+    const p99 = histogram.percentile(99) / 1e6; // ms
+    if (p99 > 50) {
+      console.warn(`[PERF ALERT] Event Loop Lag P99: ${p99.toFixed(2)}ms`);
+    }
+    histogram.reset();
+  }, 30000);
+  ```
+- **Dimensionamento de Heap em Containers Docker:**
+  Em ambientes containerizados com limites estritos de memória cgroup (ex: VPS com 1 GB de RAM), o V8 é configurado com flag explícita para evitar o encerramento abrupto pelo *OOM Killer*:
+  ```bash
+  NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=64" node dist/server.js
+  ```
+- **Inspeção e Heap Snapshot sob Demanda:**
+  Para auditoria de consumo em homologação, o Node.js pode ser iniciado com `--inspect=0.0.0.0:9229`, permitindo conectar via `chrome://inspect` para captura e comparação diferencial de Heap Snapshots entre rotas de exportação de relatórios.
+
 ### Frontend
 
 | Otimização | Implementação | Impacto |
