@@ -1458,12 +1458,34 @@ A integridade das entidades é garantida na camada de entrada através de schema
 
 ### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
 
-A API utiliza envelopes JSON estruturados para respostas de erro, permitindo tratamento padronizado no frontend e mensagens amigáveis em tela:
+A API utiliza envelopes JSON estruturados inspirados na **RFC 7807 (Problem Details for HTTP APIs)** para respostas de erro, garantindo tratamento unificado no frontend e alertas claros para o usuário:
+
+```mermaid
+flowchart TD
+    Req["🌐 HTTP Request"] --> Controller["⚙️ Controller de Domínio"]
+    Controller -->|Erro de Schema| ZodErr["⚠️ ZodError"]
+    Controller -->|Erro de Banco| PrismaErr["🗄️ Prisma KnownRequestError"]
+    Controller -->|Regra de Negócio| BizErr["🛑 Domain Business Error"]
+    Controller -->|Exceção Inesperada| Uncaught["💥 Unhandled Exception"]
+
+    ZodErr --> ErrorMiddleware["🛡️ Middleware Global de Erros (src/middlewares/errorHandler.ts)"]
+    PrismaErr --> ErrorMiddleware
+    BizErr --> ErrorMiddleware
+    Uncaught --> ErrorMiddleware
+
+    ErrorMiddleware -->|400 Bad Request| RespZod["Envelopado: VALIDATION_ERROR"]
+    ErrorMiddleware -->|409 / 404 / 503| RespPrisma["Mapeado: Códigos Semânticos P2002/P2025/P1001"]
+    ErrorMiddleware -->|400 / 403 / 409| RespBiz["Envelopado: FINANCIAL_VALIDATION_ERROR"]
+    ErrorMiddleware -->|500 Internal Error| Resp500["Envelopado: Oculta Stack em Produção"]
+```
 
 ```json
 {
   "erro": "Saldo informado inválido para quitação",
   "codigo": "FINANCIAL_VALIDATION_ERROR",
+  "status": 400,
+  "timestamp": "2026-03-29T10:30:00.000Z",
+  "path": "/api/parcelas/35/pagamento",
   "detalhes": [
     {
       "campo": "valorPago",
