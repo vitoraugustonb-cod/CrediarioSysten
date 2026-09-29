@@ -452,6 +452,27 @@ Em rotas de cobrança em bairros periféricos com sinal 3G/4G oscilante, o siste
 | **Erro 503 / Vercel Cold Start** | Retry exponencial automático (máx 3 tentativas) | Reaquecimento suave da função serverless sem perda do formulário |
 | **Perda Total de Internet** | Alerta em banner vermelho no topo da tela mobile | Bloqueio de submissão para evitar perda de dados não sincronizados |
 
+#### 📱 Roteiro Prático de Homologação em Campo sob Rede Degradada
+
+Para homologar a resiliência do aplicativo móvel antes de liberar novos cobradores na rota:
+
+1. **Simulação de Modo Avião no Envio (Offline Test):**
+   - Preencher a baixa com dupla digitação de valor.
+   - Ativar o *Modo Avião* no smartphone e tocar em **Confirmar Quitação**.
+   - **Critério de Aceite:** O sistema deve abortar graciosamente com banner de aviso sonoro/visual, mantendo os valores digitados intactos na tela sem fechar o modal.
+2. **Simulação de Throttling Slow 3G (Latência Extrema):**
+   - Configurar throttling no DevTools (`Slow 3G`: 400ms RTT / 400kbps down).
+   - Submeter o pagamento e monitorar o botão de ação primária.
+   - **Critério de Aceite:** O botão transiciona imediatamente para estado desabilitado (`disabled`) com spinner de progresso, impedindo cliques repetidos acidentais do operador.
+3. **Teste de Dupla Submissão Rápida (*Double-Tap*):**
+   - Efetuar toques sucessivos com intervalo menor que 100ms no botão de baixa.
+   - **Critério de Aceite:** Apenas uma requisição HTTP PATCH deve ser despachada pela camada de rede Axios.
+4. **Recuperação e Reconexão Automática:**
+   - Desativar o Modo Avião e tocar em **Tentar Novamente**.
+   - **Critério de Aceite:** A requisição é processada com sucesso e o recibo com código de autenticação é gerado sem duplicidade no banco de dados.
+
+---
+
 ### 7. Pipeline de CI/CD e Automação de Deploys
 
 O repositório adota um fluxo de integração e entrega contínua estruturado em etapas sequenciais:
