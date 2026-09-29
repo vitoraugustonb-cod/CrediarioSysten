@@ -965,14 +965,46 @@ const centavosRestantes = Math.round((valorFinanciado - (valorBaseParcela * numP
 // Parcela 1: R$ 33,34 | Parcela 2: R$ 33,33 | Parcela 3: R$ 33,33 | Total = R$ 100,00
 ```
 
-### 💰 Lógica de Pagamento (Amortização)
+### 💰 Lógica de Pagamento e Algoritmo de Amortização em Cascata
 
-Ao registrar um pagamento, o sistema aplica a seguinte lógica em ordem de prioridade:
+Ao registrar um pagamento, o sistema aplica uma máquina de liquidação contábil atômica com distribuição automática de valores excedentes (*Cascade Amortization*):
 
-1. **Quitação completa:** Se `valorPago >= valorParcela`, a parcela é marcada como `PAGA`
-2. **Pagamento parcial:** Se `0 < valorPago < valorParcela`, status muda para `PARCIAL`
-3. **Excedente automático:** Se `valorPago > valorParcela`, o excedente é aplicado na próxima parcela em aberto da mesma venda (amortização em cascata)
-4. **Concorrência segura:** A transação é bloqueada via `prisma.$transaction` para evitar quitações duplicadas simultâneas
+1. **Quitação Completa:** Se `valorPago === saldoRestanteParcela`, a parcela transiciona para `PAGA`.
+2. **Pagamento Parcial:** Se `0 < valorPago < saldoRestanteParcela`, o status muda para `PARCIAL` e o montante abatido é incrementado em `valorPago`.
+3. **Amortização em Cascata (Excedente):** Se `valorPago > saldoRestanteParcela`, a parcela atual é quitada como `PAGA` e o saldo remanescente (`excedente = valorPago - saldoRestanteParcela`) é distribuído sequencialmente entre as parcelas subsequentes da mesma venda:
+
+```typescript
+// Algoritmo de Amortização em Cascata executado em prisma.$transaction:
+let saldoAmortizar = valorRecebido;
+
+for (const parcela of parcelasPendentesOrdenadas) {
+  if (saldoAmortizar <= 0) break;
+
+  const saldoDevedorParcela = Number(parcela.valor) - Number(parcela.valorPago || 0);
+
+  if (saldoAmortizar >= saldoDevedorParcela) {
+    // Quitação integral da parcela atual
+    await tx.parcela.update({
+      where: { id: parcela.id },
+      data: { status: 'PAGA', valorPago: parcela.valor }
+    });
+    saldoAmortizar -= saldoDevedorParcela;
+  } else {
+    // Amortização parcial da próxima parcela e fim da cascata
+    await tx.parcela.update({
+      where: { id: parcela.id },
+      data: {
+        status: 'PARCIAL',
+        valorPago: Number(parcela.valorPago || 0) + saldoAmortizar
+      }
+    });
+    saldoAmortizar = 0;
+  }
+}
+// Se saldoAmortizar > 0 ao final, o valor é retornado como troco/devolução ao cliente
+```
+
+4. **Concorrência Segura:** Toda a cascata executa dentro de um bloco único `prisma.$transaction`, garantindo que se qualquer atualização falhar, nenhum centavo seja debitado indevidamente.
 
 #### 🔄 Fluxo de Liquidação Atômica de Parcela
 
