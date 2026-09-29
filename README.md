@@ -847,9 +847,35 @@ Para comércios onde o cliente final exige o comprovante físico impresso na por
 | :--- | :---: | :--- |
 | **Inicialização** | `0x1B 0x40` (`ESC @`) | Limpa o buffer e restaura configurações padrão |
 | **Centralizar Texto** | `0x1B 0x61 0x01` (`ESC a 1`) | Centraliza cabeçalho e título do recibo |
+| **Alinhar à Esquerda** | `0x1B 0x61 0x00` (`ESC a 0`) | Alinha corpo descritivo das parcelas |
 | **Texto em Negrito** | `0x1B 0x45 0x01` (`ESC E 1`) | Destaque para o valor pago e nome do cliente |
+| **Fonte Dupla Altura/Largura**| `0x1D 0x21 0x11` (`GS ! 0x11`) | Destaque do valor total liquidado |
 | **Avanço de Linhas** | `0x1B 0x64 0x03` (`ESC d 3`) | Alimenta 3 linhas vazias antes de rasgar o papel |
 | **Corte Parcial/Total** | `0x1D 0x56 0x00` (`GS V 0`) | Aciona a guilhotina em modelos com cortador automático |
+
+#### 📶 Matriz de Hardware Homologado e Chunking Web Bluetooth (GATT)
+
+Em aparelhos móveis operando via **Web Bluetooth API**, a conexão GATT impõe um limite típico de MTU de 20 a 512 bytes. Para evitar estouro de buffer (*buffer overrun*) em impressoras portáteis econômicas:
+
+| Modelo / Fabricante | Largura / DPI | Conexão | Protocolo GATT | Estratégia de Transmissão |
+| :--- | :---: | :---: | :---: | :--- |
+| **Goojprt PT-210 / MPT-II** | 58mm / 203 DPI | BLE 4.0+ | Service `0xFFE0` / Char `0xFFE1` | Chunks de 20 bytes com delay de 15ms |
+| **POS-5802DD / Mini POS** | 58mm / 203 DPI | BLE 4.0+ | Service `0x4953` / Char `0xE781` | Chunks de 20 bytes com delay de 20ms |
+| **ZJ-5805DD / POS-8001** | 80mm / 203 DPI | BLE 4.2+ | Service `0x18F0` / Char `0x2AF1` | Chunks de 64 bytes com delay de 10ms |
+
+```typescript
+// Exemplo de envio fracionado (chunking) para evitar perda de caracteres no Bluetooth:
+async function printEscPosChunks(characteristic: BluetoothRemoteGATTCharacteristic, data: Uint8Array) {
+  const CHUNK_SIZE = 20; // Tamanho seguro de MTU BLE
+  for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+    const chunk = data.slice(i, i + CHUNK_SIZE);
+    await characteristic.writeValue(chunk);
+    await new Promise(resolve => setTimeout(resolve, 15)); // Intervalo de descompressão do buffer
+  }
+}
+```
+
+---
 
 ### ⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks (BaaS)
 
