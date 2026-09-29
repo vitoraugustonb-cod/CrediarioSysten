@@ -2187,6 +2187,25 @@ Para conciliar a necessidade de rastreamento forense de incidentes com a conform
   - **Tokens & Cookies:** Headers `Authorization` e cookies `session` são substituídos pelo token literal `[REDACTED]`.
   - **Dados Cadastrais Pessoais:** CPFs e chaves Pix passam por regex de mascaramento preservando apenas dígitos finais para auditoria de suporte.
 
+#### 🔒 Matriz de Classificação de Dados e Pseudonimização (LGPD)
+
+| Categoria do Dado | Exemplo no Sistema | Tratamento na Emissão de Log | Finalidade Regulatória |
+| :--- | :--- | :--- | :--- |
+| **Credenciais** | Senhas em texto claro, hashes bcrypt | Expurgamento total (`omit`) | Prevenção de vazamento acidental em agregadores |
+| **Tokens de Acesso** | JWT, cookies de sessão, Bearer tokens | Substituição por `[REDACTED]` | Mitigação de sequestro de sessão por operadores de monitoramento |
+| **Dados Pessoais (PII)**| CPF, telefone de clientes | Mascaramento parcial (`***.***.123-00`) | Atendimento ao princípio da necessidade e minimização (Art. 6º LGPD) |
+| **Identificadores de Rede**| Endereço IP do operador | Pseudonimização via Hash Salgado diário | Detecção de abuso mantendo privacidade do titular |
+| **Dados Financeiros** | Valores de quitação, IDs de parcela | Preservação íntegra (sem expurgo) | Exigência legal de auditoria contábil e fiscal |
+
+```typescript
+// Pseudonimização de IP para logs em conformidade com LGPD:
+import crypto from 'crypto';
+
+export function pseudonymizeIp(ip: string, dailySalt: string): string {
+  return crypto.createHmac('sha256', dailySalt).update(ip).digest('hex').substring(0, 16);
+}
+```
+
 ---
 
 ## ❓ Perguntas Frequentes (FAQ)
