@@ -2364,9 +2364,19 @@ O projeto segue as diretrizes do [Semantic Versioning 2.0.0](https://semver.org/
 
 - **Criação de Tags Git:** Lançamentos oficiais homologados recebem tags anotadas criadas a partir da branch `main`:
   ```bash
-  git tag -a v1.0.2 -m "release: versao 1.0.2 com correcoes contabeis e melhorias de UI"
-  git push origin v1.0.2
+  git tag -a v1.0.3 -m "release: versao 1.0.3 com melhorias tecnicas estruturais e documentacao"
+  git push origin v1.0.3
   ```
+
+#### 🚀 Checklist de Prontidão de Release (Release Readiness)
+
+Antes de gerar a tag oficial de release e efetuar o deploy em produção a partir da `main`:
+
+- [x] **Homologação Concluída:** Todos os testes de integração e cenários de concorrência aprovados na branch `develop`.
+- [x] **Schema Sincronizado:** Nenhuma migração pendente no Supabase PostgreSQL via `prisma db push` / `DIRECT_URL`.
+- [x] **Build Limpo:** Frontend compilado sem alertas críticos no Rollup/Vite (`npm run build:frontend`).
+- [x] **Changelog Atualizado:** Seção correspondente preenchida no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
+- [x] **Variáveis de Ambiente Auditadas:** Segredos JWT e connection poolers validados no painel da Vercel.
 
 ---
 
