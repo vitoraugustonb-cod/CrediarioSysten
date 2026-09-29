@@ -323,6 +323,24 @@ O banco de dados opera em **PostgreSQL** com duas portas de conexão configurada
 | **Pausa por Inatividade** | Após 7 dias sem requisições | Sem pausa (Always-on) | Em produção recomenda-se Pro Tier ou cron de health check |
 | **Backups PITR** | Não disponível | 7 dias contínuos | Permite restaurar o caixa ao minuto exato antes de falhas |
 
+#### ⚡ Dimensionamento e Parametrização de Conexões PgBouncer em Serverless
+
+Em arquiteturas serverless (Vercel Functions), múltiplas instâncias Node.js podem escalar horizontalmente em milissegundos para atender picos de requisições de cobradores em campo. Se cada função abrir conexões ilimitadas ao PostgreSQL, o banco atingirá saturação de conexões (`Error P1001 / Max client connections reached`).
+
+Para garantir alta disponibilidade e consumo consciente de recursos:
+
+1. **Transaction Pooling com Modo PgBouncer:**
+   A connection string na porta `6543` opera em **Transaction Mode**, devolvendo a conexão ao pool imediatamente após o término de cada query ou transação atômica.
+2. **Parâmetros Mandatórios na `DATABASE_URL`:**
+   ```env
+   DATABASE_URL="postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=10"
+   ```
+   - `pgbouncer=true`: Desativa prepared statements do Prisma que causariam erro de `prepared statement does not exist` no pooling por transação.
+   - `connection_limit=1`: Restringe cada worker serverless a alocar no máximo 1 conexão simultânea.
+   - `pool_timeout=10`: Aborta requisições enfileiradas após 10 segundos para prevenir encadeamento de timeouts (*cascading failures*).
+3. **Padrão Singleton de Inicialização:**
+   No arquivo `src/lib/prisma.ts`, o cliente Prisma é acoplado a `globalThis` para sobreviver aos ciclos de execução da Vercel (*warm starts*) sem instanciar novos pools de conexão desnecessários.
+
 #### 🛡️ Arquitetura de Isolamento e Políticas RLS (Row Level Security)
 
 O PostgreSQL no Supabase implementa **Row Level Security (RLS)** para segregação profunda de privilégios. Embora o backend Express acesse o banco via connection pooling com a role `postgres`/`service_role` gerenciada pelo Prisma ORM, as tabelas críticas possuem diretivas declarativas RLS para prevenir vazamento acidental em acessos diretos via Supabase Studio, REST Data API ou integrações analíticas:
