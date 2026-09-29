@@ -1142,6 +1142,30 @@ flowchart TD
     Auditoria --> Fechamento
 ```
 
+#### 📐 Protocolo Matemático de Fechamento e Tolerância Contábil
+
+No momento da prestação de contas, a rotina de conferência cega aplica a seguinte equação de conciliação:
+
+$$\text{Divergência} = \text{TotalFísicoDeclarado} - \left( \sum \text{Pagamentos}_{\text{Espécie}} - \sum \text{Sangrias}_{\text{Efetuadas}} \right)$$
+
+| Resultado da Apuração | Classificação Contábil | Ação no Sistema | Trilha de Auditoria |
+| :--- | :--- | :--- | :--- |
+| **`Divergência === 0`** | ✅ Caixa Exato | Homologação instantânea do fechamento | Registro de encerramento padrão |
+| **`Divergência > 0`** | ⚠️ Sobra de Caixa | Registro de crédito avulso para conferência | Evento `SOBRA_CAIXA` com valor apurado |
+| **`Divergência < 0`** | 🚨 Falta de Caixa | Notificação à gerência e bloqueio de novo turno | Evento `FALTA_CAIXA` com justificativa obrigatória |
+
+#### 🛡️ Política de Limites de Sangria Preventiva por Rota
+
+Para minimizar a exposição a assaltos e perda patrimonial durante o deslocamento em campo:
+
+| Faixa Operacional | Limite Máximo em Mãos | Frequência de Sangria | Procedimento de Repasse |
+| :--- | :---: | :---: | :--- |
+| **Rota de Baixo Volume** | Até R$ 1.500,00 | Fechamento único | Entrega direta no caixa físico no final do expediente |
+| **Rota de Médio Volume** | R$ 1.500,00 a R$ 3.000,00 | 1 Sangria intermediária | Ponto de encontro homologado ou depósito em agência |
+| **Rota de Alta Densidade**| Acima de R$ 3.000,00 | Sangria a cada R$ 2.000,00 | Alerta no app mobile solicitando descarrego imediato |
+
+---
+
 
 ### 🔄 Fluxo de Estorno Contábil e Protocolo de Retificação
 
