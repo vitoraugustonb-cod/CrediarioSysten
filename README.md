@@ -1542,15 +1542,29 @@ Todas as requisições enviadas ao backend devem seguir os cabeçalhos padroniza
 
 ### 🛡️ Catálogo de Schemas Zod de Validação de Entrada
 
-A integridade das entidades é garantida na camada de entrada através de schemas estritos com validação em whitelist via Zod:
+A integridade das entidades é garantida na camada de entrada através de schemas estritos com validação em whitelist (`z.object({...}).strict()`), bloqueando injeção de parâmetros espúrios e sanitizando tipos primitivos:
 
-| Schema | Objeto Validado | Regras Principais de Validação |
-| :--- | :--- | :--- |
-| **`clienteSchema`** | Cadastro/Edição de Cliente | `nome` min 3 letras com trim, `telefone` formatado com DDD, `referencias` sanitizadas. |
-| **`vendaSchema`** | Emissão de Nova Venda | `clienteId` int positivo, `itens` array min 1, `valorEntrada` >= 0, `numParcelas` entre 1 e 36. |
-| **`pagamentoSchema`** | Baixa de Parcela | `valorPago` número positivo > 0, `confirmacaoValor` idêntico ao `valorPago` (dupla digitação). |
-| **`loginSchema`** | Autenticação | `email` válido formato RFC 5322, `senha` string min 6 caracteres. |
-| **`ajusteParcelaSchema`** | Ajuste Gerencial | `novoValor` > 0, `motivo` string obrigatória min 10 caracteres para trilha de auditoria. |
+| Schema Zod | Entidade / Rota | Regras Principais de Validação | Tratamento de Violação |
+| :--- | :--- | :--- | :--- |
+| **`clienteSchema`** | `POST /clientes`, `PATCH /clientes/:id` | `nome` (3 a 100 caracteres, trim), `telefone` (regex `^\(\d{2}\)\s\d{4,5}-\d{4}$`), `referencias` (opcional, max 255 chars). | `400 Bad Request` com lista de campos |
+| **`vendaSchema`** | `POST /vendas` | `clienteId` (int > 0), `tipoVenda` (Enum `MOVEIS`, `ELETRO`, etc.), `valorEntrada` (número >= 0 com 2 decimais), `numParcelas` (int 1 a 36), `itens` (array min 1). | `400 Bad Request` (`FINANCIAL_VALIDATION_ERROR`) |
+| **`pagamentoSchema`** | `PATCH /parcelas/:id/pagamento` | `valorPago` (float > 0), `confirmacaoValor` (refine: `confirmacaoValor === valorPago` para dupla digitação). | `400 Bad Request` (`DUPLA_DIGITACAO_DIVERGENTE`) |
+| **`loginSchema`** | `POST /login` | `email` (formato RFC 5322, lowercase), `senha` (string min 6 chars sem espaços em branco no início/fim). | `401 Unauthorized` (`AUTH_INVALID_CREDENTIALS`) |
+| **`ajusteParcelaSchema`** | `PATCH /parcelas/:id/ajuste` | `novoValor` (float > 0), `motivo` (string min 10 e max 500 chars para trilha de auditoria contábil). | `400 Bad Request` (Justificativa obrigatória) |
+| **`prorrogarSchema`** | `PATCH /parcelas/:id/data-vencimento`| `novaDataVencimento` (ISO 8601 > data atual), `motivo` (min 10 chars). | `400 Bad Request` (Data deve ser futura) |
+| **`produtoSchema`** | `POST /produtos`, `PATCH /produtos/:id` | `nome` (min 2 chars), `preco` (float > 0), `categoria` (Enum `CategoriaProduto`). | `400 Bad Request` (Preço e categoria válidos) |
+| **`usuarioSchema`** | `POST /usuarios` | `nome` (min 3 chars), `email` (único, formato email), `senha` (min 6), `perfil` (`GERENTE` ou `VENDEDOR_COBRADOR`). | `400 Bad Request` / `409 Conflict` (P2002) |
+
+```typescript
+// Exemplo de schema estrito com dupla digitação anti-erro:
+export const pagamentoSchema = z.object({
+  valorPago: z.number().positive('O valor deve ser maior que zero'),
+  confirmacaoValor: z.number().positive('A confirmação deve ser maior que zero')
+}).strict().refine((data) => data.valorPago === data.confirmacaoValor, {
+  message: 'O valor digitado e a confirmação devem ser rigorosamente idênticos',
+  path: ['confirmacaoValor']
+});
+```
 
 ### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
 
