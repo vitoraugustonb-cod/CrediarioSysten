@@ -563,6 +563,20 @@ Para mitigar riscos de sequestro de credenciais e garantir a segurança criptogr
    - Operadores em campo são redirecionados de forma transparente à tela de login para renovar a sessão.
 4. **Higienização de Logs:** Middlwares e interceptores omitem explicitamente qualquer menção ao conteúdo bruto de cookies ou tokens em saídas de erro ou monitoramento.
 
+#### 🍪 Matriz de Configuração e Comportamento de Cookies HTTP (Dev vs Prod)
+
+Para conciliar a execução em `localhost` com o deploy em nuvem com domínios segregados (Frontend na Vercel e API/Supabase em subdomínios):
+
+| Atributo do Cookie | Ambiente Local (`development`) | Ambiente Nuvem (`production`) | Finalidade Técnica |
+| :--- | :---: | :---: | :--- |
+| **`httpOnly`** | `true` | `true` | Bloqueia leitura via `document.cookie` em JavaScript, neutralizando ataques XSS. |
+| **`secure`** | `false` | `true` | Força transmissão restrita a conexões criptografadas HTTPS em produção. |
+| **`sameSite`** | `'lax'` | `'none'` | Permite o tráfego do cookie em chamadas Cross-Origin (CORS) entre Vercel e a API. |
+| **`maxAge`** | `28800000` (8 horas) | `28800000` (8 horas) | Expiração forçada após o término da jornada padrão de trabalho do cobrador. |
+| **`partitioned` (CHIPS)** | `false` | `true` | Ativa Cookies Having Independent Partitioned State para compatibilidade com Safari/iOS. |
+
+> **Nota para Desenvolvedores:** Em ambiente local, se `secure: true` for ativado indevidamente em conexões `http://localhost`, o navegador descartará silenciosamente o cookie, impedindo a persistência do login.
+
 ---
 
 ### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
