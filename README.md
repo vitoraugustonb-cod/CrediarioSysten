@@ -1047,6 +1047,46 @@ const centavosRestantes = Math.round((valorFinanciado - (valorBaseParcela * numP
 // Parcela 1: R$ 33,34 | Parcela 2: R$ 33,33 | Parcela 3: R$ 33,33 | Total = R$ 100,00
 ```
 
+### 📈 Cálculo de Juros de Mora Pro-Rata Die e Desconto por Pontualidade
+
+Para operações de cobrança com atraso ou incentivo à liquidação antecipada, o motor de regras financeiras adota convenções padronizadas de cálculo diário pro-rata:
+
+#### 1. Juros de Mora Diários e Multa Contratual
+- **Multa Moratória:** Percentual fixo (ex: 2,00%) aplicado uma única vez sobre o saldo devedor principal após o término do período de carência.
+- **Juros de Mora Diários (*Pro-Rata Die*):** Taxa mensal (ex: 1,00% a.m.) rateada linearmente por base de 30 dias:
+  $$\text{Juros Diários} = \text{Saldo Devedor} \times \left( \frac{\text{Taxa Mensal}}{30} \right) \times \text{Dias de Atraso}$$
+- **Janela de Carência Operacional:** Parâmetro configurável (padrão: 3 dias corridos) que isenta o cliente de multas em caso de feriados ou fins de semana bancários.
+
+#### 2. Desconto Regressivo por Antecipação
+- Quitações integrais realizadas com antecedência superior a 15 dias em relação ao vencimento têm direito a desconto proporcional sobre o encargo da parcela:
+  $$\text{Valor com Desconto} = \text{Valor Nominal} \times \left(1 - \frac{\text{Taxa Desconto Dia} \times \text{Dias Antecipados}}{100}\right)$$
+
+```typescript
+// Implementação segura com precisão centesimal (evitando IEEE 754 float drift):
+export function calcularLiquidacaoComEncargos(
+  valorNominal: number,
+  diasAtraso: number,
+  taxaMultaPct = 2.0,
+  taxaJurosMensalPct = 1.0,
+  diasCarencia = 3
+): { totalLiquidar: number; multa: number; juros: number } {
+  if (diasAtraso <= diasCarencia) {
+    return { totalLiquidar: valorNominal, multa: 0, juros: 0 };
+  }
+
+  const multaCentavos = Math.round((valorNominal * (taxaMultaPct / 100)) * 100);
+  const jurosDia = (taxaJurosMensalPct / 100) / 30;
+  const jurosCentavos = Math.round((valorNominal * jurosDia * diasAtraso) * 100);
+  const totalCentavos = Math.round(valorNominal * 100) + multaCentavos + jurosCentavos;
+
+  return {
+    totalLiquidar: totalCentavos / 100,
+    multa: multaCentavos / 100,
+    juros: jurosCentavos / 100
+  };
+}
+```
+
 ### 💰 Lógica de Pagamento e Algoritmo de Amortização em Cascata
 
 Ao registrar um pagamento, o sistema aplica uma máquina de liquidação contábil atômica com distribuição automática de valores excedentes (*Cascade Amortization*):
