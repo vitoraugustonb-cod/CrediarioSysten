@@ -2323,6 +2323,34 @@ export function pseudonymizeIp(ip: string, dailySalt: string): string {
 }
 ```
 
+### 6. Política de Rotação de Arquivos de Log e Retenção Regulatória
+
+Para prevenir esgotamento de disco em servidores VPS e cumprir prazos legais de guarda de documentos e trilhas contábeis:
+
+| Categoria do Log | Mecanismo de Coleta | Rotação / Limite | Retenção Ativa | Destino Final / Expiração |
+| :--- | :--- | :---: | :---: | :--- |
+| **Erros e Exceções** | `error.log` (Winston) | Diária ou 20 MB | 90 dias | Compactação Gzip e descarte automático |
+| **Acessos HTTP** | `access.log` (Morgan) | Diária ou 50 MB | 30 dias | Purgado automaticamente após 30 dias |
+| **Eventos de Segurança** | `security.log` (Auth/RL) | Diária | 180 dias | Arquivamento frio para auditoria interna |
+| **Trilha de Auditoria** | Tabela `Auditoria` (DB) | Sem partição | **5 anos** | Mandatório pelo Código Civil Brasileiro (Art. 206) |
+
+```typescript
+// Configuração do transportador de rotação diária de logs (Winston):
+import DailyRotateFile from 'winston-daily-rotate-file';
+
+export const fileRotateTransport = new DailyRotateFile({
+  filename: 'logs/crediario-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '90d',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  )
+});
+```
+
 ---
 
 ## ❓ Perguntas Frequentes (FAQ)
