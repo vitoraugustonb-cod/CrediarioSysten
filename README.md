@@ -2219,6 +2219,26 @@ export default function () {
 k6 run tests/load/load-test.js
 ```
 
+### 🎭 Matriz de Cenários de Testes Ponta a Ponta (E2E) com Playwright
+
+Para validar a integridade dos fluxos entre a interface visual React e os endpoints de backend, a suíte de testes E2E homologa os caminhos operacionais críticos:
+
+| ID | Fluxo Operacional | Dispositivo Simulado | Asserções de Aceite |
+| :---: | :--- | :---: | :--- |
+| **E2E-01** | Login com Proteção Brute-force | Desktop (1920x1080) | Bloqueio no 6º envio consecutivo com mensagem amigável e contador regressivo. |
+| **E2E-02** | Emissão de Nova Venda & Carnê | Desktop (1920x1080) | Geração correta de itens, cálculo de entrada à vista e criação atômica das parcelas. |
+| **E2E-03** | Baixa Mobile com Dupla Digitação | Mobile (Pixel 7 / 412x915) | Validação de divergência entre campos e geração de comprovante pós-confirmação. |
+| **E2E-04** | Detecção de Conflito Concorrente | Emulação Multi-Aba | Exibição de alerta visual `409 Conflict` e atualização automática do saldo em tela. |
+| **E2E-05** | Fechamento Diário & Sangria | Desktop (1920x1080) | Conferência de totais por forma de pagamento (Dinheiro, Pix) e registro de sangria. |
+
+```bash
+# Executar todos os testes ponta a ponta em modo headless:
+npx playwright test
+
+# Executar testes simulando dispositivo móvel de cobrador:
+npx playwright test --project="Mobile Chrome"
+```
+
 ---
 
 ### Como Rodar Verificações
