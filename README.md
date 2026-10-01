@@ -1508,6 +1508,30 @@ npx --prefix backend prisma validate
 - `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
 - `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
 
+### 📑 Paginação Baseada em Cursor (Cursor-Based Pagination)
+
+Para otimizar o tempo de resposta em tabelas com milhares de registros e evitar os gargalos de desempenho da paginação tradicional por `OFFSET` (*scanning* linear $O(N)$ no PostgreSQL), as rotas `/clientes`, `/parcelas` e `/pagamentos` suportam navegação baseada em cursor estável:
+
+| Parâmetro Query | Tipo | Padrão | Descrição Técnica |
+| :--- | :---: | :---: | :--- |
+| **`cursor`** | `number` / `string` | `null` | Identificador único (ID) do último registro recebido no lote anterior. |
+| **`take`** | `number` | `20` | Quantidade de registros solicitados por página (mínimo: 1, máximo: 100). |
+| **`orderBy`** | `string` | `id` | Coluna indexada de ordenação determinística (`id`, `dataVencimento`, `createdAt`). |
+| **`direction`** | `string` | `desc` | Sentido da navegação sequencial (`asc` para ascendente, `desc` para descendente). |
+
+#### 📨 Headers de Controle de Paginação na Resposta HTTP
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Cursor-Next: 1042
+X-Has-More: true
+X-Page-Size: 20
+X-Total-Count: 3840
+```
+
+- **Resiliência a Inserções Concorrentes:** Como a busca se apoia em `WHERE id < :cursor ORDER BY id DESC LIMIT :take`, novas vendas ou clientes cadastrados em tempo real não causam registros repetidos nem omissão de itens na rolagem do cobrador.
+
 ### 📦 Exemplos de Payloads (Request & Response)
 
 <details>
