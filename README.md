@@ -792,6 +792,20 @@ Para entregar uma experiência equivalente a um aplicativo nativo sem a fricçã
 - **Ícones Adaptativos (Maskable Icons):** Suporte a ícones vetoriais SVG e PNGs em múltiplas resoluções (192x192 e 512x512) com preenchimento seguro para recorte circular no Android.
 - **Tema de Barra de Status Dinâmico:** Meta tag `<meta name="theme-color" content="#2563eb">` harmonizada com o azul institucional do Crediário System.
 
+#### 📶 Estratégia de Cache e Resiliência Local com IndexedDB e Service Worker
+
+Para garantir alta velocidade de navegação na rota de rua e evitar telas em branco em locais de baixa conectividade:
+
+| Tipo de Recurso | Estratégia de Cache | Ciclo de Atualização | Armazenamento |
+| :--- | :---: | :---: | :--- |
+| **Bundles JS/CSS e Fontes** | `CacheFirst` | Cache por hash no nome do arquivo | Cache Storage API (Browser) |
+| **Ícones e Assets Visuais** | `StaleWhileRevalidate` | Validação em segundo plano | Cache Storage API |
+| **Catálogo de Produtos** | `StaleWhileRevalidate` | Renovação a cada 1 hora | Cache Storage / Memory |
+| **Transações e Pagamentos** | `NetworkOnly` (Sem Cache) | Chamada direta via Axios/Fetch | Sem cache HTTP (Segurança ACID) |
+| **Recibos Prontos para Impressão** | Fila Local Serializada | Purgado após envio/impressão | **IndexedDB** (`recibos_pendentes`) |
+
+- **Segurança Transacional:** Operações que alteram saldos ou registram dinheiro nunca são cacheadas na camada HTTP. Apenas a visualização da rota e a fila de impressão térmica utilizam persistência offline local, prevenindo descompassos entre o saldo em tela e o banco de dados.
+
 ---
 
 ## ⚙️ Funcionalidades Principais
