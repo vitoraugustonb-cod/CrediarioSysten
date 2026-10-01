@@ -208,6 +208,22 @@ O sistema integra uma API REST em **Node.js/Express (preparada para Serverless e
 | **Proteção contra Abuso** | express-rate-limit | — | Rate limiting agressivo contra força bruta no login e proteção de API. |
 | **Autenticação** | JWT + Cookie httpOnly | — | Sessão protegida contra ataques XSS e suporte a token Bearer híbrido. |
 
+### 🖥️ Matriz de Compatibilidade de Ambientes de Execução (Runtimes & Containers)
+
+Para assegurar previsibilidade e ausência de atritos tanto no desenvolvimento local quanto em servidores VPS:
+
+| Componente | Versão Mínima | Versão Recomendada | Status de Homologação |
+| :--- | :---: | :---: | :--- |
+| **Node.js Runtime** | `20.11.0 LTS` | `22.12.0 LTS` | ✅ Homologado (Suporte ativo a ESM e Fetch nativo) |
+| **Gerenciador npm** | `10.2.0` | `10.8.0+` | ✅ Homologado (Instalação via `package-lock.json` v3) |
+| **Docker Engine** | `24.0.0` | `27.3.1+` | ✅ Homologado (BuildKit e builds multi-stage) |
+| **Docker Compose** | `v2.20.0` | `v2.29.0+` | ✅ Homologado (Sintaxe Compose v2 sem hífen) |
+| **PostgreSQL Engine** | `15.1` | `16.x (Supabase)` | ✅ Homologado (Índices B-Tree compostos e RLS) |
+| **Sistema Operacional** | Ubuntu 22.04 / Debian 12 | Ubuntu 24.04 LTS / WSL2 | ✅ Homologado (Linux, Windows 11 com WSL2, macOS) |
+
+- **Dimensionamento Mínimo para VPS:** 1 vCPU, 1 GB de memória RAM e 15 GB de disco SSD (com swap de 1 GB ativado).
+- **Dimensionamento Recomendado para Produção:** 2 vCPU, 4 GB de memória RAM e 40 GB de disco SSD NVMe.
+
 ---
 
 ## 🏗️ Arquitetura em Nuvem & Camadas
