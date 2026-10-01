@@ -588,7 +588,21 @@ sequenceDiagram
     API->>DB: Checa status ativo instantâneo
     DB-->>API: Usuário ativo confirmado
     API-->>FE: Resposta com dados autorizados
+
+    Note over FE,API: Fluxo de Logout e Invalidação Ativa
+    FE->>API: POST /api/auth/logout
+    API->>API: Invalida cookie (Max-Age=0, Expire passado)
+    API-->>FE: 200 OK + Header Clear-Site-Data: "cookies", "storage"
+    FE->>FE: Limpa estado reativo da sessão e redireciona para /login
 ```
+
+#### 🚪 Protocolo de Logout Seguro e Invalidação Ativa
+
+Para garantir que sessões encerradas no aplicativo móvel ou desktop não deixem resíduos no cliente:
+
+1. **Remoção Criptográfica do Cookie:** A rota `POST /api/auth/logout` emite o cabeçalho `Set-Cookie` com parâmetro `Max-Age=0` e data de expiração retroativa, forçando o navegador a purgar o token de acesso da memória e do disco.
+2. **Diretiva `Clear-Site-Data`:** Em respostas de logout, o servidor envia o header HTTP `Clear-Site-Data: "cookies", "storage"`, instruindo o browser a limpar caches de navegação, cookies de sessão e dados temporários de `sessionStorage`.
+3. **Reset do Estado Reativo do Frontend:** O contexto de autenticação React (`AuthContext`) reseta imediatamente todas as variáveis de estado em memória para `null`, cancelando requisições assíncronas pendentes via `AbortController`.
 
 ### 🔐 Política de Gestão e Rotação de Segredos JWT
 
