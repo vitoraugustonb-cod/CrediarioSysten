@@ -558,6 +558,9 @@ A API e o frontend aplicam cabeçalhos de defesa ativa configurados via **Helmet
 | **`X-Content-Type-Options`** | `nosniff` | Desativa farejamento de MIME type pelo navegador, neutralizando execução indevida de arquivos anexos. |
 | **`Referrer-Policy`** | `strict-origin-when-cross-origin` | Limita o vazamento de caminhos e parâmetros internos da URL ao navegar para origens externas. |
 | **`Access-Control-Allow-Credentials`** | `true` | Autoriza o tráfego seguro de cookies `httpOnly` exclusivamente para as origens explicitamente listadas na whitelist. |
+| **`Permissions-Policy`** | `camera=(), microphone=(), geolocation=(self), payment=()` | Restringe APIs de hardware sensíveis no navegador, permitindo geolocalização apenas para origem segura de rotas. |
+| **`Cross-Origin-Opener-Policy`** | `same-origin` | Isola o contexto de navegação contra ataques de vazamento de janelas e ataques de temporização (*Spectre*). |
+| **`Cross-Origin-Resource-Policy`** | `same-origin` | Bloqueia carregamento não autorizado de assets estáticos e endpoints de API por origens de terceiros. |
 
 ### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
 
