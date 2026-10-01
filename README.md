@@ -1398,6 +1398,21 @@ npm run prisma:generate
 npm --prefix backend run seed
 ```
 
+#### 🛡️ Estratégia de Migrações em Produção com Zero Downtime & Advisory Locks
+
+Para garantir a integridade estrutural do banco em ambientes distribuídos:
+
+1. **Separação de Ambientes (`db push` vs `migrate deploy`):**
+   - Em ambiente local de desenvolvimento, utiliza-se `prisma db push` para prototipação rápida.
+   - Na esteira de CI/CD e em produção, utiliza-se **exclusivamente** `prisma migrate deploy`, aplicando scripts SQL versionados de forma determinística.
+2. **Roteamento Obrigatório via Conexão Direta (`DIRECT_URL`):**
+   - Comandos de migração executam instruções DDL e demandam travas exclusivas de sessão (*Advisory Locks* do PostgreSQL).
+   - O PgBouncer (porta `6543` no Supabase) opera em modo de transação e descarta o estado da sessão, o que gera erro ao tentar adquirir advisory locks.
+   - Portanto, o Prisma CLI deve ser configurado com `directUrl = env("DIRECT_URL")` apontando para a porta direta `5432` do PostgreSQL.
+3. **Controle de Concorrência via Tabela `_prisma_migrations`:**
+   - O Prisma registra cada migração aplicada com checksum SHA-256 e timestamp na tabela interna `_prisma_migrations`.
+   - Se duas instâncias de deploy tentarem executar migrações simultaneamente, a trava transacional bloqueia a segunda execução, prevenindo duplicações ou corrupção de schema.
+
 ### 6. Automação de Verificações com Pre-commit Hooks
 
 Para garantir que nenhum commit chegue quebrado à branch `develop`, recomenda-se rodar as validações estáticas antes de versionar:
