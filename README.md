@@ -1505,6 +1505,27 @@ npx --prefix backend prisma validate
    DATABASE_URL="postgres://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
    ```
 
+#### 🔍 Diagnóstico de Timeouts no Prisma Client (Códigos P1001 e P2024)
+
+Caso ocorram interrupções intermitentes de acesso ao banco em horários de pico operacional:
+
+1. **Diferenciação dos Códigos de Falha:**
+   - **`P1001 (Connection Refused / Unreachable)`:** O servidor backend não consegue abrir o socket TCP com o Supabase. Costuma ser causado por bloqueio de firewall corporativo na porta 6543, erro de DNS ou queda no host do banco.
+   - **`P2024 (Connection Pool Timeout)`:** O pool de conexões do Prisma Client esgotou. Todas as conexões alocadas estão ocupadas por queries lentas ou transações sem fechamento adequado (`COMMIT`/`ROLLBACK`).
+2. **Comando de Teste de Conectividade Direta:**
+   ```bash
+   # Teste rápido de abertura de porta via terminal (Linux/macOS):
+   nc -zv aws-0-sa-east-1.pooler.supabase.com 6543
+
+   # Teste equivalente no Windows PowerShell:
+   Test-NetConnection -ComputerName aws-0-sa-east-1.pooler.supabase.com -Port 6543
+   ```
+3. **Calibragem do Parâmetro `pool_timeout`:**
+   Em rotas com geração pesada de relatórios, recomenda-se estender o timeout de fila do Prisma Client no arquivo `.env`:
+   ```env
+   DATABASE_URL="postgresql://...?pgbouncer=true&connection_limit=10&pool_timeout=20"
+   ```
+
 ---
 
 ## 🔐 Contas de Acesso Padrão
