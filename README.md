@@ -2484,6 +2484,19 @@ Para monitorar o desempenho da API em condições reais de tráfego móvel de ru
 | `/relatorios/dashboard` | `GET` | `< 400ms` | `99.5%` | Avaliação de queries de agregação e consumo de conexões no PgBouncer. |
 | `/health` | `GET` | `< 50ms` | `99.99%` | Acionamento imediato do plantão de infraestrutura (Pager). |
 
+#### 📡 Blueprint de Métricas Prometheus e Rastreamento OpenTelemetry (OTel)
+Para observabilidade em larga escala em clusters Kubernetes ou dashboards Grafana:
+
+| Nome da Métrica Prometheus | Tipo | Labels | Descrição de Operação |
+| :--- | :---: | :--- | :--- |
+| `crediario_http_request_duration_seconds` | Histogram | `method, route, status` | Latência da requisição HTTP dividida por buckets (p50, p95, p99) |
+| `crediario_parcelas_liquidadas_total` | Counter | `forma_pagamento, operador_id` | Contagem cumulativa de baixas financeiras registradas |
+| `crediario_pgbouncer_active_connections` | Gauge | `pool_type` | Conexões ativas no pool Supabase PgBouncer |
+| `crediario_rate_limit_blocks_total` | Counter | `route, ip_hash` | Bloqueios disparados por excesso de requisições maliciosas |
+
+- **Rastreamento de Ponta a Ponta (W3C Trace Context):**
+  Requisições carregam os cabeçalhos padrão `traceparent` e `tracestate`, permitindo correlação direta entre o log de auditoria no backend, a query executada no PostgreSQL e a ação do cobrador no frontend mobile.
+
 ### 5. Esteira de Auditoria Forense e Sanitização de Logs (LGPD)
 
 Para conciliar a necessidade de rastreamento forense de incidentes com a conformidade estrita à LGPD:
