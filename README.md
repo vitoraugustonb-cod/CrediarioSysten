@@ -1866,6 +1866,15 @@ flowchart TD
 }
 ```
 
+#### 📋 Conformidade com a Especificação RFC 7807 / RFC 9457 (Problem Details)
+| Atributo RFC | Tipo | Equivalente no Crediário System | Descrição |
+| :--- | :---: | :--- | :--- |
+| **`type`** | URI / String | `https://crediario.local/errors/{codigo}` | URI identificadora do tipo de erro ou código textual semântico |
+| **`title`** | String | `erro` | Resumo legível e curto da condição de falha |
+| **`status`** | Integer | `status` | Código de status HTTP gerado pelo servidor |
+| **`detail`** | String | `detalhes[].mensagem` | Explicação humana detalhada sobre a falha |
+| **`instance`** | String | `path` | URI relativa do recurso acessado no momento do erro |
+
 ### 📑 Catálogo Estruturado de Códigos de Negócio
 
 Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos padronizados no campo `codigo` do payload JSON de erro:
