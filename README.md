@@ -2196,6 +2196,23 @@ Para sustentar milhares de parcelas sem degradação de tempo de resposta em con
 
 - **Modo Transaction do PgBouncer:** Mantém as conexões ativas apenas durante a execução de transações SQL, liberando slots imediatamente após o commit, permitindo que dezenas de instâncias serverless compartilhem um pool compacto de 15 conexões sem rejeição de tráfego.
 
+#### 🧹 Manutenção Preventiva de Índices e Autovacuum Tuning
+Em operações de cobrança intensa com centenas de atualizações de status por minuto, o PostgreSQL gera tuplas mortas (*dead tuples*) na tabela `Parcela`. Para evitar *bloat* e degradação de performance:
+
+- **Ajuste de Parâmetros de Autovacuum para Tabelas Críticas:**
+  ```sql
+  -- Reduzir limiar de disparo de autovacuum nas tabelas de alta escrita
+  ALTER TABLE "Parcela" SET (autovacuum_vacuum_scale_factor = 0.05);
+  ALTER TABLE "Parcela" SET (autovacuum_vacuum_cost_limit = 1000);
+  ALTER TABLE "AuditLog" SET (autovacuum_vacuum_scale_factor = 0.02);
+  ```
+- **Reindexação Concorrente sem Bloqueio de Escrita:**
+  ```sql
+  -- Executado mensalmente via Supabase SQL Editor para desfragmentar B-Trees:
+  REINDEX TABLE CONCURRENTLY "Parcela";
+  REINDEX TABLE CONCURRENTLY "Pagamento";
+  ```
+
 ### 🔬 Profiling de Memória e Monitoramento de Event Loop no Node.js
 
 Para sustentar alta volumetria sem travamentos ou degradação progressiva de memória (*memory leaks*):
