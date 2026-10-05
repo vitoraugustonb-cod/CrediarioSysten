@@ -606,6 +606,26 @@ A API e o frontend aplicam cabeçalhos de defesa ativa configurados via **Helmet
 | **`Cross-Origin-Opener-Policy`** | `same-origin` | Isola o contexto de navegação contra ataques de vazamento de janelas e ataques de temporização (*Spectre*). |
 | **`Cross-Origin-Resource-Policy`** | `same-origin` | Bloqueia carregamento não autorizado de assets estáticos e endpoints de API por origens de terceiros. |
 
+#### 🌐 Política de CORS e Whitelist Dinâmica de Origens
+A API não utiliza `Access-Control-Allow-Origin: *` em nenhuma circunstância, mantendo segregação rigorosa:
+
+```typescript
+// Implementação da checagem de origem autorizada:
+const allowedOrigins = [
+  'https://crediario-systen-mu.vercel.app',
+  /^https:\/\/crediario-.*\.vercel\.app$/, // Preview Deployments da Vercel
+  'http://localhost:5173',                 // Vite Dev Server
+  'http://localhost:3000'                  // Docker Frontend
+];
+```
+
+| Parâmetro CORS | Valor Configurado | Justificativa de Engenharia |
+| :--- | :--- | :--- |
+| **`credentials`** | `true` | Necessário para envio e recebimento de cookies `httpOnly` de autenticação. |
+| **`methods`** | `GET, POST, PATCH, DELETE, OPTIONS` | Limita os verbos HTTP aceitos estritamente às operações de negócio. |
+| **`maxAge`** | `86400` (24 horas) | Caching da resposta de preflight (`OPTIONS`), economizando roundtrips de rede em conexões 4G de rua. |
+| **`allowedHeaders`** | `Content-Type, Authorization, X-Requested-With` | Previne cabeçalhos anômalos que poderiam contornar firewalls WAF. |
+
 ### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
 
 ```mermaid
