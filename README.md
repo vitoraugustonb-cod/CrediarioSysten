@@ -1144,6 +1144,12 @@ const centavosRestantes = Math.round((valorFinanciado - (valorBaseParcela * numP
 // Parcela 1: R$ 33,34 | Parcela 2: R$ 33,33 | Parcela 3: R$ 33,33 | Total = R$ 100,00
 ```
 
+#### ⚖️ Proteção contra Erros de Ponto Flutuante (IEEE 754 Float Drift)
+Operações com valores monetários em JavaScript podem introduzir anomalias binárias (ex: `0.1 + 0.2 === 0.30000000000000004`). Para neutralizar esse risco:
+- **Representação Centesimal Inteira em Memória:** Cálculos intermediários multiplicam os valores por `100` (`Math.round(valor * 100)`), operando sobre centavos inteiros antes da divisão final.
+- **Arredondamento Bancário (Half-to-Even):** Em cálculos de amortização e juros, frações de meio centavo são arredondadas para o dígito par mais próximo conforme padrão contábil internacional (norma ISO/IEC/IEEE 754).
+- **Tipagem no Banco:** No PostgreSQL (Supabase), todas as colunas financeiras utilizam tipo `Decimal(10, 2)`, prevenindo perdas de precisão na persistência do Prisma ORM.
+
 ### 📈 Cálculo de Juros de Mora Pro-Rata Die e Desconto por Pontualidade
 
 Para operações de cobrança com atraso ou incentivo à liquidação antecipada, o motor de regras financeiras adota convenções padronizadas de cálculo diário pro-rata:
