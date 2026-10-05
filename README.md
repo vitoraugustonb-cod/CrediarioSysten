@@ -879,13 +879,15 @@ Para garantir alta velocidade de navegação na rota de rua e evitar telas em br
 
 | Tipo de Recurso | Estratégia de Cache | Ciclo de Atualização | Armazenamento |
 | :--- | :---: | :---: | :--- |
-| **Bundles JS/CSS e Fontes** | `CacheFirst` | Cache por hash no nome do arquivo | Cache Storage API (Browser) |
+| **Bundles JS/CSS e Fontes** | `CacheFirst` | Cache por hash imutável no nome do arquivo | Cache Storage API (Browser) |
 | **Ícones e Assets Visuais** | `StaleWhileRevalidate` | Validação em segundo plano | Cache Storage API |
+| **Metadados de Rota (Clientes)** | `NetworkFirst (Timeout 3s)` | Fallback para snapshot local se sem sinal | Cache Storage / IndexedDB |
 | **Catálogo de Produtos** | `StaleWhileRevalidate` | Renovação a cada 1 hora | Cache Storage / Memory |
 | **Transações e Pagamentos** | `NetworkOnly` (Sem Cache) | Chamada direta via Axios/Fetch | Sem cache HTTP (Segurança ACID) |
 | **Recibos Prontos para Impressão** | Fila Local Serializada | Purgado após envio/impressão | **IndexedDB** (`recibos_pendentes`) |
 
 - **Segurança Transacional:** Operações que alteram saldos ou registram dinheiro nunca são cacheadas na camada HTTP. Apenas a visualização da rota e a fila de impressão térmica utilizam persistência offline local, prevenindo descompassos entre o saldo em tela e o banco de dados.
+- **Gestão de Quota de Armazenamento:** A aplicação monitora o consumo via `navigator.storage.estimate()` e mantém o espaço utilizado abaixo de **15 MB**, descartando snapshots de rotas anteriores a 48 horas automaticamente.
 
 ---
 
