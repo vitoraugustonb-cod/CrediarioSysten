@@ -1583,6 +1583,8 @@ npx --prefix backend prisma validate
 | `NetworkError / Failed to fetch` | Queda momentânea de conexão 3G/4G na rua | O app exibe alerta no topo da tela preservando os dados digitados para reenvio seguro |
 | `Vercel Cold Start Delay (> 3s)` | Inicialização a frio da função Serverless | Ocorre apenas na 1ª requisição após ociosidade; chamadas subsequentes respondem em < 150ms |
 | `PrismaClientInitializationError` | Conexões esgotadas no pooler do Supabase | Reduza o `connection_limit` na connection string ou ative o PgBouncer Transaction Mode |
+| `Prisma engine not compatible (libssl)` | Discrepância de versão OpenSSL (Linux/Alpine/WSL2) | Defina `binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]` no schema |
+| `Port 3300 already in use (EADDRINUSE)` | Processo Node anterior órfão em segundo plano | No Windows: `Stop-Process -Id (Get-NetTCPConnection -LocalPort 3300).OwningProcess -Force` |
 
 #### ⚡ Procedimento de Mitigação de Cold Starts e Pool do Prisma
 
