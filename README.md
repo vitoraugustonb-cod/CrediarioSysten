@@ -2120,6 +2120,18 @@ Para auditoria rápida e triagem forense, cada ação do sistema possui uma clas
 | `AJUSTE_VALOR_GERENCIA` | 🟠 Alta | Destaque no dashboard | Exige anuência expressa da diretoria |
 | `ESTORNO_CONTABIL` | 🔴 Crítica | Alerta imediato no painel | Abertura de protocolo de averiguação interna |
 
+### 🔗 Matriz de Integridade Referencial e Ações de Chave Estrangeira (FKs)
+
+Para blindar a base contábil contra deleções acidentais e perda de rastreabilidade de pagamentos:
+
+| Relação (Origem ➔ Destino) | Campo FK | Regra de Exclusão (`onDelete`) | Justificativa de Engenharia |
+| :--- | :--- | :---: | :--- |
+| `Cliente` ➔ `Venda` | `Venda.clienteId` | `RESTRICT` | Impede a deleção de clientes com compras ou histórico de títulos emitidos |
+| `Venda` ➔ `Parcela` | `Parcela.vendaId` | `RESTRICT` | Carnês e parcelas ativas não podem ser excluídos diretamente |
+| `Parcela` ➔ `Pagamento` | `Pagamento.parcelaId` | `RESTRICT` | Protege os recibos e comprovantes financeiros de quitação |
+| `Venda` ➔ `ItemVenda` | `ItemVenda.vendaId` | `CASCADE` | Itens pertencem estritamente ao cabeçalho da venda comercial |
+| `Usuario` ➔ `Venda` | `Venda.vendedorId` | `RESTRICT` | Preserva a comissão e auditoria de vendas mesmo se o operador for desligado |
+
 ---
 
 ## ⚙️ Variáveis de Ambiente
