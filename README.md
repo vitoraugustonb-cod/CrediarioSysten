@@ -372,13 +372,18 @@ Para garantir alta disponibilidade e consumo consciente de recursos:
    A connection string na porta `6543` opera em **Transaction Mode**, devolvendo a conexão ao pool imediatamente após o término de cada query ou transação atômica.
 2. **Parâmetros Mandatórios na `DATABASE_URL`:**
    ```env
-   DATABASE_URL="postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=10"
+   DATABASE_URL="postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=10&sslmode=require"
    ```
    - `pgbouncer=true`: Desativa prepared statements do Prisma que causariam erro de `prepared statement does not exist` no pooling por transação.
-   - `connection_limit=1`: Restringe cada worker serverless a alocar no máximo 1 conexão simultânea.
+   - `connection_limit=1`: Restringe cada worker serverless a alocar no máximo 1 conexão simultânea, prevenindo exaustão rápida do pool.
    - `pool_timeout=10`: Aborta requisições enfileiradas após 10 segundos para prevenir encadeamento de timeouts (*cascading failures*).
+   - `sslmode=require`: Força negociação estrita de túnel TLS/SSL com cifras corporativas entre a borda (Vercel) e o pooler Supabase em São Paulo (`sa-east-1`).
 3. **Padrão Singleton de Inicialização:**
    No arquivo `src/lib/prisma.ts`, o cliente Prisma é acoplado a `globalThis` para sobreviver aos ciclos de execução da Vercel (*warm starts*) sem instanciar novos pools de conexão desnecessários.
+4. **Ciclo de Vida de Conexões em Serverless (Cold vs Warm Starts):**
+   - **Cold Start:** Uma nova instância aloca 1 conexão via PgBouncer em ~30ms graças à persistência dos túneis gerenciados do Supabase.
+   - **Warm Start:** Instâncias reutilizam o singleton Prisma em memória sem novo handshake TLS.
+   - **Tear-Down:** Ao ser congelada pela Vercel, o PgBouncer detecta inatividade de socket e recicla a conexão TCP sem lock no PostgreSQL.
 
 #### 🛡️ Arquitetura de Isolamento e Políticas RLS (Row Level Security)
 
