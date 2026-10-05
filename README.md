@@ -720,16 +720,33 @@ Para relatórios gerenciais em PDF ou planilhas CSV exportadas do painel desktop
 
 ## 🌿 Estratégia de Branching (Git Flow)
 
-O repositório segue o fluxo profissional de branches:
+O repositório segue rigorosamente o fluxo profissional de branches e proteção contínua de integridade:
 
-- **`main`**: Branch de **Produção** conectada diretamente ao deploy da Vercel. Apenas código testado e aprovado via Pull Request entra na `main`.
-- **`develop`**: Branch principal de **Desenvolvimento**. Novas features, melhorias e testes são realizados aqui.
+- **`main`**: Branch de **Produção** conectada diretamente ao deploy da Vercel. Commits diretos são estritamente proibidos (`protected branch`). Apenas código validado, testado e aprovado via Pull Request entra na `main`.
+- **`develop`**: Branch principal de **Desenvolvimento**. Todas as novas features, correções e melhorias técnicas devem ser integradas aqui antes de qualquer promoção para homologação ou produção.
 
 ```
-develop ───●───●───●──────┐ (Pull Request)
+develop ───●───●───●──────┐ (Pull Request Validado)
                           ▼
 main ─────────────────────● (Deploy Automático na Vercel)
 ```
+
+### 🛡️ Regras de Proteção de Branches (Branch Protection Rules)
+
+| Branch | Política de Acesso | Requisitos Obrigatórios de Merge | Status de CI/CD |
+| :--- | :--- | :--- | :--- |
+| **`main`** | Bloqueio de push direto / Sem force-push | Aprovação de PR, testes de integração verdes, fast-forward ou squash merge | Dispara pipeline de produção Vercel |
+| **`develop`** | Commits estruturados com Conventional Commits | Validação local de build e tipagem TypeScript (`tsc --noEmit`) | Dispara Vercel Preview Deployments |
+
+#### 📋 Protocolo de Versionamento e Commits Semânticos
+- Mensagens de commit devem obrigatoriamente seguir a convenção do [Conventional Commits v1.0.0](https://www.conventionalcommits.org/):
+  - `feat(...)`: Novas funcionalidades para o operador ou gerente.
+  - `fix(...)`: Correções de bugs em cálculos ou rotas de API.
+  - `docs(...)`: Alterações de documentação e diagramas técnicos.
+  - `refactor(...)`: Refatoração estrutural sem alteração de comportamento externo.
+  - `test(...)`: Adição ou ajuste de testes automatizados e suítes Vitest.
+  - `chore(...)`: Manutenção de dependências, scripts ou infraestrutura.
+- **Governança de Autonomia:** Comandos de versionamento (`git commit` e `git push`) devem ser executados apenas com confirmação explícita de escopo do operador responsável.
 
 ---
 
