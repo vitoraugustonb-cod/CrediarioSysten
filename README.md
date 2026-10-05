@@ -308,6 +308,29 @@ docker compose up --build -d
 docker compose down
 ```
 
+#### 🩺 Especificação de Healthcheck dos Serviços
+Para orquestração resiliente, os serviços no Compose definem sondas de integridade automatizadas:
+
+| Serviço | Endpoint / Comando da Sonda | Intervalo | Timeout | Retentativas | Período de Inicialização |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **`backend`** | `wget --no-verbose --tries=1 --spider http://localhost:3300/health` | `30s` | `5s` | 3 | `15s` |
+| **`frontend`** | `wget --no-verbose --tries=1 --spider http://localhost:80/` | `30s` | `3s` | 3 | `5s` |
+
+#### 🔧 Comandos Úteis de Diagnóstico e Rede Interna
+```bash
+# Inspecionar logs em tempo real dos dois containers
+docker compose logs -f --tail=100
+
+# Executar health check manual de dentro da rede Docker
+docker compose exec backend wget -qO- http://localhost:3300/health
+
+# Testar conectividade do Nginx com a API interna
+docker compose exec frontend wget -qO- http://backend:3300/health
+
+# Verificar status das portas e consumo de memória
+docker stats --no-stream
+```
+
 ### 📊 Matriz de Dimensionamento de Infraestrutura para VPS
 
 Para operações que optarem por hospedar os containers em VPS própria (ex: AWS Lightsail, DigitalOcean Droplet ou Hetzner), utilize a matriz de dimensionamento de recursos:
