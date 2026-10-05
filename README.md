@@ -2326,6 +2326,30 @@ npm --prefix backend run test:coverage
 - **Asserção de Rollback Atômico:** Testes injetam falhas deliberadas para assegurar que falhas parciais não deixem resíduos no banco.
 - **Simulação de Concorrência:** Disparo de `Promise.all()` simultâneo simulando duas baixas concorrentes para certificar retorno de HTTP 409 (`CONCURRENCY_CONFLICT`).
 
+#### 🎯 Metas Mínimas de Cobertura de Código (Vitest Thresholds)
+A esteira de integração contínua impõe bloqueio caso a cobertura do backend fique abaixo dos patamares:
+
+| Métrica de Cobertura | Mínimo Exigido | Módulos Críticos (Cálculos & Auth) |
+| :--- | :---: | :---: |
+| **Linhas (`lines`)** | `85%` | `95%` |
+| **Declarações (`statements`)** | `85%` | `95%` |
+| **Funções (`functions`)** | `90%` | `100%` |
+| **Ramificações (`branches`)** | `80%` | `90%` |
+
+#### ⏱️ Mocks Determinísticos para Regras Financeiras Temporais
+Testes que envolvem cálculo de juros diários (*pro-rata die*) e expiração de sessões JWT utilizam congelamento de relógio via Vitest:
+```typescript
+beforeEach(() => {
+  // Fixar data em 2026-03-15T00:00:00Z para evitar variações de fuso horário
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-03-15T00:00:00.000Z'));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+```
+
 ### 🏋️ Testes de Carga e Estresse de Concorrência com k6
 
 Para certificar que a API Express e o PgBouncer suportam os picos de tráfego das equipes de cobrança em campo sem degradação:
