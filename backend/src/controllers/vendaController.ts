@@ -38,6 +38,27 @@ export const registrarVenda = async (req: Request, res: Response): Promise<void>
         res.status(404).json({ erro: 'Cliente não encontrado.' });
         return;
       }
+
+      if (req.usuario!.perfil !== 'GERENTE') {
+        const clientePertence = await prisma.cliente.findFirst({
+          where: {
+            id: finalClienteId,
+            vendas: {
+              some: {
+                OR: [
+                  { vendedorId: req.usuario!.id },
+                  { parcelas: { some: { cobradorId: req.usuario!.id } } }
+                ]
+              }
+            }
+          }
+        });
+        const temOutrasVendas = await prisma.venda.count({ where: { clienteId: finalClienteId } });
+        if (temOutrasVendas > 0 && !clientePertence) {
+          res.status(403).json({ erro: 'Este cliente pertence à carteira de outro vendedor.' });
+          return;
+        }
+      }
     } else {
       const nome = novoCliente?.nome || req.body.clienteNome || req.body.nome;
       const rua = novoCliente?.rua || req.body.rua || '';

@@ -29,10 +29,35 @@ export const criarCliente = async (req: Request, res: Response): Promise<void> =
 
 export const listarClientes = async (req: Request, res: Response): Promise<void> => {
   try {
+    const usuario = req.usuario!;
+    const isGerente = usuario.perfil === 'GERENTE';
+
+    const ondeFiltro = isGerente
+      ? {}
+      : {
+          vendas: {
+            some: {
+              OR: [
+                { vendedorId: usuario.id },
+                { parcelas: { some: { cobradorId: usuario.id } } }
+              ]
+            }
+          }
+        };
+
     const clientes = await prisma.cliente.findMany({
+      where: ondeFiltro,
       orderBy: { nome: 'asc' },
       include: {
         vendas: {
+          where: isGerente
+            ? undefined
+            : {
+                OR: [
+                  { vendedorId: usuario.id },
+                  { parcelas: { some: { cobradorId: usuario.id } } }
+                ]
+              },
           select: {
             id: true,
             parcelas: {
@@ -86,6 +111,8 @@ export const listarClientes = async (req: Request, res: Response): Promise<void>
 
 export const obterClientePorId = async (req: Request, res: Response): Promise<void> => {
   try {
+    const usuario = req.usuario!;
+    const isGerente = usuario.perfil === 'GERENTE';
     const { id } = req.params;
     const idStr = Array.isArray(id) ? id[0] : id;
     const clienteId = parseInt(idStr, 10);
@@ -95,10 +122,32 @@ export const obterClientePorId = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    if (!isGerente) {
+      const temPermissao = await prisma.cliente.findFirst({
+        where: {
+          id: clienteId,
+          vendas: {
+            some: {
+              OR: [
+                { vendedorId: usuario.id },
+                { parcelas: { some: { cobradorId: usuario.id } } }
+              ]
+            }
+          }
+        }
+      });
+
+      if (!temPermissao) {
+        res.status(403).json({ erro: 'Acesso negado: este cliente não pertence à sua carteira.' });
+        return;
+      }
+    }
+
     const cliente = await prisma.cliente.findUnique({
       where: { id: clienteId },
       include: {
         pagamentos: {
+          where: isGerente ? undefined : { cobradorId: usuario.id },
           include: {
             cobrador: { select: { id: true, nome: true, email: true } },
             venda: {
@@ -113,6 +162,14 @@ export const obterClientePorId = async (req: Request, res: Response): Promise<vo
           ]
         },
         vendas: {
+          where: isGerente
+            ? undefined
+            : {
+                OR: [
+                  { vendedorId: usuario.id },
+                  { parcelas: { some: { cobradorId: usuario.id } } }
+                ]
+              },
           include: {
             itens: { include: { produto: true } },
             parcelas: true
@@ -139,6 +196,8 @@ export const obterClientePorId = async (req: Request, res: Response): Promise<vo
  */
 export const obterSaldoDevedorCliente = async (req: Request, res: Response): Promise<void> => {
   try {
+    const usuario = req.usuario!;
+    const isGerente = usuario.perfil === 'GERENTE';
     const { id } = req.params;
     const idStr = Array.isArray(id) ? id[0] : id;
     const clienteId = parseInt(idStr, 10);
@@ -146,6 +205,27 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
     if (isNaN(clienteId)) {
       res.status(400).json({ erro: 'ID de cliente inválido.' });
       return;
+    }
+
+    if (!isGerente) {
+      const temPermissao = await prisma.cliente.findFirst({
+        where: {
+          id: clienteId,
+          vendas: {
+            some: {
+              OR: [
+                { vendedorId: usuario.id },
+                { parcelas: { some: { cobradorId: usuario.id } } }
+              ]
+            }
+          }
+        }
+      });
+
+      if (!temPermissao) {
+        res.status(403).json({ erro: 'Acesso negado: este cliente não pertence à sua carteira.' });
+        return;
+      }
     }
 
     const cliente = await prisma.cliente.findUnique({
@@ -157,10 +237,19 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
       return;
     }
 
-    // Busca TODAS as parcelas de TODAS as vendas deste cliente para calculo de saldo exato
+    // Busca parcelas de vendas deste cliente (filtradas para o vendedor/cobrador caso não seja gerente)
     const todasParcelas = await prisma.parcela.findMany({
       where: {
-        venda: { clienteId: clienteId }
+        venda: {
+          clienteId: clienteId,
+          ...(isGerente ? {} : {
+            OR: [
+              { vendedorId: usuario.id },
+              { parcelas: { some: { cobradorId: usuario.id } } }
+            ]
+          })
+        },
+        ...(isGerente ? {} : { cobradorId: usuario.id })
       }
     });
 
@@ -205,8 +294,11 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
     res.status(500).json({ erro: 'Erro interno ao calcular saldo devedor do cliente.' });
   }
 };
+
 export const atualizarCliente = async (req: Request, res: Response): Promise<void> => {
   try {
+    const usuario = req.usuario!;
+    const isGerente = usuario.perfil === 'GERENTE';
     const { id } = req.params;
     const idStr = Array.isArray(id) ? id[0] : id;
     const clienteId = parseInt(idStr, 10);
@@ -214,6 +306,27 @@ export const atualizarCliente = async (req: Request, res: Response): Promise<voi
     if (isNaN(clienteId)) {
       res.status(400).json({ erro: 'ID de cliente inválido.' });
       return;
+    }
+
+    if (!isGerente) {
+      const temPermissao = await prisma.cliente.findFirst({
+        where: {
+          id: clienteId,
+          vendas: {
+            some: {
+              OR: [
+                { vendedorId: usuario.id },
+                { parcelas: { some: { cobradorId: usuario.id } } }
+              ]
+            }
+          }
+        }
+      });
+
+      if (!temPermissao) {
+        res.status(403).json({ erro: 'Acesso negado: este cliente não pertence à sua carteira.' });
+        return;
+      }
     }
 
     const cliente = await prisma.cliente.findUnique({ where: { id: clienteId } });
