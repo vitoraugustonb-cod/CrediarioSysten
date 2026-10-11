@@ -44,3 +44,7 @@ logs/
 # Repositórios clonados localmente
 vitoraugustonb-cod/
 
+# Backups confidenciais do banco de dados
+backups/
+*.dump
+

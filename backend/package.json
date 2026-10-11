@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "seed": "tsx src/scripts/seedGerente.ts",
-    "reset-db": "tsx src/scripts/resetBanco.ts"
+    "reset-db": "tsx src/scripts/resetBanco.ts",
+    "backup": "powershell -ExecutionPolicy Bypass -File ../scripts/fazer-backup.ps1"
   },
   "keywords": [],
   "author": "",

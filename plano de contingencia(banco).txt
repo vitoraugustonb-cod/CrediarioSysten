@@ -1,0 +1,99 @@
+================================================================================
+PLANO DE CONTINGÊNCIA E RECUPERAÇÃO DE DESASTRES (BANCO DE DADOS)
+PROJETO: CREDIÁRIO MASTER
+================================================================================
+
+OBJETIVO:
+Este documento contém o protocolo oficial passo a passo para restaurar o sistema 
+e todos os dados dos clientes em caso de queda, ataque, exclusão ou instabilidade 
+no banco de dados principal (Supabase).
+
+Se algum dia o banco de dados cair, basta enviar este arquivo para o Assistente de IA 
+ou seguir os passos abaixo para restabelecer o funcionamento do sistema em menos de 5 minutos,
+sem que o cliente ou os cobradores percam nenhuma informação.
+
+--------------------------------------------------------------------------------
+1. ONDE ESTÃO OS DADOS E OS BACKUPS?
+--------------------------------------------------------------------------------
+- Todos os backups gerados ficam salvos na pasta:
+  `backups/`
+  Exemplo de arquivo: `backups/backup_crediario_2026-10-11_18-41-13.sql`
+
+- Como gerar um backup atualizado a qualquer momento (manual):
+  Abra o terminal e execute:
+  cd backend
+  npm run backup
+  (Ou na raiz do projeto: powershell -ExecutionPolicy Bypass -File .\scripts\fazer-backup.ps1)
+
+- O arquivo `.sql` contém 100% das tabelas e registros:
+  * Usuários e credenciais (Gerente e Vendedores)
+  * Clientes completos (Nomes, telefones, endereços e referências)
+  * Produtos do catálogo
+  * Vendas realizadas (valores totais e entradas)
+  * Itens de cada venda
+  * Parcelas (valores, vencimentos, status e observações)
+  * Histórico de pagamentos recebidos
+  * Histórico de auditoria
+
+--------------------------------------------------------------------------------
+2. PROTOCOLO DE CONTINGÊNCIA (PASSO A PASSO)
+--------------------------------------------------------------------------------
+
+CENÁRIO: O Supabase caiu e os cobradores na rua precisam continuar operando.
+
+PASSO 1: CRIAR UMA NOVA INSTÂNCIA POSTGRESQL (LEVA 30 SEGUNDOS)
+- Como o banco de dados do Crediário é PostgreSQL padrão, ele funciona em qualquer provedor do mundo.
+- Acesse um provedor gratuito e rápido:
+  Opção A (Recomendada): https://neon.tech -> Crie uma conta e clique em "Create Project" (gratuito e instantâneo).
+  Opção B: https://render.com -> Clique em "New +" > "PostgreSQL".
+  Opção C: https://supabase.com -> Crie um novo projeto com nova senha.
+- Copie a "Connection String" fornecida pelo novo provedor.
+  Exemplo de URL: postgresql://neondb_owner:senha@ep-xyz.sa-east-1.aws.neon.tech/neondb?sslmode=require
+
+PASSO 2: RESTAURAR O ARQUIVO DE BACKUP NO NOVO BANCO
+- No terminal do projeto, execute o script de restauração:
+  .\scripts\restaurar-backup.ps1 -ArquivoBackup "backups/NOME_DO_ARQUIVO_MAIS_RECENTE.sql" -DestinoUrl "URL_DO_NOVO_BANCO"
+
+- Ou, se preferir, abra a aba "SQL Editor" no painel do novo provedor (Neon/Supabase/Render), cole o conteúdo do arquivo `.sql` e clique em "Run / Executar".
+
+PASSO 3: ATUALIZAR A VARIÁVEL DE AMBIENTE NA VERCEL (PRODUÇÃO)
+1. Acesse https://vercel.com e abra o projeto do Crediário.
+2. Vá em: Settings > Environment Variables.
+3. Edite as variáveis com a nova URL do banco:
+   - DATABASE_URL: Cole a nova URL de conexão.
+   - DIRECT_URL: Cole a nova URL de conexão direta.
+4. Salve as alterações.
+
+PASSO 4: DISPARAR O REDEPLOY NA VERCEL
+1. Na Vercel, vá na aba "Deployments".
+2. No deploy mais recente, clique nos 3 pontinhos (...) e selecione "Redeploy".
+3. Aguarde cerca de 1 a 2 minutos até o deploy concluir.
+
+PASSO 5: RESULTADO E VALIDAÇÃO
+- O aplicativo PWA no celular do cobrador e no computador do cliente volta a responder imediatamente.
+- O cobrador e o cliente NÃO precisam reinstalar o app nem deslogar.
+- Nenhuma venda, parcela ou cliente foi perdido.
+
+--------------------------------------------------------------------------------
+3. INSTRUÇÃO AUTOMÁTICA PARA O ASSISTENTE DE IA
+--------------------------------------------------------------------------------
+Se você estiver utilizando este arquivo com o Assistente de IA, basta enviar o comando:
+
+"O banco caiu. Siga o plano de contingencia(banco).txt usando o backup [NOME_DO_ARQUIVO.sql] e aponte para a nova URL [NOVA_URL_DO_POSTGRES]."
+
+O assistente executará a restauração, atualizará os arquivos de configuração locais e preparará a sincronização para restabelecer a operação instantaneamente.
+
+--------------------------------------------------------------------------------
+4. CONTINGÊNCIA SECUNDÁRIA (LOCAL / SEM INTERNET NO ESCRITÓRIO)
+--------------------------------------------------------------------------------
+Se a internet cair ou você quiser rodar tudo 100% no seu computador:
+1. Abra o Docker Desktop no computador.
+2. Inicie o PostgreSQL local via docker compose.
+3. Restaure o backup localmente:
+   docker exec -i crediario_postgres psql -U postgres crediario_db < backups/backup_mais_recente.sql
+4. No arquivo backend/.env, aponte DATABASE_URL para "postgresql://postgres:postgrespassword@localhost:5432/crediario_db".
+5. O sistema funciona offline no endereço http://localhost.
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================
