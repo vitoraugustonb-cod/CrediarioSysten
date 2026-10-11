@@ -10,6 +10,10 @@ export interface Cliente {
   endereco: string;
   referencias?: string | null;
   criadoEm?: string;
+  totalVendas?: number;
+  parcelasEmAberto?: number;
+  saldoDevedor?: number;
+  quitado?: boolean;
 }
 
 export type CategoriaProduto = 'MOVEIS' | 'VARIEDADES';

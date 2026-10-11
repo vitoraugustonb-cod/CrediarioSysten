@@ -30,9 +30,54 @@ export const criarCliente = async (req: Request, res: Response): Promise<void> =
 export const listarClientes = async (req: Request, res: Response): Promise<void> => {
   try {
     const clientes = await prisma.cliente.findMany({
-      orderBy: { nome: 'asc' }
+      orderBy: { nome: 'asc' },
+      include: {
+        vendas: {
+          select: {
+            id: true,
+            parcelas: {
+              select: {
+                id: true,
+                status: true,
+                valor: true,
+                valorPago: true,
+              }
+            }
+          }
+        }
+      }
     });
-    res.json(clientes);
+
+    const clientesComStatus = clientes.map(c => {
+      const totalVendas = c.vendas.length;
+      let parcelasEmAberto = 0;
+      let saldoDevedor = 0;
+
+      for (const v of c.vendas) {
+        for (const p of v.parcelas) {
+          const vOriginal = Number(p.valor);
+          const vPago = p.valorPago ? Number(p.valorPago) : 0;
+          if (p.status !== StatusParcela.PAGA) {
+            parcelasEmAberto++;
+            saldoDevedor += Math.max(0, vOriginal - vPago);
+          }
+        }
+      }
+
+      // Cliente quitado: já possui compras/dívidas no sistema e finalizou todas as parcelas (saldo = 0)
+      const quitado = totalVendas > 0 && parcelasEmAberto === 0;
+
+      const { vendas, ...clienteSemVendas } = c;
+      return {
+        ...clienteSemVendas,
+        totalVendas,
+        parcelasEmAberto,
+        saldoDevedor: Math.round(saldoDevedor * 100) / 100,
+        quitado
+      };
+    });
+
+    res.json(clientesComStatus);
   } catch (error) {
     console.error('Erro ao listar clientes:', error);
     res.status(500).json({ erro: 'Erro interno ao listar clientes.' });

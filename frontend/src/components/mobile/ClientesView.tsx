@@ -541,67 +541,89 @@ export const ClientesView: React.FC = () => {
               {busca ? `Nenhum cliente encontrado para "${busca}".` : 'Nenhum cliente cadastrado ainda.'}
             </div>
           ) : (
-            clientesFiltrados.map((cliente) => (
-              <div
-                key={cliente.id}
-                onClick={() => abrirSaldoCliente(cliente)}
-                className="card-interactive touch-target"
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '16px',
-                  border: '1px solid var(--border-color)',
-                  boxShadow: 'var(--shadow-sm)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0, paddingRight: '12px' }}>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-800)', margin: 0 }}>
-                    {cliente.nome}
-                  </h4>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={14} color="var(--accent-600)" />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {cliente.endereco}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Phone size={14} color="var(--primary-500)" />
-                    <span>{cliente.telefone}</span>
-                  </div>
-                </div>
-
-                {/* Botão de 3 Pontos na Vertical */}
-                <button
-                  type="button"
-                  title="Opções do cliente"
-                  aria-label="Opções do cliente"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    abrirSaldoCliente(cliente);
-                  }}
+            clientesFiltrados.map((cliente) => {
+              const isQuitado = Boolean(cliente.quitado);
+              return (
+                <div
+                  key={cliente.id}
+                  onClick={() => abrirSaldoCliente(cliente)}
+                  className="card-interactive touch-target"
                   style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--bg-subtle, #F8FAFC)',
-                    color: 'var(--primary-700, #334155)',
-                    border: '1px solid var(--border-color, #E2E8F0)',
+                    backgroundColor: isQuitado ? '#F0FDF4' : '#FFFFFF',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '16px',
+                    border: isQuitado ? '1px solid #86EFAC' : '1px solid var(--border-color)',
+                    boxShadow: isQuitado ? '0 1px 3px rgba(34, 197, 94, 0.15)' : 'var(--shadow-sm)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'background-color 0.15s ease',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <MoreVertical size={20} />
-                </button>
-              </div>
-            ))
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0, paddingRight: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 800, color: isQuitado ? '#166534' : 'var(--primary-800)', margin: 0 }}>
+                        {cliente.nome}
+                      </h4>
+                      {isQuitado && (
+                        <span
+                          style={{
+                            fontSize: '0.66rem',
+                            fontWeight: 800,
+                            backgroundColor: '#DCFCE7',
+                            color: '#15803D',
+                            padding: '2px 8px',
+                            borderRadius: 'var(--radius-full)',
+                            border: '1px solid #86EFAC',
+                            letterSpacing: '0.02em',
+                          }}
+                        >
+                          QUITADO
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: isQuitado ? '#15803D' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MapPin size={14} color={isQuitado ? '#22C55E' : 'var(--accent-600)'} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {cliente.endereco}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: isQuitado ? '#15803D' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Phone size={14} color={isQuitado ? '#16A34A' : 'var(--primary-500)'} />
+                      <span>{cliente.telefone}</span>
+                    </div>
+                  </div>
+
+                  {/* Botão de 3 Pontos na Vertical */}
+                  <button
+                    type="button"
+                    title="Opções do cliente"
+                    aria-label="Opções do cliente"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      abrirSaldoCliente(cliente);
+                    }}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: isQuitado ? '#DCFCE7' : 'var(--bg-subtle, #F8FAFC)',
+                      color: isQuitado ? '#15803D' : 'var(--primary-700, #334155)',
+                      border: isQuitado ? '1px solid #86EFAC' : '1px solid var(--border-color, #E2E8F0)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      transition: 'background-color 0.15s ease',
+                    }}
+                  >
+                    <MoreVertical size={20} />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       )}
