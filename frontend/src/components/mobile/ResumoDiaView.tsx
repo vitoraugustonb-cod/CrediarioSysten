@@ -34,11 +34,11 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
   const [error, setError] = useState<string | null>(null);
   const [detalheAberto, setDetalheAberto] = useState<'cobrancas' | 'vendas' | null>(null);
 
-  const carregarResumo = useCallback(async () => {
+  const carregarResumo = useCallback(async (force = false) => {
     setLoading(true);
     setError(null);
     try {
-      const dados = await getPrestacaoContasDia(token, dataSel);
+      const dados = await getPrestacaoContasDia(token, dataSel, force);
       setResumo(dados);
     } catch {
       setError('Não foi possível carregar a prestação de contas do dia.');
@@ -48,7 +48,16 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
   }, [token, dataSel]);
 
   useEffect(() => {
-    carregarResumo();
+    carregarResumo(false);
+  }, [carregarResumo]);
+
+  // Atualiza automaticamente quando houver novas vendas ou recebimentos registrados
+  useEffect(() => {
+    const handleInvalidation = () => {
+      carregarResumo(true);
+    };
+    window.addEventListener('api:cache-invalidated', handleInvalidation);
+    return () => window.removeEventListener('api:cache-invalidated', handleInvalidation);
   }, [carregarResumo]);
 
   return (
@@ -90,7 +99,8 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
         </div>
 
         <button
-          onClick={carregarResumo}
+          onClick={() => carregarResumo(true)}
+          title="Recarregar resumo"
           className="touch-target"
           style={{
             width: '40px',

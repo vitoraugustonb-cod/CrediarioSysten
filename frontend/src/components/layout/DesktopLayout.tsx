@@ -24,6 +24,17 @@ import { ProdutosDesktopView } from '../desktop/ProdutosDesktopView';
 export const DesktopLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set(['dashboard']));
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    setVisitedTabs((prev) => {
+      if (prev.has(tabId)) return prev;
+      const next = new Set(prev);
+      next.add(tabId);
+      return next;
+    });
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard Inicial', icon: LayoutDashboard },
@@ -94,7 +105,7 @@ export const DesktopLayout: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -251,14 +262,28 @@ export const DesktopLayout: React.FC = () => {
           </div>
         </header>
 
-        {/* Dynamic Desktop Views */}
-        {activeTab === 'dashboard' && <DashboardView />}
-        {activeTab === 'funcionarios' && <FuncionariosView />}
-        {activeTab === 'clientes' && <ClientesDesktopView />}
-        {activeTab === 'vendas' && <VendasDesktopView />}
-        {activeTab === 'cobrancas' && <CobrancasDesktopView />}
-        {activeTab === 'relatorios' && <RelatorioMensalView />}
-        {activeTab === 'produtos' && <ProdutosDesktopView />}
+        {/* Dynamic Desktop Views (Keep-Alive) */}
+        <div style={{ display: activeTab === 'dashboard' ? 'block' : 'none' }}>
+          {visitedTabs.has('dashboard') && <DashboardView />}
+        </div>
+        <div style={{ display: activeTab === 'funcionarios' ? 'block' : 'none' }}>
+          {visitedTabs.has('funcionarios') && <FuncionariosView />}
+        </div>
+        <div style={{ display: activeTab === 'clientes' ? 'block' : 'none' }}>
+          {visitedTabs.has('clientes') && <ClientesDesktopView />}
+        </div>
+        <div style={{ display: activeTab === 'vendas' ? 'block' : 'none' }}>
+          {visitedTabs.has('vendas') && <VendasDesktopView />}
+        </div>
+        <div style={{ display: activeTab === 'cobrancas' ? 'block' : 'none' }}>
+          {visitedTabs.has('cobrancas') && <CobrancasDesktopView />}
+        </div>
+        <div style={{ display: activeTab === 'relatorios' ? 'block' : 'none' }}>
+          {visitedTabs.has('relatorios') && <RelatorioMensalView />}
+        </div>
+        <div style={{ display: activeTab === 'produtos' ? 'block' : 'none' }}>
+          {visitedTabs.has('produtos') && <ProdutosDesktopView />}
+        </div>
       </main>
     </div>
   );

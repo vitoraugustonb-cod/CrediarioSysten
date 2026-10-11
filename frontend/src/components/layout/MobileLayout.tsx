@@ -22,6 +22,17 @@ import { PWAInstallBanner } from '../common/PWAInstallBanner';
 export const MobileLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('resumo');
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set(['resumo']));
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    setVisitedTabs((prev) => {
+      if (prev.has(tabId)) return prev;
+      const next = new Set(prev);
+      next.add(tabId);
+      return next;
+    });
+  };
 
   const bottomNavItems = [
     { id: 'resumo', label: 'Resumo', icon: TrendingUp },
@@ -121,14 +132,26 @@ export const MobileLayout: React.FC = () => {
       {/* Banner de Instalação do Aplicativo PWA */}
       <PWAInstallBanner />
 
-      {/* Dynamic Content Views */}
+      {/* Dynamic Content Views com Keep-Alive (0ms para alternar abas, sem refetch e mantendo scroll) */}
       <main style={{ padding: '12px 10px', flex: 1, maxWidth: '100vw', overflowX: 'hidden' }}>
-        {activeTab === 'resumo' && <ResumoDiaView onNavigate={(t) => setActiveTab(t)} />}
-        {activeTab === 'cobrancas' && <CobrancasView onNavigate={(t) => setActiveTab(t)} />}
-        {activeTab === 'venda' && <NovaVendaView onNavigate={(t) => setActiveTab(t)} />}
-        {activeTab === 'clientes' && <ClientesView />}
-        {activeTab === 'historico' && <HistoricoExtratoView />}
-        {activeTab === 'historico_vendas' && <HistoricoVendasExtratoView />}
+        <div style={{ display: activeTab === 'resumo' ? 'block' : 'none' }}>
+          {visitedTabs.has('resumo') && <ResumoDiaView onNavigate={handleTabChange} />}
+        </div>
+        <div style={{ display: activeTab === 'cobrancas' ? 'block' : 'none' }}>
+          {visitedTabs.has('cobrancas') && <CobrancasView onNavigate={handleTabChange} />}
+        </div>
+        <div style={{ display: activeTab === 'venda' ? 'block' : 'none' }}>
+          {visitedTabs.has('venda') && <NovaVendaView onNavigate={handleTabChange} />}
+        </div>
+        <div style={{ display: activeTab === 'clientes' ? 'block' : 'none' }}>
+          {visitedTabs.has('clientes') && <ClientesView />}
+        </div>
+        <div style={{ display: activeTab === 'historico' ? 'block' : 'none' }}>
+          {visitedTabs.has('historico') && <HistoricoExtratoView />}
+        </div>
+        <div style={{ display: activeTab === 'historico_vendas' ? 'block' : 'none' }}>
+          {visitedTabs.has('historico_vendas') && <HistoricoVendasExtratoView />}
+        </div>
       </main>
 
       {/* Navegação Inferior Fixa (Bottom Navigation for Mobile) */}
@@ -155,7 +178,7 @@ export const MobileLayout: React.FC = () => {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleTabChange(item.id)}
               className="touch-target"
               style={{
                 flex: 1,

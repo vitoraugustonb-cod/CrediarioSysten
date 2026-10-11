@@ -139,8 +139,52 @@ export interface VendaItem {
   parcelas?: Parcela[];
 }
 
+// ==========================================
+// In-Memory Client Cache System (60s TTL)
+// ==========================================
+interface CacheEntry<T = any> {
+  data: T;
+  timestamp: number;
+}
+
+const apiCache = new Map<string, CacheEntry>();
+const DEFAULT_CACHE_TTL_MS = 60 * 1000; // 60 segundos de cache para requisições GET
+
+/**
+ * Limpa o cache em memória da API.
+ * Se endpointPrefix for fornecido, limpa apenas as chaves correspondentes.
+ */
+export function clearApiCache(endpointPrefix?: string) {
+  if (!endpointPrefix) {
+    apiCache.clear();
+  } else {
+    for (const key of apiCache.keys()) {
+      if (key.startsWith(endpointPrefix)) {
+        apiCache.delete(key);
+      }
+    }
+  }
+}
+
 // Helper to make authenticated requests to backend REST API
-async function fetchWithAuth(endpoint: string, token: string | null, options: RequestInit = {}) {
+async function fetchWithAuth(
+  endpoint: string,
+  token: string | null,
+  options: RequestInit = {},
+  bypassCache: boolean = false
+) {
+  const method = (options.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+  const cacheKey = `${endpoint}::${token || 'anon'}`;
+
+  // Se for GET e não for bypass de cache, verifica o cache primeiro
+  if (isGet && !bypassCache) {
+    const cached = apiCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < DEFAULT_CACHE_TTL_MS)) {
+      return cached.data;
+    }
+  }
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
@@ -162,12 +206,23 @@ async function fetchWithAuth(endpoint: string, token: string | null, options: Re
     throw new Error(data.erro || data.message || 'Erro ao comunicar com o servidor');
   }
 
+  if (isGet) {
+    // Salva resposta GET no cache
+    apiCache.set(cacheKey, { data, timestamp: Date.now() });
+  } else {
+    // Qualquer alteração/mutação limpa o cache e notifica ouvintes
+    clearApiCache();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('api:cache-invalidated'));
+    }
+  }
+
   return data;
 }
 
 // 1. GET /parcelas
-export async function getParcelas(token: string | null): Promise<Parcela[]> {
-  return await fetchWithAuth('/parcelas', token);
+export async function getParcelas(token: string | null, forceRefresh: boolean = false): Promise<Parcela[]> {
+  return await fetchWithAuth('/parcelas', token, {}, forceRefresh);
 }
 
 // 2. PATCH /parcelas/:id/pagamento
@@ -196,8 +251,8 @@ export async function registrarObservacaoAPI(
 }
 
 // 4. GET /clientes
-export async function getClientes(token: string | null): Promise<Cliente[]> {
-  return await fetchWithAuth('/clientes', token);
+export async function getClientes(token: string | null, forceRefresh: boolean = false): Promise<Cliente[]> {
+  return await fetchWithAuth('/clientes', token, {}, forceRefresh);
 }
 
 // 5. POST /clientes
@@ -212,18 +267,18 @@ export async function criarClienteAPI(
 }
 
 // 6. GET /clientes/:id/saldo
-export async function getSaldoCliente(id: number, token: string | null): Promise<SaldoDevedorCliente> {
-  return await fetchWithAuth(`/clientes/${id}/saldo`, token);
+export async function getSaldoCliente(id: number, token: string | null, forceRefresh: boolean = false): Promise<SaldoDevedorCliente> {
+  return await fetchWithAuth(`/clientes/${id}/saldo`, token, {}, forceRefresh);
 }
 
 // 6.1 GET /clientes/:id (Dados completos + Histórico de Vendas)
-export async function getClientePorId(id: number, token: string | null): Promise<any> {
-  return await fetchWithAuth(`/clientes/${id}`, token);
+export async function getClientePorId(id: number, token: string | null, forceRefresh: boolean = false): Promise<any> {
+  return await fetchWithAuth(`/clientes/${id}`, token, {}, forceRefresh);
 }
 
 // 7. GET /produtos
-export async function getProdutos(token: string | null): Promise<Produto[]> {
-  return await fetchWithAuth('/produtos', token);
+export async function getProdutos(token: string | null, forceRefresh: boolean = false): Promise<Produto[]> {
+  return await fetchWithAuth('/produtos', token, {}, forceRefresh);
 }
 
 // 8. POST /vendas
@@ -257,14 +312,14 @@ export async function criarVendaAPI(
 }
 
 // 9. GET /prestacao-contas/dia
-export async function getPrestacaoContasDia(token: string | null, dataIso?: string): Promise<PrestacaoContasDia> {
+export async function getPrestacaoContasDia(token: string | null, dataIso?: string, forceRefresh: boolean = false): Promise<PrestacaoContasDia> {
   const endpoint = dataIso ? `/prestacao-contas/dia?data=${dataIso}` : '/prestacao-contas/dia';
-  return await fetchWithAuth(endpoint, token);
+  return await fetchWithAuth(endpoint, token, {}, forceRefresh);
 }
 
 // 10. GET /usuarios
-export async function getUsuarios(token: string | null): Promise<UsuarioItem[]> {
-  return await fetchWithAuth('/usuarios', token);
+export async function getUsuarios(token: string | null, forceRefresh: boolean = false): Promise<UsuarioItem[]> {
+  return await fetchWithAuth('/usuarios', token, {}, forceRefresh);
 }
 
 // 11. POST /usuarios
@@ -282,25 +337,27 @@ export async function criarUsuarioAPI(
 export async function getPrestacaoContasFuncionarioDia(
   usuarioId: number,
   token: string | null,
-  dataIso?: string
+  dataIso?: string,
+  forceRefresh: boolean = false
 ): Promise<PrestacaoContasDia> {
   const endpoint = dataIso
     ? `/prestacao-contas/dia/${usuarioId}?data=${dataIso}`
     : `/prestacao-contas/dia/${usuarioId}`;
-  return await fetchWithAuth(endpoint, token);
+  return await fetchWithAuth(endpoint, token, {}, forceRefresh);
 }
 
 // 13. GET /relatorios/mensal
 export async function getRelatorioMensal(
   mes?: number,
   ano?: number,
-  token: string | null = null
+  token: string | null = null,
+  forceRefresh: boolean = false
 ): Promise<RelatorioMensalItem[]> {
   let endpoint = '/relatorios/mensal';
   if (mes && ano) {
     endpoint += `?mes=${mes}&ano=${ano}`;
   }
-  const data = await fetchWithAuth(endpoint, token);
+  const data = await fetchWithAuth(endpoint, token, {}, forceRefresh);
   return data.consolidadoPorFuncionario || data;
 }
 
@@ -308,7 +365,8 @@ export async function getRelatorioMensal(
 export async function getVendas(
   dataInicio?: string,
   dataFim?: string,
-  token: string | null = null
+  token: string | null = null,
+  forceRefresh: boolean = false
 ): Promise<VendaItem[]> {
   let endpoint = '/vendas';
   const params = new URLSearchParams();
@@ -316,12 +374,12 @@ export async function getVendas(
   if (dataFim) params.append('dataFim', dataFim);
   if (params.toString()) endpoint += `?${params.toString()}`;
 
-  return await fetchWithAuth(endpoint, token);
+  return await fetchWithAuth(endpoint, token, {}, forceRefresh);
 }
 
 // 15. GET /vendas/:id
-export async function getVendaPorId(id: number, token: string | null): Promise<VendaItem> {
-  return await fetchWithAuth(`/vendas/${id}`, token);
+export async function getVendaPorId(id: number, token: string | null, forceRefresh: boolean = false): Promise<VendaItem> {
+  return await fetchWithAuth(`/vendas/${id}`, token, {}, forceRefresh);
 }
 
 // 16. PATCH /parcelas/:id/ajuste (GERENTE only)
@@ -379,12 +437,12 @@ export interface ExtratoDiaResponse {
   itens: ExtratoDiaItem[];
 }
 
-export async function getHistoricoDiasFechados(token: string | null): Promise<DiaFechadoItem[]> {
-  return await fetchWithAuth('/pagamentos/dias-fechados', token);
+export async function getHistoricoDiasFechados(token: string | null, forceRefresh: boolean = false): Promise<DiaFechadoItem[]> {
+  return await fetchWithAuth('/pagamentos/dias-fechados', token, {}, forceRefresh);
 }
 
-export async function getExtratoDia(dataIso: string, token: string | null): Promise<ExtratoDiaResponse> {
-  return await fetchWithAuth(`/pagamentos/extrato-dia?data=${dataIso}`, token);
+export async function getExtratoDia(dataIso: string, token: string | null, forceRefresh: boolean = false): Promise<ExtratoDiaResponse> {
+  return await fetchWithAuth(`/pagamentos/extrato-dia?data=${dataIso}`, token, {}, forceRefresh);
 }
 
 // 19. Histórico de Vendas Dias Fechados & Extrato Diário de Vendas
@@ -424,12 +482,12 @@ export interface ExtratoDiaVendasResponse {
   itens: ExtratoDiaVendasItem[];
 }
 
-export async function getHistoricoVendasDiasFechados(token: string | null): Promise<DiaFechadoVendasItem[]> {
-  return await fetchWithAuth('/vendas/dias-fechados', token);
+export async function getHistoricoVendasDiasFechados(token: string | null, forceRefresh: boolean = false): Promise<DiaFechadoVendasItem[]> {
+  return await fetchWithAuth('/vendas/dias-fechados', token, {}, forceRefresh);
 }
 
-export async function getExtratoVendasDia(dataIso: string, token: string | null): Promise<ExtratoDiaVendasResponse> {
-  return await fetchWithAuth(`/vendas/extrato-dia?data=${dataIso}`, token);
+export async function getExtratoVendasDia(dataIso: string, token: string | null, forceRefresh: boolean = false): Promise<ExtratoDiaVendasResponse> {
+  return await fetchWithAuth(`/vendas/extrato-dia?data=${dataIso}`, token, {}, forceRefresh);
 }
 
 // 20. PATCH /clientes/:id — Atualizar dados do cliente

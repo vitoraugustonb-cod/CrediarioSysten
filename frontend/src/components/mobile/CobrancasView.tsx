@@ -12,7 +12,8 @@ import {
   MessageCircle,
   Phone,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -82,11 +83,11 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const [observacaoInput, setObservacaoInput] = useState<string>('');
   const [salvando, setSalvando] = useState<boolean>(false);
 
-  const carregarParcelas = useCallback(async () => {
+  const carregarParcelas = useCallback(async (force = false) => {
     setLoading(true);
     setError(null);
     try {
-      const dados = await getParcelas(token);
+      const dados = await getParcelas(token, force);
       setParcelas(dados);
     } catch {
       setError('Erro ao carregar parcelas de cobrança.');
@@ -96,7 +97,16 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   }, [token]);
 
   useEffect(() => {
-    carregarParcelas();
+    carregarParcelas(false);
+  }, [carregarParcelas]);
+
+  // Atualiza automaticamente quando houver novas vendas ou recebimentos registrados
+  useEffect(() => {
+    const handleInvalidation = () => {
+      carregarParcelas(true);
+    };
+    window.addEventListener('api:cache-invalidated', handleInvalidation);
+    return () => window.removeEventListener('api:cache-invalidated', handleInvalidation);
   }, [carregarParcelas]);
 
   const abrirDetalhe = (p: Parcela) => {
@@ -478,31 +488,56 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Search Input */}
-      <div style={{ position: 'relative', width: '100%' }}>
-        <Search
-          size={18}
-          color="var(--text-muted)"
-          style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-        />
-        <input
-          type="text"
-          placeholder="Buscar cliente na rota..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
+      {/* Search Input & Manual Refresh Button */}
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search
+            size={18}
+            color="var(--text-muted)"
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+          />
+          <input
+            type="text"
+            placeholder="Buscar cliente na rota..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            style={{
+              width: '100%',
+              height: '44px',
+              padding: '0 12px 0 38px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              backgroundColor: '#FFFFFF',
+              fontSize: '0.9rem',
+              outline: 'none',
+              boxShadow: 'var(--shadow-sm)',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => carregarParcelas(true)}
+          title="Recarregar cobranças"
+          className="touch-target"
           style={{
-            width: '100%',
+            width: '44px',
             height: '44px',
-            padding: '0 12px 0 38px',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-color)',
             backgroundColor: '#FFFFFF',
-            fontSize: '0.9rem',
-            outline: 'none',
-            boxShadow: 'var(--shadow-sm)',
-            boxSizing: 'border-box'
+            color: 'var(--primary-800)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0,
+            boxShadow: 'var(--shadow-sm)'
           }}
-        />
+        >
+          <RefreshCw size={18} className={loading ? 'spin' : ''} />
+        </button>
       </div>
 
       {/* Filter Tabs: Cobrar Hoje / Atrasados / Todos */}
