@@ -124,6 +124,7 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
     let parcelasAbertoCount = 0;
     let parcelasAtrasoCount = 0;
     const agora = new Date();
+    const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 0, 0, 0, 0);
 
     for (const p of todasParcelas) {
       const vOriginal = Number(p.valor);
@@ -134,7 +135,9 @@ export const obterSaldoDevedorCliente = async (req: Request, res: Response): Pro
 
       if (p.status !== StatusParcela.PAGA) {
         parcelasAbertoCount++;
-        if (p.dataVencimento < agora || p.status === StatusParcela.ATRASADA) {
+        const dVenc = new Date(p.dataVencimento);
+        const vencInicio = new Date(dVenc.getFullYear(), dVenc.getMonth(), dVenc.getDate(), 0, 0, 0, 0);
+        if (vencInicio < inicioHoje || p.status === StatusParcela.ATRASADA) {
           parcelasAtrasoCount++;
         }
       }

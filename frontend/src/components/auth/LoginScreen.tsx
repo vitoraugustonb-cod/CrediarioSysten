@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Wallet, Eye, EyeOff, LogIn, ShieldCheck, Smartphone, Monitor } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { PerfilUsuario } from '../../types/auth';
+import { PWAInstallBanner } from '../common/PWAInstallBanner';
 
 export const LoginScreen: React.FC = () => {
   const { login, demoLogin, error, loading } = useAuth();
@@ -77,6 +78,9 @@ export const LoginScreen: React.FC = () => {
             Sistema de Gestão & Cobrança de Campo
           </p>
         </div>
+
+        {/* Banner de Instalação do Aplicativo PWA */}
+        <PWAInstallBanner />
 
         {/* Login Form Body */}
         <div style={{ padding: '28px 24px' }}>

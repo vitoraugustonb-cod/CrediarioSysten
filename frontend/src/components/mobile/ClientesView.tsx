@@ -57,6 +57,38 @@ function getDataHojeLocal(): string {
   return `${ano}-${mes}-${dia}`;
 }
 
+// Determina status de exibição da parcela considerando data local e data de hoje
+function getStatusParcelaInfo(dataVencStr: string, statusOriginal: string): { label: string; tipo: 'HOJE' | 'ATRASADA' | 'EM_DIA' | 'PAGA' } {
+  if (statusOriginal === 'PAGA') return { label: 'PAGA', tipo: 'PAGA' };
+
+  let anoVenc = 0, mesVenc = 0, diaVenc = 0;
+  if (typeof dataVencStr === 'string') {
+    const match = dataVencStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      anoVenc = Number(match[1]);
+      mesVenc = Number(match[2]) - 1;
+      diaVenc = Number(match[3]);
+    }
+  }
+  if (!anoVenc) {
+    const d = new Date(dataVencStr);
+    anoVenc = d.getFullYear();
+    mesVenc = d.getMonth();
+    diaVenc = d.getDate();
+  }
+  const hoje = new Date();
+  const vencLocal = new Date(anoVenc, mesVenc, diaVenc).getTime();
+  const hojeLocal = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime();
+
+  if (vencLocal === hojeLocal) {
+    return { label: 'VENCE HOJE', tipo: 'HOJE' };
+  } else if (vencLocal < hojeLocal || statusOriginal === 'ATRASADA') {
+    return { label: 'ATRASADA', tipo: 'ATRASADA' };
+  } else {
+    return { label: statusOriginal === 'PARCIAL' ? 'PARCIAL' : 'EM DIA', tipo: 'EM_DIA' };
+  }
+}
+
 export const ClientesView: React.FC = () => {
   const { token } = useAuth();
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -821,6 +853,7 @@ export const ClientesView: React.FC = () => {
                         .filter((p: any) => ['PENDENTE', 'ATRASADA', 'PARCIAL'].includes(p.status))
                         .sort((a: any, b: any) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime());
 
+                      const temParcelaHoje = parcelasEmAberto.some((p: any) => getStatusParcelaInfo(p.dataVencimento, p.status).tipo === 'HOJE');
                       const estaEmDia = saldoTotalNum === 0 && parcelasAbertoCount === 0;
 
                       return (
@@ -829,8 +862,8 @@ export const ClientesView: React.FC = () => {
                           <div style={{
                             padding: '12px 14px',
                             borderRadius: 'var(--radius-md)',
-                            backgroundColor: estaEmDia ? '#DCFCE7' : (parcelasAtrasoCount > 0 ? '#FEE2E2' : '#FEF3C7'),
-                            border: `1px solid ${estaEmDia ? '#86EFAC' : (parcelasAtrasoCount > 0 ? '#FCA5A5' : '#FCD34D')}`,
+                            backgroundColor: estaEmDia ? '#DCFCE7' : (parcelasAtrasoCount > 0 ? '#FEE2E2' : (temParcelaHoje ? '#EFF6FF' : '#FEF3C7')),
+                            border: `1px solid ${estaEmDia ? '#86EFAC' : (parcelasAtrasoCount > 0 ? '#FCA5A5' : (temParcelaHoje ? '#93C5FD' : '#FCD34D'))}`,
                             display: 'flex',
                             alignItems: 'center',
                             gap: '10px'
@@ -839,17 +872,23 @@ export const ClientesView: React.FC = () => {
                               <CheckCircle size={22} color="#166534" style={{ flexShrink: 0 }} />
                             ) : parcelasAtrasoCount > 0 ? (
                               <AlertCircle size={22} color="#B91C1C" style={{ flexShrink: 0 }} />
+                            ) : temParcelaHoje ? (
+                              <CalendarClock size={22} color="#1D4ED8" style={{ flexShrink: 0 }} />
                             ) : (
                               <Clock size={22} color="#D97706" style={{ flexShrink: 0 }} />
                             )}
                             <div>
-                              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: estaEmDia ? '#166534' : (parcelasAtrasoCount > 0 ? '#B91C1C' : '#92400E') }}>
-                                {estaEmDia ? 'Cliente em Dia (Sem Débitos)' : (parcelasAtrasoCount > 0 ? 'Cliente com Parcelas em Atraso' : 'Cliente com Parcelas a Vencer')}
+                              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: estaEmDia ? '#166534' : (parcelasAtrasoCount > 0 ? '#B91C1C' : (temParcelaHoje ? '#1D4ED8' : '#92400E')) }}>
+                                {estaEmDia ? 'Cliente em Dia (Sem Débitos)' : (parcelasAtrasoCount > 0 ? 'Cliente com Parcelas em Atraso' : (temParcelaHoje ? 'Cliente com Parcela Vencendo Hoje' : 'Cliente com Parcelas a Vencer'))}
                               </div>
-                              <div style={{ fontSize: '0.78rem', color: estaEmDia ? '#15803D' : (parcelasAtrasoCount > 0 ? '#991B1B' : '#B45309'), marginTop: '2px' }}>
+                              <div style={{ fontSize: '0.78rem', color: estaEmDia ? '#15803D' : (parcelasAtrasoCount > 0 ? '#991B1B' : (temParcelaHoje ? '#1E40AF' : '#B45309')), marginTop: '2px' }}>
                                 {estaEmDia 
                                   ? 'Nenhuma pendência financeira em aberto.' 
-                                  : `Possui ${parcelasAbertoCount} parcela(s) em aberto${parcelasAtrasoCount > 0 ? ` (${parcelasAtrasoCount} em atraso)` : ''}.`}
+                                  : (parcelasAtrasoCount > 0 
+                                      ? `Possui ${parcelasAbertoCount} parcela(s) em aberto (${parcelasAtrasoCount} em atraso).` 
+                                      : (temParcelaHoje 
+                                          ? `Possui parcela com vencimento na data de hoje para cobrança.` 
+                                          : `Possui ${parcelasAbertoCount} parcela(s) a vencer nos próximos meses.`))}
                               </div>
                             </div>
                           </div>
@@ -993,7 +1032,9 @@ export const ClientesView: React.FC = () => {
                                   {parcelasEmAberto.map((p: any) => {
                                     const vPago = p.valorPago ? Number(p.valorPago) : 0;
                                     const resta = Number(p.valor) - vPago;
-                                    const estaAtrasada = p.status === 'ATRASADA' || new Date(p.dataVencimento) < new Date();
+                                    const infoStatus = getStatusParcelaInfo(p.dataVencimento, p.status);
+                                    const estaAtrasada = infoStatus.tipo === 'ATRASADA';
+                                    const venceHoje = infoStatus.tipo === 'HOJE';
 
                                     // Formulário de alterar data desta parcela
                                     if (parcelaParaAltData?.id === p.id) {
@@ -1061,9 +1102,9 @@ export const ClientesView: React.FC = () => {
                                         key={p.id}
                                         style={{
                                           padding: '12px',
-                                          border: `1px solid ${estaAtrasada ? '#FCA5A5' : 'var(--border-color, #E2E8F0)'}`,
+                                          border: `1px solid ${estaAtrasada ? '#FCA5A5' : (venceHoje ? '#93C5FD' : 'var(--border-color, #E2E8F0)')}`,
                                           borderRadius: 'var(--radius-md)',
-                                          backgroundColor: estaAtrasada ? '#FFF5F5' : '#FFFFFF',
+                                          backgroundColor: estaAtrasada ? '#FFF5F5' : (venceHoje ? '#EFF6FF' : '#FFFFFF'),
                                           display: 'flex',
                                           justifyContent: 'space-between',
                                           alignItems: 'center',
@@ -1075,7 +1116,7 @@ export const ClientesView: React.FC = () => {
                                             Parcela #{p.numero} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>(Venda #{p.vendaId})</span>
                                           </div>
                                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                            Venc: {formatarDataBR(p.dataVencimento)} • <strong style={{ color: estaAtrasada ? '#B91C1C' : '#D97706' }}>{estaAtrasada ? 'ATRASADA' : p.status}</strong>
+                                            Venc: {formatarDataBR(p.dataVencimento)} • <strong style={{ color: estaAtrasada ? '#B91C1C' : (venceHoje ? '#1D4ED8' : '#059669') }}>{infoStatus.label}</strong>
                                           </div>
                                           <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--accent-700)', marginTop: '2px' }}>
                                             Resta: R$ {resta.toFixed(2)}

@@ -17,6 +17,7 @@ import { NovaVendaView } from '../mobile/NovaVendaView';
 import { ClientesView } from '../mobile/ClientesView';
 import { HistoricoExtratoView } from '../mobile/HistoricoExtratoView';
 import { HistoricoVendasExtratoView } from '../mobile/HistoricoVendasExtratoView';
+import { PWAInstallBanner } from '../common/PWAInstallBanner';
 
 export const MobileLayout: React.FC = () => {
   const { usuario, logout } = useAuth();
@@ -116,6 +117,9 @@ export const MobileLayout: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Banner de Instalação do Aplicativo PWA */}
+      <PWAInstallBanner />
 
       {/* Dynamic Content Views */}
       <main style={{ padding: '12px 10px', flex: 1, maxWidth: '100vw', overflowX: 'hidden' }}>
