@@ -13,7 +13,9 @@ import {
   Phone,
   ChevronDown,
   ChevronUp,
-  RefreshCw
+  RefreshCw,
+  Calendar,
+  RotateCcw
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -55,15 +57,38 @@ function formatarHoraContato(ultimoContatoEm?: string | null): string {
   return `${hh}:${mm}`;
 }
 
+// Retorna a data de hoje no fuso local no formato YYYY-MM-DD
+function getDataHojeLocal(): string {
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+// Formata data YYYY-MM-DD para DD/MM/AAAA
+function formatarDataBR(dataStr?: string | null): string {
+  if (!dataStr) return '';
+  const match = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, ano, mes, dia] = match;
+    return `${dia}/${mes}/${ano}`;
+  }
+  return dataStr;
+}
+
 export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const { token } = useAuth();
   const [parcelas, setParcelas] = useState<Parcela[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState<string>('');
+  const [dataFiltro, setDataFiltro] = useState<string>(getDataHojeLocal());
   const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'COBRAR_HOJE' | 'ATRASADO'>('COBRAR_HOJE');
   const [gavetaContatadosAberta, setGavetaContatadosAberta] = useState<boolean>(true);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+
+  const isDataHoje = dataFiltro === getDataHojeLocal();
 
   // Selected Parcela for Detail Modal
   const [parcelaSelecionada, setParcelaSelecionada] = useState<Parcela | null>(null);
@@ -267,23 +292,34 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     }
   };
 
-  // 1. Filtrar APENAS parcelas com vencimento HOJE ou ATRASADAS
+  // 1. Filtrar parcelas pela data (Se dataFiltro for hoje, pega HOJE + ATRASADOS. Se for outra data, pega apenas as que vencem nela)
   const cobrancasFiltradasPorData = useMemo(() => {
-    return parcelas.filter(p => {
-      const statusC = getStatusCobranca(p.dataVencimento, p.status);
-      return statusC === 'COBRAR_HOJE' || statusC === 'ATRASADO';
-    });
-  }, [parcelas]);
+    if (isDataHoje) {
+      return parcelas.filter(p => {
+        const statusC = getStatusCobranca(p.dataVencimento, p.status);
+        return statusC === 'COBRAR_HOJE' || statusC === 'ATRASADO';
+      });
+    } else {
+      return parcelas.filter(p => {
+        if (p.status === 'PAGA') return false;
+        const dataVenc = p.dataVencimento.substring(0, 10);
+        return dataVenc === dataFiltro;
+      });
+    }
+  }, [parcelas, isDataHoje, dataFiltro]);
 
-  // 2. Filtro pelas abas (Cobrar Hoje / Atrasados)
+  // 2. Filtro pelas abas (Cobrar Hoje / Atrasados) - ativo somente no modo Hoje
   const cobrancasPorStatus = useMemo(() => {
+    if (!isDataHoje) {
+      return cobrancasFiltradasPorData;
+    }
     return cobrancasFiltradasPorData.filter(p => {
       const statusC = getStatusCobranca(p.dataVencimento, p.status);
       if (filtroStatus === 'COBRAR_HOJE') return statusC === 'COBRAR_HOJE';
       if (filtroStatus === 'ATRASADO') return statusC === 'ATRASADO';
       return true;
     });
-  }, [cobrancasFiltradasPorData, filtroStatus]);
+  }, [cobrancasFiltradasPorData, filtroStatus, isDataHoje]);
 
   // 3. Filtro por Busca de texto
   const parcelasExibidas = useMemo(() => {
@@ -306,23 +342,39 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
     return parcelasExibidas.filter(p => foiContatadoHoje(p.ultimoContatoEm));
   }, [parcelasExibidas]);
 
-  // Contadores
+  // Contadores e Totais
   const qtdHoje = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'COBRAR_HOJE').length;
   const qtdAtrasados = cobrancasFiltradasPorData.filter(p => getStatusCobranca(p.dataVencimento, p.status) === 'ATRASADO').length;
+  const totalPrevistoData = useMemo(() => {
+    return cobrancasFiltradasPorData.reduce((acc, p) => acc + Number(p.valor || 0), 0);
+  }, [cobrancasFiltradasPorData]);
 
   // Renderização ultra otimizada e consistente de Card de Cobrança
   const renderCardCobranca = (p: Parcela, isJaContatado: boolean) => {
     const statusC = getStatusCobranca(p.dataVencimento, p.status);
-    const isHoje = statusC === 'COBRAR_HOJE';
     const cliente = p.venda?.cliente;
+    const isHoje = isDataHoje && statusC === 'COBRAR_HOJE';
+    const isCustomDate = !isDataHoje;
 
     const [yyyy, mm, dd] = p.dataVencimento.substring(0, 10).split('-');
     const dataVencFormatada = `${dd}/${mm}/${yyyy}`;
 
-    const cardBorderTop = isHoje ? '4px solid #2563EB' : '4px solid #DC2626';
-    const badgeBg = isHoje ? '#EFF6FF' : '#FEE2E2';
-    const badgeText = isHoje ? '#1D4ED8' : '#B91C1C';
-    const statusLabel = isHoje ? '🔵 Hoje' : '🔴 Atrasado';
+    let cardBorderTop = '4px solid #DC2626';
+    let badgeBg = '#FEE2E2';
+    let badgeText = '#B91C1C';
+    let statusLabel = '🔴 Atrasado';
+
+    if (isCustomDate) {
+      cardBorderTop = '4px solid #0284C7';
+      badgeBg = '#E0F2FE';
+      badgeText = '#0369A1';
+      statusLabel = `📅 Vence ${dataVencFormatada}`;
+    } else if (isHoje) {
+      cardBorderTop = '4px solid #2563EB';
+      badgeBg = '#EFF6FF';
+      badgeText = '#1D4ED8';
+      statusLabel = '🔵 Hoje';
+    }
     const horaContato = formatarHoraContato(p.ultimoContatoEm);
 
     return (
@@ -437,7 +489,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>
             P. {p.numero}/{p.venda?.numParcelas || 1} • {dataVencFormatada}
           </span>
-          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isHoje ? '#1D4ED8' : '#B91C1C', marginTop: '2px' }}>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isCustomDate ? '#0369A1' : isHoje ? '#1D4ED8' : '#B91C1C', marginTop: '2px' }}>
             R$ {Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
         </div>
@@ -449,9 +501,9 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             width: '100%',
             height: '36px',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: isHoje ? '#EFF6FF' : '#FEE2E2',
-            color: isHoje ? '#1D4ED8' : '#B91C1C',
-            border: `1px solid ${isHoje ? '#BFDBFE' : '#FCA5A5'}`,
+            backgroundColor: isCustomDate ? '#E0F2FE' : isHoje ? '#EFF6FF' : '#FEE2E2',
+            color: isCustomDate ? '#0369A1' : isHoje ? '#1D4ED8' : '#B91C1C',
+            border: `1px solid ${isCustomDate ? '#BAE6FD' : isHoje ? '#BFDBFE' : '#FCA5A5'}`,
             fontWeight: 800,
             fontSize: '0.8rem',
             cursor: 'pointer'
@@ -488,7 +540,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Search Input & Manual Refresh Button */}
+      {/* Search Input, Native Calendar Button & Manual Refresh Button */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search
@@ -498,7 +550,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           />
           <input
             type="text"
-            placeholder="Buscar cliente na rota..."
+            placeholder={isDataHoje ? "Buscar cliente na rota..." : `Buscar na rota de ${formatarDataBR(dataFiltro)}...`}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             style={{
@@ -516,6 +568,61 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
           />
         </div>
 
+        {/* Botão de Calendário (Opção A: Seletor Nativo com acionamento seguro) */}
+        <label
+          title="Escolher data específica para ver rota"
+          className="touch-target"
+          style={{
+            position: 'relative',
+            width: '44px',
+            height: '44px',
+            borderRadius: 'var(--radius-md)',
+            border: isDataHoje ? '1px solid var(--border-color)' : '2px solid #2563EB',
+            backgroundColor: isDataHoje ? '#FFFFFF' : '#EFF6FF',
+            color: isDataHoje ? 'var(--primary-800)' : '#2563EB',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0,
+            boxShadow: 'var(--shadow-sm)',
+            overflow: 'hidden'
+          }}
+        >
+          <Calendar size={19} />
+          {!isDataHoje && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#2563EB',
+                boxShadow: '0 0 0 2px #EFF6FF'
+              }}
+            />
+          )}
+          <input
+            type="date"
+            value={dataFiltro}
+            onChange={(e) => {
+              if (e.target.value) setDataFiltro(e.target.value);
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              cursor: 'pointer'
+            }}
+          />
+        </label>
+
+        {/* Botão de Recarregar */}
         <button
           type="button"
           onClick={() => carregarParcelas(true)}
@@ -540,79 +647,164 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
         </button>
       </div>
 
-      {/* Filter Tabs: Cobrar Hoje / Atrasados / Todos */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.9fr', gap: '6px' }}>
-        <button
-          type="button"
-          onClick={() => setFiltroStatus('COBRAR_HOJE')}
+      {/* Banner de Rota de Data Específica + Botão Voltar para Hoje */}
+      {!isDataHoje && (
+        <div
           style={{
-            padding: '10px 4px',
-            borderRadius: 'var(--radius-md)',
-            border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #2563EB' : '1px solid var(--border-color)',
-            backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#EFF6FF' : '#FFFFFF',
-            color: '#1D4ED8',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: filtroStatus === 'COBRAR_HOJE' ? 'var(--shadow-sm)' : 'none',
-            whiteSpace: 'nowrap'
+            justifyContent: 'space-between',
+            backgroundColor: '#FEF3C7',
+            border: '1px solid #FCD34D',
+            borderRadius: 'var(--radius-md)',
+            padding: '10px 14px',
+            boxShadow: 'var(--shadow-sm)'
           }}
         >
-          <span>🔵 Hoje ({qtdHoje})</span>
-        </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Calendar size={18} color="#B45309" />
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#92400E' }}>
+              Rota de: {formatarDataBR(dataFiltro)}
+            </span>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setFiltroStatus('ATRASADO')}
+          <button
+            type="button"
+            onClick={() => setDataFiltro(getDataHojeLocal())}
+            className="touch-target"
+            style={{
+              backgroundColor: '#D97706',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              padding: '6px 12px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            <RotateCcw size={13} />
+            <span>Voltar para Hoje</span>
+          </button>
+        </div>
+      )}
+
+      {/* Card de Resumo Financeiro / Totalizador da Data Selecionada */}
+      {!isDataHoje && (
+        <div
           style={{
-            padding: '10px 4px',
+            backgroundColor: '#FFFFFF',
             borderRadius: 'var(--radius-md)',
-            border: filtroStatus === 'ATRASADO' ? '2px solid #DC2626' : '1px solid var(--border-color)',
-            backgroundColor: filtroStatus === 'ATRASADO' ? '#FEE2E2' : '#FFFFFF',
-            color: '#B91C1C',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            cursor: 'pointer',
+            border: '1px solid #BFDBFE',
+            borderLeft: '4px solid #2563EB',
+            padding: '12px 14px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: filtroStatus === 'ATRASADO' ? 'var(--shadow-sm)' : 'none',
-            whiteSpace: 'nowrap'
+            justifyContent: 'space-between',
+            boxShadow: 'var(--shadow-sm)'
           }}
         >
-          <span>🔴 Atrasados ({qtdAtrasados})</span>
-        </button>
+          <div>
+            <div style={{ fontSize: '0.72rem', color: '#1E40AF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Previsto para {formatarDataBR(dataFiltro)}
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1E3A8A', marginTop: '2px' }}>
+              R$ {totalPrevistoData.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setFiltroStatus('TODOS')}
-          style={{
-            padding: '10px 4px',
-            borderRadius: 'var(--radius-md)',
-            border: filtroStatus === 'TODOS' ? '2px solid var(--primary-800)' : '1px solid var(--border-color)',
-            backgroundColor: filtroStatus === 'TODOS' ? 'var(--primary-100)' : '#FFFFFF',
-            color: 'var(--primary-900)',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            boxShadow: filtroStatus === 'TODOS' ? 'var(--shadow-sm)' : 'none',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <span>Todos ({cobrancasFiltradasPorData.length})</span>
-        </button>
-      </div>
+          <div
+            style={{
+              backgroundColor: '#EFF6FF',
+              color: '#1D4ED8',
+              fontWeight: 800,
+              fontSize: '0.78rem',
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-full)',
+              border: '1px solid #DBEAFE'
+            }}
+          >
+            {cobrancasFiltradasPorData.length} {cobrancasFiltradasPorData.length === 1 ? 'cliente' : 'clientes'}
+          </div>
+        </div>
+      )}
 
+      {/* Filter Tabs: Cobrar Hoje / Atrasados / Todos (Apenas no modo Hoje) */}
+      {isDataHoje && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.9fr', gap: '6px' }}>
+          <button
+            type="button"
+            onClick={() => setFiltroStatus('COBRAR_HOJE')}
+            style={{
+              padding: '10px 4px',
+              borderRadius: 'var(--radius-md)',
+              border: filtroStatus === 'COBRAR_HOJE' ? '2px solid #2563EB' : '1px solid var(--border-color)',
+              backgroundColor: filtroStatus === 'COBRAR_HOJE' ? '#EFF6FF' : '#FFFFFF',
+              color: '#1D4ED8',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              boxShadow: filtroStatus === 'COBRAR_HOJE' ? 'var(--shadow-sm)' : 'none',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>🔵 Hoje ({qtdHoje})</span>
+          </button>
 
+          <button
+            type="button"
+            onClick={() => setFiltroStatus('ATRASADO')}
+            style={{
+              padding: '10px 4px',
+              borderRadius: 'var(--radius-md)',
+              border: filtroStatus === 'ATRASADO' ? '2px solid #DC2626' : '1px solid var(--border-color)',
+              backgroundColor: filtroStatus === 'ATRASADO' ? '#FEE2E2' : '#FFFFFF',
+              color: '#B91C1C',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              boxShadow: filtroStatus === 'ATRASADO' ? 'var(--shadow-sm)' : 'none',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>🔴 Atrasados ({qtdAtrasados})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFiltroStatus('TODOS')}
+            style={{
+              padding: '10px 4px',
+              borderRadius: 'var(--radius-md)',
+              border: filtroStatus === 'TODOS' ? '2px solid var(--primary-800)' : '1px solid var(--border-color)',
+              backgroundColor: filtroStatus === 'TODOS' ? 'var(--primary-100)' : '#FFFFFF',
+              color: 'var(--primary-900)',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              boxShadow: filtroStatus === 'TODOS' ? 'var(--shadow-sm)' : 'none',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>Todos ({cobrancasFiltradasPorData.length})</span>
+          </button>
+        </div>
+      )}
 
       {loading && (
         <div style={{ padding: '40px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -654,10 +846,33 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
                 {busca 
                   ? `Nenhuma cobrança encontrada com "${busca}".` 
-                  : 'Nenhuma cobrança pendente para hoje ou em atraso!'}
+                  : isDataHoje
+                    ? 'Nenhuma cobrança pendente para hoje ou em atraso!'
+                    : `Nenhuma cobrança agendada para ${formatarDataBR(dataFiltro)}.`}
               </div>
 
-              {onNavigate && (
+              {!isDataHoje ? (
+                <button
+                  type="button"
+                  onClick={() => setDataFiltro(getDataHojeLocal())}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <RotateCcw size={14} />
+                  <span>Voltar para Hoje</span>
+                </button>
+              ) : onNavigate && (
                 <button
                   type="button"
                   onClick={() => onNavigate('clientes')}
