@@ -1,2812 +1,389 @@
+<div align="center">
+
 # 💳 Crediário System
 
-<p align="center">
-  <strong>Sistema completo de gestão de crediário próprio: controle de clientes, emissão de carnês flexíveis, rotas de cobrança de rua, segurança dupla em pagamentos, relatórios financeiros em tempo real e arquitetura moderna na nuvem (Supabase + Vercel + Docker).</strong>
-</p>
+**Gestão de crediário próprio e cobrança de rua, do carnê ao fechamento do dia.**
 
-<p align="center">
-  <a href="https://crediario-systen-mu.vercel.app" target="_blank">
-    <img src="https://img.shields.io/badge/🌐_Acessar_Online-crediario--systen--mu.vercel.app-2563eb?style=for-the-badge" alt="Acessar Sistema Online">
-  </a>
-</p>
+[![Acessar online](https://img.shields.io/badge/🌐_Acessar_online-crediario--systen--mu.vercel.app-2563eb?style=for-the-badge)](https://crediario-systen-mu.vercel.app)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Operacional-brightgreen?logo=statuspage&logoColor=white" alt="Status">
-  <img src="https://img.shields.io/badge/Uptime-99.9%25-success?logo=apache&logoColor=white" alt="Uptime">
-  <img src="https://img.shields.io/badge/Node.js-20.x%20%2F%2022.x-339933?logo=nodedotjs&logoColor=white" alt="Node.js">
-  <img src="https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white" alt="Express">
-  <img src="https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=black" alt="React">
-  <img src="https://img.shields.io/badge/Vite-8.x-646CFF?logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Prisma_ORM-6.x-2D3748?logo=prisma&logoColor=white" alt="Prisma">
-  <img src="https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?logo=supabase&logoColor=white" alt="Supabase">
-  <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel">
-  <img src="https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/Security-Helmet_%2B_Zod_%2B_RateLimit-red?logo=shield&logoColor=white" alt="Security">
-  <img src="https://img.shields.io/badge/Code_Quality-TypeScript_Strict-blue?logo=typescript&logoColor=white" alt="TS Strict">
-  <img src="https://img.shields.io/badge/Commits-Conventional%20Commits-yellow?logo=git&logoColor=white" alt="Conventional Commits">
-</p>
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=nodedotjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?logo=supabase&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Arquitetura-Serverless_%26_REST-blue?logoColor=white" alt="Serverless API">
-  <img src="https://img.shields.io/badge/Auth-JWT_%2B_httpOnly_Cookie-F7B731?logoColor=white" alt="JWT">
-  <img src="https://img.shields.io/badge/Design-Dual--Platform-8B5CF6?logoColor=white" alt="Dual Platform">
-  <img src="https://img.shields.io/badge/Branching-Git_Flow_(main_%2F_develop)-orange?logo=git&logoColor=white" alt="Git Flow">
-  <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?logo=github&logoColor=white" alt="PRs Welcome">
-  <img src="https://img.shields.io/github/last-commit/vitoraugustonb-cod/CrediarioSysten/develop?label=Último%20Commit&logo=git&logoColor=white&color=7c3aed" alt="Last Commit">
-  <img src="https://img.shields.io/github/languages/top/vitoraugustonb-cod/CrediarioSysten?label=Linguagem%20Principal&logo=typescript&logoColor=white&color=3178C6" alt="Top Language">
-  <img src="https://img.shields.io/github/repo-size/vitoraugustonb-cod/CrediarioSysten?label=Tamanho%20do%20Repo&color=0ea5e9" alt="Repo Size">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Code_Style-Prettier-ff69b4?logo=prettier&logoColor=white" alt="Prettier">
-  <img src="https://img.shields.io/badge/Linter-ESLint-4B32C3?logo=eslint&logoColor=white" alt="ESLint">
-  <img src="https://img.shields.io/badge/OWASP-Top_10_Aligned-brightgreen?logo=owasp&logoColor=white" alt="OWASP">
-  <img src="https://img.shields.io/badge/Architecture-Clean_MVC-informational?logoColor=white" alt="Clean MVC">
-  <img src="https://img.shields.io/badge/Database_Engine-PostgreSQL_15+-4169E1?logo=postgresql&logoColor=white" alt="Postgres Engine">
-</p>
-
+</div>
 
 ---
 
 ## 📑 Sumário
 
-- [📱 Sobre o Projeto](#-sobre-o-projeto)
-  - [📊 O Mercado de Crediário no Brasil](#-o-mercado-de-crediário-no-brasil)
-  - [👥 Jornada Detalhada das Personas](#-jornada-detalhada-das-personas-operacionais)
-  - [⚡ Diferenciais Técnicos](#-diferenciais-técnicos)
-- [💻 Stack Tecnológica & Justificativas](#-stack-tecnológica--justificativas)
-- [🏗️ Arquitetura em Nuvem & Camadas](#️-arquitetura-em-nuvem--camadas)
-  - [🏛️ Fluxo de Dados e Ciclo de Vida da Requisição (Clean MVC)](#️-fluxo-de-dados-e-ciclo-de-vida-da-requisição-clean-mvc)
-- [🐳 Execução com Docker & Docker Compose](#-execução-com-docker--docker-compose)
-  - [📊 Matriz de Dimensionamento de Infraestrutura para VPS](#-matriz-de-dimensionamento-de-infraestrutura-para-vps)
-- [☁️ Deploy e Infraestrutura (Vercel + Supabase)](#️-deploy-e-infraestrutura-vercel--supabase)
-  - [📊 Matriz de Limites Supabase (Free vs Pro)](#-matriz-de-limites-e-capacidade-supabase-free-vs-pro-tier)
-  - [🛡️ Arquitetura de Isolamento e Políticas RLS (Supabase)](#️-arquitetura-de-isolamento-e-políticas-rls-row-level-security)
-  - [💾 Backup, Restauração e Resiliência de Dados](#3-backup-restauração-e-resiliência-de-dados)
-  - [🌐 Estratégia de Failover de DNS e Redundância de Borda](#-estratégia-de-failover-de-dns-e-redundância-de-borda-vercel)
-  - [⚡ Resiliência e Falhas de Rede](#6-matriz-de-resiliência-e-tratamento-de-falhas-de-conexão)
-  - [🔄 Pipeline de CI/CD e Automação de Deploys](#7-pipeline-de-cicd-e-automação-de-deploys)
-  - [🚀 Checklist Operacional de Pré e Pós-Deploy](#8-checklist-operacional-de-pré-deploy-e-pós-deploy)
-- [🔒 Segurança & Hardening Avançado](#-segurança--hardening-avançado)
-  - [⏱️ Matriz Detalhada de Rate Limiting por Rota](#️-matriz-detalhada-de-rate-limiting-e-prevenção-de-abuso-por-rota)
-  - [🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)](#️-matriz-de-diretivas-de-segurança-http--content-security-policy-csp)
-  - [🛡️ Ciclo de Vida da Sessão & Autenticação Segura](#️-ciclo-de-vida-da-sessão--autenticação-segura)
-  - [🔐 Política de Gestão e Rotação de Segredos JWT](#-política-de-gestão-e-rotação-de-segredos-jwt)
-  - [🔐 Checklist de Segurança para Operadores](#-checklist-de-boas-práticas-para-operadores-de-rua)
-  - [🔒 Mascaramento e Sanitização de Dados para Homologação](#-procedimento-de-mascaramento-e-sanitização-de-dados-para-homologação)
-- [🛡️ Privacidade e Conformidade LGPD](#️-privacidade-de-dados-e-conformidade-lgpd)
-  - [🛡️ Política de Exportação de Dados e Expiração](#️-política-de-exportação-de-dados-e-expiração-de-relatórios)
-- [🌿 Estratégia de Branching (Git Flow)](#-estratégia-de-branching-git-flow)
-- [🎨 Design & Usabilidade](#-design--usabilidade)
-  - [📸 Demonstração Visual das Interfaces](#-demonstração-visual-das-interfaces)
-  - [⌨️ Acessibilidade & Atalhos no Painel Desktop](#️-acessibilidade--atalhos-no-painel-desktop)
-  - [♿ Matriz de Acessibilidade Digital (WCAG 2.1 AA)](#-matriz-de-acessibilidade-digital-wcag-21-nível-aa)
-  - [📱 Matriz de Compatibilidade de Dispositivos & Browsers](#-matriz-de-compatibilidade-de-dispositivos--browsers)
-  - [📱 Guia de Usabilidade Tátil no Campo Mobile](#-guia-de-usabilidade-tátil-e-otimização-para-cobradores-de-rua)
-  - [📲 Arquitetura PWA e Otimizações de Viewport Mobile](#-arquitetura-pwa-e-otimizações-de-viewport-mobile)
-  - [🖨️ Impressoras Térmicas Bluetooth](#️-suporte-a-mini-impressoras-térmicas-bluetooth-escpos)
-- [⚙️ Funcionalidades Principais](#️-funcionalidades-principais)
-  - [⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks](#-arquitetura-de-conciliação-pix-dinâmico-e-webhooks-baas)
-  - [🛠️ Guia Operacional e Resiliência de Webhooks Pix](#️-guia-operacional-e-resiliência-de-webhooks-pix)
-- [📐 Regras de Negócio Financeiras](#-regras-de-negócio-financeiras)
-  - [📊 Ciclo de Vida e Máquina de Estados de Parcelas](#-ciclo-de-vida-e-máquina-de-estados-de-parcelas)
-  - [🔄 Emissão de Vendas e Carnê com Transação Atômica](#-emissão-de-vendas-e-carnê-com-transação-atômica)
-  - [🔢 Cálculo de Parcelas e Algoritmo de Rateio Centesimal](#-cálculo-de-parcelas-e-algoritmo-de-rateio-centesimal)
-  - [🔄 Fluxo de Liquidação Atômica de Parcela](#-fluxo-de-liquidação-atômica-de-parcela)
-  - [🏦 Conciliação Diária de Caixa & Sangria](#-conciliação-diária-de-caixa-e-gestão-de-sangria)
-  - [🔄 Fluxo de Estorno Contábil e Retificação](#-fluxo-de-estorno-contábil-e-protocolo-de-retificação)
-- [🗂️ Estrutura do Projeto](#️-estrutura-do-projeto)
-- [🛠️ Como Executar Localmente](#️-como-executar-localmente)
-  - [📦 Comandos Prisma & Seeds](#5-comandos-de-manutenção-do-prisma-e-dados-de-teste)
-  - [🪝 Automação com Pre-commit Hooks](#6-automação-de-verificações-com-pre-commit-hooks)
-  - [🔧 Troubleshooting (Resolução de Problemas Comuns)](#-troubleshooting-resolução-de-problemas-comuns)
-- [🔐 Contas de Acesso Padrão](#-contas-de-acesso-padrão)
-- [🌐 Referência da API REST](#-referência-da-api-rest)
-  - [📦 Exemplos de Payloads (Request & Response)](#-exemplos-de-payloads-request--response)
-  - [📨 Headers HTTP Globais e Convenção de Envelope REST](#-headers-http-globais-e-convenção-de-envelope-rest)
-  - [🛡️ Catálogo de Schemas Zod de Validação de Entrada](#️-catálogo-de-schemas-zod-de-validação-de-entrada)
-  - [⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro](#️-padronização-de-códigos-de-status-http--respostas-de-erro)
-  - [🗄️ Mapeamento de Exceções do Prisma ORM](#️-mapeamento-de-exceções-do-prisma-orm-para-contratos-http)
-- [🗃️ Modelo de Dados (Prisma Schema)](#️-modelo-de-dados-prisma-schema)
-  - [⚖️ Matriz de Severidade de Auditoria](#️-matriz-de-severidade-e-alertas-de-auditoria)
-- [⚙️ Variáveis de Ambiente](#️-variáveis-de-ambiente)
-- [⚡ Performance e Otimizações](#-performance-e-otimizações)
-  - [🗄️ Indexação e Otimização no PostgreSQL](#️-indexação-e-otimização-no-postgresql)
-  - [🔬 Profiling de Memória e Monitoramento de Event Loop](#-profiling-de-memória-e-monitoramento-de-event-loop-no-nodejs)
-  - [🚀 Core Web Vitals & Compressão](#-métricas-de-core-web-vitals-e-compressão-de-assets)
-- [🧪 Testes e Qualidade de Código](#-testes-e-qualidade-de-código)
-  - [🧪 Automação de Testes de Integração com Vitest & Supertest](#-automação-de-testes-de-integração-com-vitest--supertest)
-  - [🏋️ Testes de Carga e Estresse de Concorrência com k6](#️-testes-de-carga-e-estresse-de-concorrência-com-k6)
-  - [📋 Roteiro de Testes Manuais & Homologação](#-roteiro-de-testes-manuais-e-homologação-operacional)
-- [📊 Observabilidade, Logs e Monitoramento](#-observabilidade-logs-e-monitoramento)
-  - [📈 Métricas de APM e Rastreamento de Latência por Rota (SLIs/SLOs)](#4-métricas-de-apm-e-rastreamento-de-latência-por-rota-slisslos)
-  - [🛡️ Esteira de Auditoria Forense e Sanitização de Logs](#5-esteira-de-auditoria-forense-e-sanitização-de-logs-lgpd)
-- [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
-- [🗺️ Roadmap & Milestones](#️-roadmap--milestones)
-- [🤝 Contribuição & Convenções](#-contribuição--convenções)
-  - [🏷️ Política de Versionamento Semântico (SemVer) e Tags de Release](#️-política-de-versionamento-semântico-semver-e-tags-de-release)
-- [📋 Changelog](#-changelog)
-- [📞 Matriz de SLAs Operacionais e Canais de Suporte](#-matriz-de-slas-operacionais-e-canais-de-suporte)
-  - [🚨 Protocolo de Resposta a Incidentes](#-protocolo-de-resposta-a-incidentes-de-cobrança-em-campo)
-- [📜 Licença](#-licença)
+- [Sobre o projeto](#-sobre-o-projeto)
+- [Funcionalidades](#-funcionalidades)
+- [Regras de negócio](#-regras-de-negócio)
+- [Stack](#-stack)
+- [Arquitetura](#-arquitetura)
+- [Estrutura do repositório](#-estrutura-do-repositório)
+- [Rodando localmente](#-rodando-localmente)
+- [Variáveis de ambiente](#-variáveis-de-ambiente)
+- [API REST](#-api-rest)
+- [Modelo de dados](#-modelo-de-dados)
+- [Segurança](#-segurança)
+- [Deploy](#-deploy)
+- [Backup e scripts de manutenção](#-backup-e-scripts-de-manutenção)
+- [Fluxo de trabalho (Git)](#-fluxo-de-trabalho-git)
+- [Próximos passos](#-próximos-passos)
 
 ---
 
-## 📱 Sobre o Projeto
+## 📱 Sobre o projeto
 
-O **Crediário System** é uma solução full-stack moderna desenvolvida para digitalizar e otimizar operações de crediário próprio para comércios locais, confecções, óticas, lojas de móveis e equipes de cobrança de rua.
+O **Crediário System** digitaliza a operação de lojas que vendem a prazo no carnê (crediário próprio) e usam cobradores de rua. Ele substitui cadernetas e planilhas por um sistema único, em produção, com dois ambientes sob medida:
 
-### 📊 O Mercado de Crediário no Brasil
-No varejo tradicional brasileiro, o crediário próprio ou modelo "carnê" segue como um motor essencial de inclusão financeira e retenção de clientes. Milhões de consumidores ainda operam prioritariamente com renda informal ou limites de cartão insuficientes. O **Crediário System** preenche essa lacuna fornecendo às empresas o mesmo rigor técnico e inteligência de risco de grandes financeiras, mas com a agilidade e simplicidade exigidas no comércio de proximidade e na cobrança de porta em porta.
+| Perfil | Interface | O que faz |
+| :--- | :--- | :--- |
+| **Gerente** (`GERENTE`) | Painel **desktop** | Acompanha a carteira, gerencia funcionários, clientes, produtos e vendas, e confere os relatórios. |
+| **Vendedor / Cobrador** (`VENDEDOR_COBRADOR`) | App **mobile** (PWA instalável) | Registra vendas, cobra parcelas na rua, atende clientes e fecha o resumo do dia. |
 
-### 🔴 O Cenário Tradicional e suas Dores
-- **Inadimplência Desconhecida:** Falta de clareza sobre parcelas vencidas no dia;
-- **Falta de Controle de Repasse:** Dificuldade na prestação de contas diária entre cobradores e a gerência;
-- **Lentidão Operacional:** Demora na consulta de saldo devedor e aprovação de compras;
-- **Vulnerabilidades de Segurança:** Risco de inconsistências contábeis e baixas duplicadas sem auditoria.
+A interface é escolhida automaticamente pelo perfil do usuário logado, dentro da mesma aplicação React.
 
-### 🟢 A Solução Digital
-O sistema integra uma API REST em **Node.js/Express (preparada para Serverless e Docker)** a uma interface **React 19 SPA com Vite**, banco **PostgreSQL na nuvem (Supabase)** e deploy contínuo na **Vercel**.
+---
 
-### 🎯 Para Quem é Este Sistema?
+## ✨ Funcionalidades
 
-| Perfil | Contexto de Uso |
+### 🛵 App do Vendedor / Cobrador (mobile)
+
+| Aba | Descrição |
 | :--- | :--- |
-| **Lojistas e Comerciantes** | Controle centralizado do crediário sem depender de planilhas ou cadernetas manuais |
-| **Equipes de Cobrança** | Interface mobile otimizada para registrar pagamentos em campo, sem precisar de laptop |
-| **Gerentes Financeiros** | Dashboard em tempo real com inadimplência, faturamento e projeções de recebimento |
-| **Desenvolvedores** | Base de código moderna (TypeScript fullstack) e arquitetura bem documentada como referência |
-
-### 👥 Jornada Detalhada das Personas Operacionais
-
-1. **Gerente de Loja (Desktop):**
-   - Inicia o expediente analisando o painel de inadimplência e metas do mês.
-   - Emite novos carnês de venda com cálculo automático de parcelas e datas de vencimento.
-   - Acompanha em tempo real os recebimentos que os cobradores registram na rua.
-   - Realiza o fechamento financeiro do dia e confere as sangrias de caixa da equipe.
-
-2. **Cobrador de Rota (Mobile):**
-   - Acessa o aplicativo diretamente pelo celular no início da rota.
-   - Filtra os clientes com parcelas vencidas ou com vencimento na data de hoje.
-   - Registra baixas com dupla confirmação para evitar erros de digitação.
-   - Envia comprovante instantâneo para o WhatsApp do cliente ou imprime em mini-impressora portátil.
-
-3. **Operador de Caixa de Balcão (Híbrido):**
-   - Atende clientes que comparecem à loja física para quitar parcelas antecipadas.
-   - Consulta rapidamente o saldo devedor consolidado e emite recibos de quitação total.
-
-### ⚡ Diferenciais Técnicos
-
-- **Dual-Platform nativo:** Uma única SPA detecta se o usuário está no mobile (cobrador) ou desktop (gerente) e renderiza interfaces completamente diferentes — sem apps separados.
-- **Segurança financeira de ponta:** Transações atômicas + concorrência segura impedem que dois cobradores registrem a mesma parcela simultaneamente.
-- **Pronto para escalar:** Arquitetura desacoplada suporta tanto deploy Serverless (Vercel) quanto containerização Docker em VPS sem mudança de código.
-- **Auditoria completa:** Toda alteração em parcelas gera um registro de auditoria com usuário, ação e timestamp.
-
----
-
-
-
-## 💻 Stack Tecnológica & Justificativas
-
-| Camada | Tecnologia | Versão | Justificativa Técnica |
-| :--- | :--- | :---: | :--- |
-| **Frontend Core** | React | 19.x | Renderização reativa de alto desempenho com interfaces modernas. |
-| **Build & Tooling** | Vite | 8.x | Hot Module Replacement (HMR) instantâneo e bundling Rollup otimizado. |
-| **Linguagem (Fullstack)** | TypeScript | 5.x | Tipagem estática fim a fim, prevenindo falhas em regras financeiras. |
-| **Backend Framework** | Node.js + Express | 20.x+ / 5.x | Arquitetura desacoplada em `app.ts` e `server.ts` para suporte Serverless e Docker. |
-| **ORM & Migrations** | Prisma ORM | 6.x | Cliente tipado, migrações declarativas e suporte a singleton em Serverless. |
-| **Banco de Dados** | PostgreSQL (Supabase) | 15+ | Banco relacional corporativo na nuvem em São Paulo (`sa-east-1`) com Connection Pooling. |
-| **Hospedagem & Deploy** | Vercel Serverless | — | Edge CDN global para o frontend e execução serverless automática do backend. |
-| **Containerização** | Docker & Compose | 29.x | Imagens Alpine multi-stage e Nginx reverse proxy para padronização local e VPS. |
-| **Segurança & Headers** | Helmet.js + CORS | — | Headers HTTP automáticos (HSTS, CSP, X-Frame-Options) e CORS com credenciais. |
-| **Validação de Schemas** | Zod | 3.x | Whitelist estrita e validação de contratos de entrada com tipagem estática. |
-| **Proteção contra Abuso** | express-rate-limit | — | Rate limiting agressivo contra força bruta no login e proteção de API. |
-| **Autenticação** | JWT + Cookie httpOnly | — | Sessão protegida contra ataques XSS e suporte a token Bearer híbrido. |
-
-### 🖥️ Matriz de Compatibilidade de Ambientes de Execução (Runtimes & Containers)
-
-Para assegurar previsibilidade e ausência de atritos tanto no desenvolvimento local quanto em servidores VPS:
-
-| Componente | Versão Mínima | Versão Recomendada | Status de Homologação |
-| :--- | :---: | :---: | :--- |
-| **Node.js Runtime** | `20.11.0 LTS` | `22.12.0 LTS` | ✅ Homologado (Suporte ativo a ESM e Fetch nativo) |
-| **Gerenciador npm** | `10.2.0` | `10.8.0+` | ✅ Homologado (Instalação via `package-lock.json` v3) |
-| **Docker Engine** | `24.0.0` | `27.3.1+` | ✅ Homologado (BuildKit e builds multi-stage) |
-| **Docker Compose** | `v2.20.0` | `v2.29.0+` | ✅ Homologado (Sintaxe Compose v2 sem hífen) |
-| **PostgreSQL Engine** | `15.1` | `16.x (Supabase)` | ✅ Homologado (Índices B-Tree compostos e RLS) |
-| **Sistema Operacional** | Ubuntu 22.04 / Debian 12 | Ubuntu 24.04 LTS / WSL2 | ✅ Homologado (Linux, Windows 11 com WSL2, macOS) |
-
-- **Dimensionamento Mínimo para VPS:** 1 vCPU, 1 GB de memória RAM e 15 GB de disco SSD (com swap de 1 GB ativado).
-- **Dimensionamento Recomendado para Produção:** 2 vCPU, 4 GB de memória RAM e 40 GB de disco SSD NVMe.
-
----
-
-## 🏗️ Arquitetura em Nuvem & Camadas
-
-```mermaid
-flowchart TD
-    subgraph Clients["Dispositivos do Usuário"]
-        Mobile["📱 Celular (Cobrador Mobile)"]
-        Desktop["💻 Desktop (Painel Gerencial)"]
-    end
-
-    subgraph Vercel["Vercel Cloud (Produção)"]
-        Edge["🌐 Edge Network / CDN"]
-        FE["🎨 Frontend SPA (React + Vite)"]
-        API["⚙️ Serverless Functions (Express API)"]
-        Security["🛡️ Helmet + Zod + RateLimiter + httpOnly"]
-    end
-
-    subgraph Supabase["Supabase Cloud (São Paulo / sa-east-1)"]
-        Pooler["⚡ PgBouncer Pooler (Porta 6543)"]
-        Postgres[("🐘 PostgreSQL Database")]
-    end
-
-    subgraph LocalDocker["Docker Desktop (Ambiente Local)"]
-        Nginx["🐳 Container Frontend (Nginx :80)"]
-        NodeApp["🐳 Container Backend (Node.js :3300)"]
-    end
-
-    Clients -->|HTTPS| Edge
-    Edge --> FE
-    Edge -->|/login, /clientes, /vendas...| API
-    API --> Security
-    Security --> Pooler
-    Pooler --> Postgres
-
-    Clients -.->|Localhost :80| Nginx
-    Nginx --> NodeApp
-    NodeApp -.->|Conexão Externa| Pooler
-```
-
-### 🏛️ Fluxo de Dados e Ciclo de Vida da Requisição (Clean MVC)
-
-A aplicação segue uma separação estrita de responsabilidades inspirada no padrão Clean MVC, garantindo manutenibilidade, testabilidade e desacoplamento do motor de execução (Serverless ou Container):
-
-```mermaid
-flowchart LR
-    Req["🌐 HTTP Request"] --> Sec["1. Middlewares de Segurança\n(Helmet, CORS, RateLimit)"]
-    Sec --> Auth["2. Auth & RBAC\n(JWT Cookie & Perfil)"]
-    Auth --> Val["3. Validação de Entrada\n(Zod Schemas)"]
-    Val --> Ctrl["4. Controller de Domínio\n(Regras Financeiras)"]
-    Ctrl --> Prism["5. Prisma ORM\n(Singleton / $transaction)"]
-    Prism --> DB[("6. Supabase PostgreSQL\n(PgBouncer :6543)")]
-    DB --> Resp["📤 Resposta Formatada JSON"]
-```
-
-| Camada | Arquivos / Diretório | Responsabilidade Exclusiva |
-| :--- | :--- | :--- |
-| **Ponto de Entrada** | `src/app.ts` / `api/index.ts` | Configuração de middlewares globais, parser de JSON e roteador Express. |
-| **Segurança & Guarda** | `src/middlewares/` | Extração de token JWT de cookies httpOnly, verificação de revogação de conta e rate limiting por IP. |
-| **Validação de Schemas** | `src/validators/` | Sanitização em whitelist estrita via Zod, coerção de tipos e bloqueio de payloads anômalos. |
-| **Controladores (Controllers)**| `src/controllers/` | Orquestração da regra de negócio, cálculos contábeis e formatação de envelopes HTTP. |
-| **Acesso a Dados (Prisma)** | `src/lib/prisma.ts` | Gerenciamento de conexões pooled, execução de transações atômicas e isolamento ACID. |
-| **Banco Relacional** | Supabase (PostgreSQL 15+) | Persistência íntegra, índices B-Tree e constraints de integridade referencial. |
-
----
-
-## 🐳 Execução com Docker & Docker Compose
-
-O projeto possui suporte nativo ao **Docker** com builds multi-stage e Nginx integrado:
-
-### Subir a aplicação completa em containers:
-```bash
-docker compose up --build -d
-```
-
-- **Frontend (Nginx):** [http://localhost](http://localhost) (porta `80`)
-- **Backend (Express):** [http://localhost:3300](http://localhost:3300) (porta `3300`)
-- **Health Check:** `http://localhost/health`
-
-### Parar os containers:
-```bash
-docker compose down
-```
-
-#### 🩺 Especificação de Healthcheck dos Serviços
-Para orquestração resiliente, os serviços no Compose definem sondas de integridade automatizadas:
-
-| Serviço | Endpoint / Comando da Sonda | Intervalo | Timeout | Retentativas | Período de Inicialização |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **`backend`** | `wget --no-verbose --tries=1 --spider http://localhost:3300/health` | `30s` | `5s` | 3 | `15s` |
-| **`frontend`** | `wget --no-verbose --tries=1 --spider http://localhost:80/` | `30s` | `3s` | 3 | `5s` |
-
-#### 🔧 Comandos Úteis de Diagnóstico e Rede Interna
-```bash
-# Inspecionar logs em tempo real dos dois containers
-docker compose logs -f --tail=100
-
-# Executar health check manual de dentro da rede Docker
-docker compose exec backend wget -qO- http://localhost:3300/health
-
-# Testar conectividade do Nginx com a API interna
-docker compose exec frontend wget -qO- http://backend:3300/health
-
-# Verificar status das portas e consumo de memória
-docker stats --no-stream
-```
-
-### 📊 Matriz de Dimensionamento de Infraestrutura para VPS
-
-Para operações que optarem por hospedar os containers em VPS própria (ex: AWS Lightsail, DigitalOcean Droplet ou Hetzner), utilize a matriz de dimensionamento de recursos:
-
-| Perfil da Operação | Volume de Clientes | Cobradores Simultâneos | Especificação Recomendada | Memória Containers (Node / Nginx) |
-| :--- | :---: | :---: | :--- | :--- |
-| **Pequeno Comércio** | Até 500 | 1 a 3 | 1 vCPU, 2 GB RAM, 25 GB SSD | 512 MB Node / 128 MB Nginx |
-| **Médio Varejo** | 500 a 3.000 | 4 a 10 | 2 vCPUs, 4 GB RAM, 50 GB SSD | 1024 MB Node / 256 MB Nginx |
-| **Alta Densidade (Redes)** | Mais de 3.000 | Mais de 10 | 4 vCPUs, 8 GB RAM, 100 GB NVMe | 2048 MB Node / 512 MB Nginx |
-
-> **Dica Operacional:** Ative sempre ao menos 2 GB de memória *Swap* no Linux para prevenir falhas por esgotamento de memória (*OOM Killer*) durante picos matinais de sincronização de rotas.
-
----
-
-## ☁️ Deploy e Infraestrutura (Vercel + Supabase)
-
-### 1. Banco de Dados (Supabase)
-O banco de dados opera em **PostgreSQL** com duas portas de conexão configuradas:
-- **`DATABASE_URL` (Porta 6543 - Transaction Pooler):** Utilizada pela API em produção para não esgotar as conexões simultâneas em Serverless.
-- **`DIRECT_URL` (Porta 5432 - Direct Connection):** Utilizada exclusivamente pelo Prisma para rodar migrações e comandos de schema (`prisma db push`).
-
-#### 📊 Matriz de Limites e Capacidade Supabase (Free vs Pro Tier)
-
-| Parâmetro / Recurso | Supabase Free Tier | Supabase Pro Tier | Comportamento no Sistema Crediário |
-| :--- | :---: | :---: | :--- |
-| **Conexões Diretas (Porta 5432)** | ~60 | ~200+ | Usado somente para migrations e seeds |
-| **Transaction Pooler (PgBouncer - 6543)** | Até 200 ativas | Até 1.000+ ativas | Suporta centenas de requisições simultâneas de cobradores |
-| **Capacidade de Armazenamento** | 500 MB | 8 GB inclusos | Comporta mais de 50.000 carnês com histórico completo |
-| **Pausa por Inatividade** | Após 7 dias sem requisições | Sem pausa (Always-on) | Em produção recomenda-se Pro Tier ou cron de health check |
-| **Backups PITR** | Não disponível | 7 dias contínuos | Permite restaurar o caixa ao minuto exato antes de falhas |
-
-#### ⚡ Dimensionamento e Parametrização de Conexões PgBouncer em Serverless
-
-Em arquiteturas serverless (Vercel Functions), múltiplas instâncias Node.js podem escalar horizontalmente em milissegundos para atender picos de requisições de cobradores em campo. Se cada função abrir conexões ilimitadas ao PostgreSQL, o banco atingirá saturação de conexões (`Error P1001 / Max client connections reached`).
-
-Para garantir alta disponibilidade e consumo consciente de recursos:
-
-1. **Transaction Pooling com Modo PgBouncer:**
-   A connection string na porta `6543` opera em **Transaction Mode**, devolvendo a conexão ao pool imediatamente após o término de cada query ou transação atômica.
-2. **Parâmetros Mandatórios na `DATABASE_URL`:**
-   ```env
-   DATABASE_URL="postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=10&sslmode=require"
-   ```
-   - `pgbouncer=true`: Desativa prepared statements do Prisma que causariam erro de `prepared statement does not exist` no pooling por transação.
-   - `connection_limit=1`: Restringe cada worker serverless a alocar no máximo 1 conexão simultânea, prevenindo exaustão rápida do pool.
-   - `pool_timeout=10`: Aborta requisições enfileiradas após 10 segundos para prevenir encadeamento de timeouts (*cascading failures*).
-   - `sslmode=require`: Força negociação estrita de túnel TLS/SSL com cifras corporativas entre a borda (Vercel) e o pooler Supabase em São Paulo (`sa-east-1`).
-3. **Padrão Singleton de Inicialização:**
-   No arquivo `src/lib/prisma.ts`, o cliente Prisma é acoplado a `globalThis` para sobreviver aos ciclos de execução da Vercel (*warm starts*) sem instanciar novos pools de conexão desnecessários.
-4. **Ciclo de Vida de Conexões em Serverless (Cold vs Warm Starts):**
-   - **Cold Start:** Uma nova instância aloca 1 conexão via PgBouncer em ~30ms graças à persistência dos túneis gerenciados do Supabase.
-   - **Warm Start:** Instâncias reutilizam o singleton Prisma em memória sem novo handshake TLS.
-   - **Tear-Down:** Ao ser congelada pela Vercel, o PgBouncer detecta inatividade de socket e recicla a conexão TCP sem lock no PostgreSQL.
-
-#### 🛡️ Arquitetura de Isolamento e Políticas RLS (Row Level Security)
-
-O PostgreSQL no Supabase implementa **Row Level Security (RLS)** para segregação profunda de privilégios. Embora o backend Express acesse o banco via connection pooling com a role `postgres`/`service_role` gerenciada pelo Prisma ORM, as tabelas críticas possuem diretivas declarativas RLS para prevenir vazamento acidental em acessos diretos via Supabase Studio, REST Data API ou integrações analíticas:
-
-- **Papéis de Acesso (Database Roles):**
-  - `anon`: Acesso estritamente bloqueado para leitura e escrita em tabelas financeiras (`Parcela`, `Venda`, `AuditLog`).
-  - `authenticated`: Permissão de leitura e escrita restrita aos registros pertencentes à rota ou escopo do operador autenticado.
-  - `service_role`: Privilégio irrestrito (*bypass RLS*), exclusivo da API Node.js/Express para execução de transações atômicas de liquidação contábil, rateio e auditoria.
-- **Políticas Declarativas de Exemplo:**
-  ```sql
-  -- Ativação do RLS na tabela de parcelas
-  ALTER TABLE "Parcela" ENABLE ROW LEVEL SECURITY;
-
-  -- Cobradores visualizam apenas parcelas da carteira atribuída ou gerência visualiza geral
-  CREATE POLICY "Segregação de cobrança por carteira"
-  ON "Parcela" FOR SELECT
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM "Venda" v
-      JOIN "Cliente" c ON c.id = v."clienteId"
-      WHERE v.id = "Parcela"."vendaId"
-      AND (c."cobradorResponsavelId" = auth.uid() OR auth.jwt() ->> 'role' = 'GERENTE')
-    )
-  );
-  ```
-
-### 2. Deploy na Vercel
-A Vercel executa o script `vercel-build` pré-configurado na raiz:
-```bash
-npm run vercel-build
-```
-Variáveis de ambiente necessárias no painel da Vercel:
-- `DATABASE_URL`: Connection string do Supabase Transaction Pooler (porta 6543 com `?pgbouncer=true`).
-- `DIRECT_URL`: Connection string direta do Supabase (porta 5432).
-- `JWT_SECRET`: Chave secreta de assinatura JWT.
-- `NODE_ENV`: `production`.
-
-### 3. Backup, Restauração e Resiliência de Dados
-
-Para garantir a integridade patrimonial das cobranças e continuidade do negócio:
-
-- **Backups Automáticos Diários:** O Supabase realiza snapshots automáticos diários com retenção e integridade física.
-- **Exportação Manual (Dump Completo via `pg_dump`):**
-  ```bash
-  # Gerar dump comprimido contendo dados e schema
-  pg_dump -h db.[REF].supabase.co -U postgres -p 5432 -d postgres -F c -b -v -f crediario_backup_$(date +%Y%m%d).dump
-  ```
-- **Restauração em Banco de Contingência:**
-  ```bash
-  # Restaurar dump em uma nova base
-  pg_restore -h db.[REF_NOVO].supabase.co -U postgres -p 5432 -d postgres -v -c crediario_backup_20260315.dump
-  ```
-- **Point-in-Time Recovery (PITR):** Suporte à restauração para qualquer segundo dos últimos 7 dias através dos registros de WAL (Write-Ahead Logging) do PostgreSQL.
-
-### 4. Política de Retenção e Ciclo de Vida dos Registros
-
-Para atender a conformidades fiscais e garantir auditoria retroativa sem sobrecarregar o banco de dados:
-
-| Entidade / Registro | Período de Retenção | Política de Limpeza | Justificativa Regulatória |
-| :--- | :--- | :--- | :--- |
-| **Vendas & Carnês** | 5 Anos após quitação | Arquivamento histórico | Art. 174 do CTN (Prescrição tributária e fiscal) |
-| **Recibos de Pagamento** | Permanente | Imutável (Somente leitura) | Comprovação jurídica de quitação de títulos |
-| **Clientes Inativos** | Indefinido | Soft Delete (`ativo: false`) | Preservação da integridade referencial com vendas antigas |
-| **Logs de Tentativas de Login** | 90 Dias | Expiração automática (Cron) | Detecção forense de ataques sem acúmulo de dados |
-| **Sessões JWT / Cookies** | 8 Horas | Invalidação automática | Mitigação de sequestro de sessão em dispositivos móveis |
-
-### 5. Plano de Continuidade e Disaster Recovery (RPO & RTO)
-
-Para assegurar a operação contínua mesmo em caso de falhas severas na infraestrutura:
-
-| Métrica | Meta Operacional | Estratégia Adotada |
-| :--- | :--- | :--- |
-| **RPO (Recovery Point Objective)** | **< 15 minutos** | Gravação contínua em WAL (Write-Ahead Logging) no Supabase e transações atômicas síncronas. |
-| **RTO (Recovery Time Objective)** | **< 30 minutos** | Script de provisionamento rápido e restauração de schema via `prisma db push` + dump de contingência. |
-
-```mermaid
-flowchart TD
-    Incidente["🚨 Incidente Detectado (Falha de Região / Queda de Banco)"] --> Triagem["1. Diagnóstico de Conectividade"]
-    Triagem --> Decisao{"Supabase Operacional?"}
-    Decisao -- Sim --> Reparo["Restauração via PITR para minuto anterior à falha"]
-    Decisao -- Não --> Contingencia["2. Apontar DIRECT_URL / DATABASE_URL para Base Backup"]
-    Contingencia --> Restore["3. pg_restore do último snapshot consolidado"]
-    Restore --> Validacao["4. Validação de Integridade Contábil"]
-    Reparo --> Validacao
-    Validacao --> Normalizacao["✅ Operação Normalizada (Cobranças Liberadas)"]
-```
-
-#### 🌐 Estratégia de Failover de DNS e Redundância de Borda (Vercel)
-
-Para mitigar incidentes de indisponibilidade em massa na camada de borda (*Edge CDN*):
-
-- **Configuração de TTL Reduzido:** O domínio de produção utiliza **TTL de 300 segundos (5 minutos)** nos registros CNAME/A da zona DNS, permitindo redirecionamento veloz de tráfego em caso de falha regional.
-- **Página de Contingência Estática (Static Failover):**
-  - Hospedada em provedor alternativo geograficamente segregado (Cloudflare Pages / AWS S3 estático).
-  - Exibe instruções operacionais para os cobradores utilizarem o canhoto físico pré-impresso de contingência enquanto a sincronização digital é restabelecida.
-- **Sonda Automatizada de Chaveamento:**
-  - Monitores externos consultam o endpoint `/health` a cada 60 segundos a partir de múltiplas regiões.
-  - Três falhas consecutivas disparam webhook de alerta imediato no Telegram da gerência técnica.
-
-### 6. Matriz de Resiliência e Tratamento de Falhas de Conexão
-
-Em rotas de cobrança em bairros periféricos com sinal 3G/4G oscilante, o sistema adota comportamentos específicos para prevenir inconsistências:
-
-| Cenário de Falha | Comportamento da Aplicação | Medida de Proteção aos Dados |
-| :--- | :--- | :--- |
-| **Queda de Conexão durante POST** | Timeout de 10s no client com botão de retentativa | Idempotência pelo código único da parcela, impedindo duplicidade |
-| **Latência Elevada (> 3000ms)** | Bloqueio temporário da interface com spinner de aguardo | Desativação imediata de múltiplos cliques acidentais no botão |
-| **Erro 503 / Vercel Cold Start** | Retry exponencial automático (máx 3 tentativas) | Reaquecimento suave da função serverless sem perda do formulário |
-| **Perda Total de Internet** | Alerta em banner vermelho no topo da tela mobile | Bloqueio de submissão para evitar perda de dados não sincronizados |
-
-#### 📱 Roteiro Prático de Homologação em Campo sob Rede Degradada
-
-Para homologar a resiliência do aplicativo móvel antes de liberar novos cobradores na rota:
-
-1. **Simulação de Modo Avião no Envio (Offline Test):**
-   - Preencher a baixa com dupla digitação de valor.
-   - Ativar o *Modo Avião* no smartphone e tocar em **Confirmar Quitação**.
-   - **Critério de Aceite:** O sistema deve abortar graciosamente com banner de aviso sonoro/visual, mantendo os valores digitados intactos na tela sem fechar o modal.
-2. **Simulação de Throttling Slow 3G (Latência Extrema):**
-   - Configurar throttling no DevTools (`Slow 3G`: 400ms RTT / 400kbps down).
-   - Submeter o pagamento e monitorar o botão de ação primária.
-   - **Critério de Aceite:** O botão transiciona imediatamente para estado desabilitado (`disabled`) com spinner de progresso, impedindo cliques repetidos acidentais do operador.
-3. **Teste de Dupla Submissão Rápida (*Double-Tap*):**
-   - Efetuar toques sucessivos com intervalo menor que 100ms no botão de baixa.
-   - **Critério de Aceite:** Apenas uma requisição HTTP PATCH deve ser despachada pela camada de rede Axios.
-4. **Recuperação e Reconexão Automática:**
-   - Desativar o Modo Avião e tocar em **Tentar Novamente**.
-   - **Critério de Aceite:** A requisição é processada com sucesso e o recibo com código de autenticação é gerado sem duplicidade no banco de dados.
-
----
-
-### 7. Pipeline de CI/CD e Automação de Deploys
-
-O repositório adota um fluxo de integração e entrega contínua estruturado em etapas sequenciais:
-
-```mermaid
-flowchart LR
-    Push["1. Git Push (develop)"] --> Lint["2. Lint & TypeScript Strict"]
-    Lint --> PrismaVal["3. Validação do Prisma Schema"]
-    PrismaVal --> Preview["4. Preview Deployment (Vercel)"]
-    Preview --> PR["5. PR Homologado para main"]
-    PR --> Prod["6. Deploy Automático em Produção"]
-```
-
-1. **Validação Estática e Tipagem:** Cada push na branch `develop` dispara a checagem rigorosa de tipos no frontend e backend (`tsc --noEmit`), assegurando ausência de inconsistências.
-2. **Auditoria de Schema:** O Prisma Schema é verificado com `prisma validate` para garantir que modelos, relações e enums estejam íntegros.
-3. **Deploy Preview na Vercel:** Pull Requests recebem automaticamente uma URL de pré-visualização isolada para homologação de layout e fluxos antes de tocar a branch `main`.
-4. **Deploy Contínuo em Produção:** Ao mesclar na `main`, a Vercel compila o frontend e atualiza as Serverless Functions sem interrupção de serviço.
-
-### 8. Checklist Operacional de Pré-Deploy e Pós-Deploy
-
-Para assegurar lançamentos em produção com zero indisponibilidade (*zero-downtime*) e proteção contábil:
-
-#### 📋 Pré-Deploy
-- [x] **Compatibilidade de Schema:** Validar se alterações no Prisma Schema mantêm compatibilidade retroativa com a API em execução.
-- [x] **Variáveis de Ambiente:** Garantir que novas variáveis estejam cadastradas nos ambientes `Preview` e `Production` da Vercel.
-- [x] **Verificação de Build:** Executar compilação local completa (`npm run build:frontend` e `npm run build:backend`).
-
-#### 🚀 Pós-Deploy
-- [x] **Sonda de Integridade:** Testar endpoint de health check (`GET /health`) confirmando status `connected` do PostgreSQL.
-- [x] **Fluxo Crítico de Login:** Realizar login de teste com operador homologado verificando a emissão do cookie `httpOnly`.
-- [x] **Pooling de Conexões:** Verificar métricas no Supabase Dashboard para checar uso saudável de conexões na porta 6543 (PgBouncer).
-
----
-
-## 🔒 Segurança & Hardening Avançado
-
-O projeto implementa camadas estritas de segurança em profundidade:
-
-1. **Proteção XSS via Cookies httpOnly:**
-   O JWT é transmitido em cookies com flags `httpOnly: true`, `secure: true` e `sameSite: none/lax`, impedindo o roubo de tokens por scripts maliciosos.
-2. **Revogação Instantânea de Contas:**
-   A cada requisição autenticada, o `authMiddleware` valida no banco se o usuário existe e se `ativo === true`. Contas desativadas pelo Gerente perdem o acesso em tempo real.
-3. **Proteção contra Força Bruta (Rate Limiting):**
-   - Rota `/login`: Bloqueio temporário após **5 tentativas em 15 minutos** por IP.
-   - API geral: Limite de **120 requisições por minuto** por IP.
-4. **Validação Rigorosa com Zod (Whitelist):**
-   Nenhum dado é gravado no banco sem passar por validação estrita. Campos financeiros possuem validação contra valores negativos ou nulos.
-5. **Transações Atômicas (`prisma.$transaction`):**
-   Baixas de parcelas e vendas são executadas em bloco atômico com verificação de concorrência para evitar quitações duplicadas simultâneas.
-6. **Headers de Segurança (Helmet.js):**
-   Injeção automática de HSTS, CSP, X-Frame-Options, X-Content-Type-Options e bloqueio de MIME sniffing.
-7. **Tratamento Global de Erros:**
-   Stack traces e detalhes internos do banco são omitidos das respostas em ambiente de produção.
-
-### ⏱️ Matriz Detalhada de Rate Limiting e Prevenção de Abuso por Rota
-
-Para proteger os recursos computacionais e conter ataques de negação de serviço (DoS) ou força bruta em credenciais e transações:
-
-| Rota / Escopo | Limite Máximo | Janela Temporal | Chave de Segmentação | Resposta em Violação |
-| :--- | :---: | :---: | :--- | :--- |
-| **`/api/auth/login`** | 5 requisições | 15 minutos | `IP + body.email` | `429 Too Many Requests` + Header `Retry-After: 900` |
-| **`/api/parcelas/:id/pagar`** | 30 requisições | 1 minuto | `JWT userId` + `IP` | `429 Too Many Requests` (Prevenção de spam de liquidação) |
-| **`/api/relatorios/*`** | 20 requisições | 1 minuto | `JWT userId` | `429 Too Many Requests` (Proteção de pool de banco de dados) |
-| **`/api/*` (Geral/Listagens)** | 120 requisições | 1 minuto | `IP` | `429 Too Many Requests` (Cota padrão de navegação operacional) |
-| **`/health` (Sonda de Uptime)** | 300 requisições | 1 minuto | `IP` | `429 Too Many Requests` (Proteção contra monitoramentos desregulados) |
-
-- **Padronização de Headers RFC 6585:**
-  - `RateLimit-Limit`: Cota máxima permitida na janela.
-  - `RateLimit-Remaining`: Requisições restantes antes do bloqueio.
-  - `RateLimit-Reset`: Timestamp UTC do desbloqueio da cota.
-  - `Retry-After`: Tempo restante em segundos para tentar novamente.
-- **Tratamento Reativo no Frontend:** Ao interceptar status `429`, o interceptor Axios exibe uma notificação amigável com contador regressivo de segundos, impedindo novos cliques desnecessários pelo cobrador.
-
-### 🛡️ Matriz de Diretivas de Segurança HTTP & Content Security Policy (CSP)
-
-A API e o frontend aplicam cabeçalhos de defesa ativa configurados via **Helmet.js** e regras de CORS restritivas:
-
-| Cabeçalho HTTP | Configuração Ativa | Propósito de Proteção |
-| :--- | :--- | :--- |
-| **`Content-Security-Policy`** | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.co` | Prevenção rigorosa de ataques de injeção de script (XSS) e carregamento de recursos maliciosos externos. |
-| **`Strict-Transport-Security`** | `max-age=31536000; includeSubDomains; preload` | Força tráfego criptografado exclusivo via HTTPS por 1 ano, prevenindo ataques de downgrade (SSL Stripping). |
-| **`X-Frame-Options`** | `DENY` | Impede inclusão do sistema em `<iframe>`, blindando interfaces contra sequestro de clique (*Clickjacking*). |
-| **`X-Content-Type-Options`** | `nosniff` | Desativa farejamento de MIME type pelo navegador, neutralizando execução indevida de arquivos anexos. |
-| **`Referrer-Policy`** | `strict-origin-when-cross-origin` | Limita o vazamento de caminhos e parâmetros internos da URL ao navegar para origens externas. |
-| **`Access-Control-Allow-Credentials`** | `true` | Autoriza o tráfego seguro de cookies `httpOnly` exclusivamente para as origens explicitamente listadas na whitelist. |
-| **`Permissions-Policy`** | `camera=(), microphone=(), geolocation=(self), payment=()` | Restringe APIs de hardware sensíveis no navegador, permitindo geolocalização apenas para origem segura de rotas. |
-| **`Cross-Origin-Opener-Policy`** | `same-origin` | Isola o contexto de navegação contra ataques de vazamento de janelas e ataques de temporização (*Spectre*). |
-| **`Cross-Origin-Resource-Policy`** | `same-origin` | Bloqueia carregamento não autorizado de assets estáticos e endpoints de API por origens de terceiros. |
-
-#### 🌐 Política de CORS e Whitelist Dinâmica de Origens
-A API não utiliza `Access-Control-Allow-Origin: *` em nenhuma circunstância, mantendo segregação rigorosa:
-
-```typescript
-// Implementação da checagem de origem autorizada:
-const allowedOrigins = [
-  'https://crediario-systen-mu.vercel.app',
-  /^https:\/\/crediario-.*\.vercel\.app$/, // Preview Deployments da Vercel
-  'http://localhost:5173',                 // Vite Dev Server
-  'http://localhost:3000'                  // Docker Frontend
-];
-```
-
-| Parâmetro CORS | Valor Configurado | Justificativa de Engenharia |
-| :--- | :--- | :--- |
-| **`credentials`** | `true` | Necessário para envio e recebimento de cookies `httpOnly` de autenticação. |
-| **`methods`** | `GET, POST, PATCH, DELETE, OPTIONS` | Limita os verbos HTTP aceitos estritamente às operações de negócio. |
-| **`maxAge`** | `86400` (24 horas) | Caching da resposta de preflight (`OPTIONS`), economizando roundtrips de rede em conexões 4G de rua. |
-| **`allowedHeaders`** | `Content-Type, Authorization, X-Requested-With` | Previne cabeçalhos anômalos que poderiam contornar firewalls WAF. |
-
-### 🛡️ Ciclo de Vida da Sessão & Autenticação Segura
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor U as Usuário
-    participant FE as Frontend React (SPA)
-    participant RL as Rate Limiter (IP Guard)
-    participant API as Auth Controller & Middleware
-    participant DB as Supabase PostgreSQL
-
-    U->>FE: Fornece e-mail e senha
-    FE->>RL: POST /login (credenciais)
-    alt Tentativas excedidas (> 5 em 15 min)
-        RL-->>FE: 429 Too Many Requests
-    else Taxa permitida
-        RL->>API: Encaminha requisição
-        API->>DB: Consulta usuário por e-mail
-        DB-->>API: Retorna hash e status ativo
-        API->>API: Compara senha e valida se ativo === true
-        API-->>FE: 200 OK (Cookie httpOnly com JWT + perfil)
-    end
-
-    Note over FE,API: Requisições subsequentes autenticadas
-    FE->>API: GET /clientes (Cookie enviado pelo browser)
-    API->>API: authMiddleware decodifica e valida JWT
-    API->>DB: Checa status ativo instantâneo
-    DB-->>API: Usuário ativo confirmado
-    API-->>FE: Resposta com dados autorizados
-
-    Note over FE,API: Fluxo de Logout e Invalidação Ativa
-    FE->>API: POST /api/auth/logout
-    API->>API: Invalida cookie (Max-Age=0, Expire passado)
-    API-->>FE: 200 OK + Header Clear-Site-Data: "cookies", "storage"
-    FE->>FE: Limpa estado reativo da sessão e redireciona para /login
-```
-
-#### 🚪 Protocolo de Logout Seguro e Invalidação Ativa
-
-Para garantir que sessões encerradas no aplicativo móvel ou desktop não deixem resíduos no cliente:
-
-1. **Remoção Criptográfica do Cookie:** A rota `POST /api/auth/logout` emite o cabeçalho `Set-Cookie` com parâmetro `Max-Age=0` e data de expiração retroativa, forçando o navegador a purgar o token de acesso da memória e do disco.
-2. **Diretiva `Clear-Site-Data`:** Em respostas de logout, o servidor envia o header HTTP `Clear-Site-Data: "cookies", "storage"`, instruindo o browser a limpar caches de navegação, cookies de sessão e dados temporários de `sessionStorage`.
-3. **Reset do Estado Reativo do Frontend:** O contexto de autenticação React (`AuthContext`) reseta imediatamente todas as variáveis de estado em memória para `null`, cancelando requisições assíncronas pendentes via `AbortController`.
-
-### 🔐 Política de Gestão e Rotação de Segredos JWT
-
-Para mitigar riscos de sequestro de credenciais e garantir a segurança criptográfica da autenticação:
-
-1. **Tempo de Vida do Token:** Cada token JWT emitido possui validade máxima estrita de **8 horas**, cobrindo o turno operacional padrão de cobrança e forçando nova autenticação diária.
-2. **Armazenamento Seguro em Produção:** A variável `JWT_SECRET` é injetada exclusivamente em tempo de execução via painel seguro da Vercel, nunca sendo versionada no repositório.
-3. **Procedimento de Rotação Periódica:** Em caso de rotação preventiva de chaves ou suspeita de comprometimento:
-   - A nova chave é atualizada nas variáveis de ambiente da Vercel.
-   - O redeploy automático invalida instantaneamente todos os cookies legados assinados com a chave anterior.
-   - Operadores em campo são redirecionados de forma transparente à tela de login para renovar a sessão.
-4. **Higienização de Logs:** Middlwares e interceptores omitem explicitamente qualquer menção ao conteúdo bruto de cookies ou tokens em saídas de erro ou monitoramento.
-
-#### 🍪 Matriz de Configuração e Comportamento de Cookies HTTP (Dev vs Prod)
-
-Para conciliar a execução em `localhost` com o deploy em nuvem com domínios segregados (Frontend na Vercel e API/Supabase em subdomínios):
-
-| Atributo do Cookie | Ambiente Local (`development`) | Ambiente Nuvem (`production`) | Finalidade Técnica |
-| :--- | :---: | :---: | :--- |
-| **`httpOnly`** | `true` | `true` | Bloqueia leitura via `document.cookie` em JavaScript, neutralizando ataques XSS. |
-| **`secure`** | `false` | `true` | Força transmissão restrita a conexões criptografadas HTTPS em produção. |
-| **`sameSite`** | `'lax'` | `'none'` | Permite o tráfego do cookie em chamadas Cross-Origin (CORS) entre Vercel e a API. |
-| **`maxAge`** | `28800000` (8 horas) | `28800000` (8 horas) | Expiração forçada após o término da jornada padrão de trabalho do cobrador. |
-| **`partitioned` (CHIPS)** | `false` | `true` | Ativa Cookies Having Independent Partitioned State para compatibilidade com Safari/iOS. |
-
-> **Nota para Desenvolvedores:** Em ambiente local, se `secure: true` for ativado indevidamente em conexões `http://localhost`, o navegador descartará silenciosamente o cookie, impedindo a persistência do login.
-
----
-
-### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
-
-O sistema adota o princípio do menor privilégio (*Least Privilege*), dividindo responsabilidades estritas entre os perfis:
-
-| Recurso / Ação Operacional | `GERENTE` (Desktop) | `VENDEDOR_COBRADOR` (Mobile) | Validação Backend |
-| :--- | :---: | :---: | :--- |
-| **Dashboard Consolidado & Projeções** | ✅ Total | ❌ Sem Acesso | `authMiddleware` + `perfil === GERENTE` |
-| **Criar / Desativar Operadores** | ✅ Total | ❌ Sem Acesso | Endpoint restrito `/usuarios` |
-| **Cadastrar Novos Clientes** | ✅ Total | ✅ Em Campo | Permissão mútua com Zod Whitelist |
-| **Emissão de Vendas e Carnês** | ✅ Total | ✅ No Ponto de Venda | Transação atômica vinculando o operador |
-| **Baixa de Parcelas e Quitações** | ✅ Total | ✅ Rota do Dia / Ficha | Dupla digitação e concorrência segura |
-| **Ajuste Manual de Valores / Descontos** | ✅ Total | ❌ Proibido | Apenas com justificativa em auditoria |
-| **Prorrogação de Vencimentos** | ✅ Total | ❌ Proibido | Evita adiamentos sem anuência gerencial |
-| **Visualizar Trilha de Auditoria** | ✅ Total | ❌ Sem Acesso | Acesso exclusivo ao log contábil |
-| **Prestação de Contas de Caixa** | ✅ Todos os Cobradores | ✅ Própria Arrecadação | Filtro automático por `operadorId` |
-
----
-
-## 🛡️ Privacidade de Dados e Conformidade LGPD
-
-O **Crediário System** foi concebido em conformidade com as diretrizes da **Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD)**, garantindo a proteção dos dados cadastrais e financeiros de consumidores e colaboradores:
-
-1. **Princípio da Minimização:**
-   - Coleta restrita ao essencial para execução do contrato comercial de crediário: Nome, Telefone de Contato e Referências de Localização/Endereço.
-   - Nenhum dado biométrico, sensível ou prescindível é solicitado ou armazenado no banco de dados.
-
-2. **Segurança de Trânsito e Repouso:**
-   - Toda comunicação entre cliente, API e banco opera sob túneis criptografados **TLS 1.3 / HTTPS**.
-   - Conexão com o banco PostgreSQL no Supabase requer autenticação forte com credenciais protegidas em variáveis de ambiente isoladas.
-
-3. **Direito de Acesso e Retificação:**
-   - Clientes possuem direito de atualização facilitada de número telefônico e referências residenciais através do endpoint gerencial `PATCH /clientes/:id`.
-
-4. **Trilha de Auditoria e Transparência:**
-   - Cada modificação contábil ou cadastral registra a identidade do operador responsável, a estampa de tempo precisa (`timestamp`) e o histórico de estados (`dadosAnteriores` vs `dadosNovos`).
-
-5. **Isolamento de Credenciais:**
-   - Senhas de operadores são convertidas com função criptográfica de hashing unidirecional de alta complexidade (`bcrypt`) antes de serem gravadas no banco de dados.
-
-### 🔐 Checklist de Boas Práticas para Operadores de Rua
-
-Para preservar o sigilo das informações de clientes e a integridade da arrecadação em trânsito:
-
-- [x] **Bloqueio de Tela Obrigatório:** Manter biometria ou PIN ativo no aparelho celular utilizado na rota de cobrança.
-- [x] **Encerramento de Sessão:** Efetuar logout no final do turno para expirar o cookie de autenticação `httpOnly`.
-- [x] **Não Compartilhamento de Credenciais:** Cada operador deve utilizar estritamente o seu usuário nominal para preservar o valor jurídico da auditoria.
-- [x] **Conferência Visual com o Cliente:** Sempre exibir o resumo da tela de quitação ao cliente antes de finalizar a baixa.
-
-### 🔒 Procedimento de Mascaramento e Sanitização de Dados para Homologação
-
-Para cumprir os preceitos de privacidade da LGPD ao restaurar dumps de produção em ambientes de desenvolvimento ou homologação local:
-
-1. **Anonimização Cadastral:** Scripts de sanitização substituem nomes reais por pseudônimos randômicos e geram telefones fictícios válidos.
-2. **Ofuscação de Referências Residenciais:** Endereços e referências de cobrança são substituídos por marcadores sintéticos (*"Rua Homologação, 100"*).
-3. **Preservação da Integridade Contábil:** Relações de chave estrangeira (`clienteId`, `vendaId`, `parcelaId`), valores monetários e datas históricas de vencimento são rigorosamente mantidos para validar cálculos matemáticos reais sem expor dados pessoais sensíveis.
-4. **Vedação de Cópia Bruta:** É terminantemente proibido transferir dumps de produção diretamente para máquinas pessoais sem a execução prévia do script de mascaramento.
-
-### 🛡️ Política de Exportação de Dados e Expiração de Relatórios
-
-Para relatórios gerenciais em PDF ou planilhas CSV exportadas do painel desktop:
-
-- **Expiração de Links Assinados:** Relatórios gerados para download utilizam URLs pré-assinadas temporárias com validade máxima de **15 minutos**.
-- **Registro em Trilha de Auditoria:** Cada exportação de carteira de clientes ou fechamento financeiro gera um evento indelével `RELATORIO_EXPORTADO` registrando o usuário solicitante, IP de origem e filtros aplicados.
-- **Marca d'Água Digital:** Relatórios gerados em PDF contêm no rodapé a identificação do operador responsável pela emissão e timestamp da geração para desencorajar vazamentos.
-
----
-
-## 🌿 Estratégia de Branching (Git Flow)
-
-O repositório segue rigorosamente o fluxo profissional de branches e proteção contínua de integridade:
-
-- **`main`**: Branch de **Produção** conectada diretamente ao deploy da Vercel. Commits diretos são estritamente proibidos (`protected branch`). Apenas código validado, testado e aprovado via Pull Request entra na `main`.
-- **`develop`**: Branch principal de **Desenvolvimento**. Todas as novas features, correções e melhorias técnicas devem ser integradas aqui antes de qualquer promoção para homologação ou produção.
-
-```
-develop ───●───●───●──────┐ (Pull Request Validado)
-                          ▼
-main ─────────────────────● (Deploy Automático na Vercel)
-```
-
-### 🛡️ Regras de Proteção de Branches (Branch Protection Rules)
-
-| Branch | Política de Acesso | Requisitos Obrigatórios de Merge | Status de CI/CD |
-| :--- | :--- | :--- | :--- |
-| **`main`** | Bloqueio de push direto / Sem force-push | Aprovação de PR, testes de integração verdes, fast-forward ou squash merge | Dispara pipeline de produção Vercel |
-| **`develop`** | Commits estruturados com Conventional Commits | Validação local de build e tipagem TypeScript (`tsc --noEmit`) | Dispara Vercel Preview Deployments |
-
-#### 📋 Protocolo de Versionamento e Commits Semânticos
-- Mensagens de commit devem obrigatoriamente seguir a convenção do [Conventional Commits v1.0.0](https://www.conventionalcommits.org/):
-  - `feat(...)`: Novas funcionalidades para o operador ou gerente.
-  - `fix(...)`: Correções de bugs em cálculos ou rotas de API.
-  - `docs(...)`: Alterações de documentação e diagramas técnicos.
-  - `refactor(...)`: Refatoração estrutural sem alteração de comportamento externo.
-  - `test(...)`: Adição ou ajuste de testes automatizados e suítes Vitest.
-  - `chore(...)`: Manutenção de dependências, scripts ou infraestrutura.
-- **Governança de Autonomia:** Comandos de versionamento (`git commit` e `git push`) devem ser executados apenas com confirmação explícita de escopo do operador responsável.
-
----
-
-## 🎨 Design & Usabilidade
-
-- **Interface Dual-Platform:** Detecção automática de desktop (painel gerencial) e mobile (foco em agilidade de rua).
-- **Favicon & PWA Ready:** Ícone vetorial SVG premium em squircle com suporte a `apple-touch-icon` e `theme-color` para instalação como atalho no celular.
-- **Conferência de Dupla Digitação:** Prevenção de toques acidentais em telas mobile na baixa de parcelas.
-
-### 📸 Demonstração Visual das Interfaces
-
-| Plataforma Desktop (Administração) | Plataforma Mobile (Cobrador de Rua) |
-| :---: | :---: |
-| ![Desktop Dashboard](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=60) | ![Mobile Cobrança](https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=300&auto=format&fit=crop&q=60) |
-| *Controle unificado de clientes, inadimplência e projeções mensais* | *Rotas ágeis de cobrança com quitação rápida e dupla conferência* |
-
-### ⌨️ Acessibilidade & Atalhos no Painel Desktop
-
-Para operadores de caixa e gerentes que buscam agilidade na rotina de escritório, o painel desktop oferece atalhos de teclado e conformidade com padrões de acessibilidade:
-
-| Combinação de Teclas | Ação no Sistema |
-| :---: | :--- |
-| <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> | Foco imediato na barra de busca global de clientes |
-| <kbd>Esc</kbd> | Fechar modais ativos, gavetas de detalhes ou limpar filtros |
-| <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd> | Navegação sequencial acessível entre formulários e tabelas |
-| <kbd>Alt</kbd> + <kbd>V</kbd> | Acesso direto ao fluxo de emissão de Nova Venda |
-| <kbd>Enter</kbd> | Submissão rápida de pesquisas e confirmação de diálogos |
-
-- **Contraste Visual AA:** Paleta calibrada para legibilidade superior em ambientes com variação de luminosidade.
-- **Outline de Foco:** Marcadores de foco destacados (`focus-visible`) para operação 100% via teclado sem mouse.
-
-#### ♿ Matriz de Acessibilidade Digital (WCAG 2.1 Nível AA)
-
-Para garantir uso pleno por operadores com necessidades especiais ou limitações motoras temporárias:
-
-| Critério WCAG | Requisito da Norma | Implementação no Crediário System |
-| :--- | :--- | :--- |
-| **1.4.3 Contraste Mínimo** | Razão mínima de 4.5:1 para texto normal | Contraste medido de **7.2:1** em textos informativos e **12.1:1** em valores monetários |
-| **2.1.1 Acessível por Teclado** | Todas as ações disponíveis via teclado | Modais com captura de foco (*Focus Trap*) e navegação cíclica completa |
-| **2.4.7 Foco Visível** | Indicador de foco evidente em elementos ativos | Anel de foco azul de 2px com offset de 2px via seletor `:focus-visible` |
-| **4.1.2 Nome, Função e Valor** | Elementos customizados expõem semântica ARIA | Modais com `aria-modal="true"`, botões de baixa com `aria-busy` e alertas via `aria-live="polite"` |
-
-### 📱 Matriz de Compatibilidade de Dispositivos & Browsers
-
-O frontend responsivo é testado e homologado para os seguintes ambientes:
-
-| Navegador / Plataforma | Suporte | Versão Mínima | Modo Recomendado |
-| :--- | :---: | :---: | :--- |
-| **Google Chrome (Desktop)** | ✅ Homologado | 110+ | Painel Gerencial em alta resolução |
-| **Google Chrome (Android)** | ✅ Homologado | 115+ | Instalado como Atalho Web / PWA |
-| **Apple Safari (iOS)** | ✅ Homologado | 16.4+ | Adicionar à Tela de Início (Full Screen) |
-| **Mozilla Firefox** | ✅ Homologado | 115+ (ESR) | Modo Navegador Desktop |
-| **Microsoft Edge** | ✅ Homologado | 110+ | Ambientes corporativos Windows |
-| **Samsung Internet** | ✅ Homologado | 22+ | Cobrança em campo em aparelhos Samsung |
-
-### 📱 Guia de Usabilidade Tátil e Otimização para Cobradores de Rua
-
-A interface mobile foi projetada especificamente para o ritmo dinâmico de cobrança em campo, sob condições adversas de iluminação e mobilidade:
-
-- **Alvos de Toque Ampliados:** Botões de ação primária (baixa, confirmação, WhatsApp) possuem altura mínima de **48px** com espaçamento generoso, prevenindo cliques acidentais mesmo com uso de luvas ou em trânsito.
-- **Teclado Numérico Direto:** Campos de entrada de valores monetários utilizam `inputMode="decimal"` com `pattern="[0-9]*"`, acionando o teclado numérico direto no smartphone sem necessidade de alternar abas no teclado virtual.
-- **Prevenção de Zoom Indesejado:** Aplicação de `touch-action: manipulation` e fontes com tamanho mínimo de `16px` em inputs para desativar o duplo toque de zoom involuntário no iOS Safari e Android Chrome.
-- **Visibilidade sob Sol Forte:** Uso de contraste tipográfico elevado (preto puro e fundos claros) nas listas de títulos para permitir leitura clara sob luz solar direta em áreas abertas.
-
-### 📲 Arquitetura PWA e Otimizações de Viewport Mobile
-
-Para entregar uma experiência equivalente a um aplicativo nativo sem a fricção de lojas de aplicativos (App Store / Play Store):
-
-- **Modo Standalone Sem Barras do Navegador:** O arquivo `manifest.json` com `display: "standalone"` oculta a barra de endereço e controles de navegação padrão do browser, dedicando 100% da área útil do smartphone ao trabalho de cobrança.
-- **Suporte a Entalhes (Notch / Ilha Dinâmica):** Uso de `viewport-fit=cover` e variáveis CSS com funções de ambiente:
-  ```css
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  ```
-  Evitando que botões de quitação ou cabeçalhos fiquem obstruídos pela barra de navegação por gestos do sistema operacional.
-- **Ícones Adaptativos (Maskable Icons):** Suporte a ícones vetoriais SVG e PNGs em múltiplas resoluções (192x192 e 512x512) com preenchimento seguro para recorte circular no Android.
-- **Tema de Barra de Status Dinâmico:** Meta tag `<meta name="theme-color" content="#2563eb">` harmonizada com o azul institucional do Crediário System.
-
-#### 📶 Estratégia de Cache e Resiliência Local com IndexedDB e Service Worker
-
-Para garantir alta velocidade de navegação na rota de rua e evitar telas em branco em locais de baixa conectividade:
-
-| Tipo de Recurso | Estratégia de Cache | Ciclo de Atualização | Armazenamento |
-| :--- | :---: | :---: | :--- |
-| **Bundles JS/CSS e Fontes** | `CacheFirst` | Cache por hash imutável no nome do arquivo | Cache Storage API (Browser) |
-| **Ícones e Assets Visuais** | `StaleWhileRevalidate` | Validação em segundo plano | Cache Storage API |
-| **Metadados de Rota (Clientes)** | `NetworkFirst (Timeout 3s)` | Fallback para snapshot local se sem sinal | Cache Storage / IndexedDB |
-| **Catálogo de Produtos** | `StaleWhileRevalidate` | Renovação a cada 1 hora | Cache Storage / Memory |
-| **Transações e Pagamentos** | `NetworkOnly` (Sem Cache) | Chamada direta via Axios/Fetch | Sem cache HTTP (Segurança ACID) |
-| **Recibos Prontos para Impressão** | Fila Local Serializada | Purgado após envio/impressão | **IndexedDB** (`recibos_pendentes`) |
-
-- **Segurança Transacional:** Operações que alteram saldos ou registram dinheiro nunca são cacheadas na camada HTTP. Apenas a visualização da rota e a fila de impressão térmica utilizam persistência offline local, prevenindo descompassos entre o saldo em tela e o banco de dados.
-- **Gestão de Quota de Armazenamento:** A aplicação monitora o consumo via `navigator.storage.estimate()` e mantém o espaço utilizado abaixo de **15 MB**, descartando snapshots de rotas anteriores a 48 horas automaticamente.
-
----
-
-## ⚙️ Funcionalidades Principais
-
-### 👥 Matriz de Controle de Acesso Baseado em Funções (RBAC)
-
-O sistema implementa controle rígido de autorização por perfil de acesso (Role-Based Access Control) validado em cada requisição na camada de middleware:
-
-| Recurso / Ação Operacional | Gerente (`GERENTE`) | Cobrador de Rua (`VENDEDOR_COBRADOR`) | Justificativa de Compliance |
-| :--- | :---: | :---: | :--- |
-| **Login com Rate Limiter** | ✅ Permitido | ✅ Permitido | Acesso unificado com auditoria por IP |
-| **Consulta de Clientes & Saldo** | ✅ Total | ✅ Própria rota/geral | Necessário para atendimento em campo |
-| **Cadastro de Novo Cliente** | ✅ Permitido | ✅ Permitido | Agilidade para abertura de fichas na rua |
-| **Emissão de Nova Venda (Carnê)** | ✅ Permitido | ✅ Permitido | Fechamento imediato de negócios em visita |
-| **Baixa de Parcela com Dupla Digitação** | ✅ Permitido | ✅ Permitido | Operação central de liquidação |
-| **Ajuste Manual / Estorno de Parcela** | ✅ Exclusivo | ❌ Bloqueado | Prevenção de adulteração de valores |
-| **Prorrogação de Vencimento** | ✅ Exclusivo | ❌ Bloqueado | Política de risco e negociação contratual |
-| **Gestão de Operadores & Usuários** | ✅ Exclusivo | ❌ Bloqueado | Controle administrativo de credenciais |
-| **Ativação / Desativação de Contas** | ✅ Exclusivo | ❌ Bloqueado | Revogação instantânea de acesso à equipe |
-| **Dashboard Consolidado (KPIs)** | ✅ Total | ❌ Bloqueado | Dados estratégicos e financeiros globais |
-| **Prestação de Contas da Equipe** | ✅ Todos os cobradores | ❌ Bloqueado | Auditoria do montante total arrecadado |
-| **Prestação de Contas Individual** | ✅ Visualiza todos | ✅ Apenas o próprio dia | Conferência diária do dinheiro em espécie |
-
----
-
-### 👤 Perfil: Gerente (Desktop)
-- Dashboard financeiro em tempo real (Faturamento, Inadimplência, Projeções).
-- Gestão de Usuários (criação e desativação instantânea de operadores).
-- Gestão de Clientes e cálculo automático de Saldo Devedor.
-- Catálogo de Produtos e precificação.
-- Relatórios de prestação de contas diária da equipe.
-
-### 📊 Indicadores de Desempenho e Métricas Operacionais (KPIs)
-
-O Dashboard Gerencial consolida métricas estratégicas para monitorar a saúde da carteira de crédito:
-
-| Indicador (KPI) | Fórmula de Cálculo | Meta Operacional | Ação Recomendada em Desvio |
-| :--- | :--- | :---: | :--- |
-| **Taxa de Inadimplência** | `(Total Vencido > 5 dias / Carteira Ativa) * 100` | `< 8.0%` | Priorização de rota e renegociação amigável |
-| **Eficácia de Cobrança Diária** | `(Parcelas Recebidas / Parcelas Agendadas Hoje) * 100` | `> 85.0%` | Redistribuição de clientes por cobrador |
-| **Ticket Médio de Venda** | `Faturamento Total / Número de Vendas no Mês` | Monitoramento | Ajuste no limite de crédito por perfil de renda |
-| **Taxa de Adiantamento** | `Parcelas Liquidadas Antecipadamente / Total de Parcelas` | `> 12.0%` | Incentivo comercial com descontos pontuais |
-| **Aging da Carteira** | Distribuição em faixas: 1-15d, 16-30d, 31-60d e 60d+ | `< 5% em 60d+` | Encaminhamento para cobrança extrajudicial |
-
-### 🛵 Guia Operacional: Rotina Diária de Cobrança em Campo
-
-Para garantir a eficiência operacional e a exatidão financeira na rotina de porta em porta, o cobrador segue um fluxo padronizado de 5 etapas:
-
-```mermaid
-flowchart LR
-    E1["1. Abertura do Dia & Sincronização"] --> E2["2. Filtragem de Vencidos & Hoje"]
-    E2 --> E3["3. Localização do Cliente na Rota"]
-    E3 --> E4["4. Baixa com Dupla Digitação"]
-    E4 --> E5["5. Fechamento de Caixa Diário"]
-```
-
-1. **Sincronização Matinal:** Ao efetuar login no aparelho mobile, a listagem inicial carrega automaticamente os títulos pendentes agrupados por prioridade (parcelas vencidas em destaque vermelho e vencendo no dia em amarelo).
-2. **Localização e Contato:** Cada registro exibe os dados essenciais de contato, referências de endereço e saldo consolidado do cliente, permitindo confirmação rápida da identidade antes de abordar a cobrança.
-3. **Liquidação Segura (Anti-Erro):** O cobrador informa o valor em dinheiro ou transferência e o sistema exige a **dupla digitação de conferência**, evitando erros por digitação rápida ou toques involuntários em tela sensível.
-4. **Tratamento de Excedentes:** Caso o cliente pague um valor superior ao da parcela atual, o motor do sistema calcula e distribui o excedente como amortização na próxima parcela vincenda automaticamente.
-5. **Fechamento e Prestação de Contas:** Ao final do expediente de cobrança, a tela de *Prestação de Contas Pessoal* exibe o total arrecadado no dia e a quantidade de parcelas recebidas para conferência física com a gerência.
-
----
-
-### 🛵 Perfil: Vendedor / Cobrador (Mobile)
-- Lista de cobranças diárias priorizada (Hoje e Atrasadas).
-- Baixa rápida com conferência de segurança.
-- Quitação e amortização de parcelas com cálculo automático de excedentes.
-- Cadastro e consulta instantânea de clientes em campo.
-- Resumo pessoal de arrecadação do dia.
-
-### 📲 Comunicação e Comprovantes via WhatsApp
-
-Para agilizar o atendimento em campo e reforçar a transparência com os clientes, o sistema oferece integração direta com a API de links do WhatsApp:
-
-- **Envio Imediato de Recibo Digital:** Ao confirmar uma baixa de parcela ou quitação adiantada, o cobrador pode disparar um comprovante com mensagem pré-formatada com apenas um clique.
-- **Lembrete de Vencimento:** Notificações amigáveis automáticas informando a data de vencimento da parcela e chave Pix para pagamento antecipado.
-- **Formatação do Comprovante:**
-  ```text
-  📄 *COMPROVANTE DE PAGAMENTO - CREDIÁRIO SYSTEM*
-  -----------------------------------------------
-  👤 Cliente: Maria Silva
-  📅 Data/Hora: 19/09/2026 às 14:32
-  🔢 Parcela: 03/10
-  💵 Valor Pago: R$ 150,00
-  📉 Saldo Devedor Restante: R$ 1.050,00
-  -----------------------------------------------
-  Cobrador: Carlos Vendedor | Autenticação: #TX-98412
-  Obrigado pela preferência!
-  ```
-
-### 🖨️ Suporte a Mini-Impressoras Térmicas Bluetooth (ESC/POS)
-
-Para comércios onde o cliente final exige o comprovante físico impresso na porta de casa:
-
-- **Protocolo de Impressão:** Compatível com impressoras térmicas portáteis de bolso utilizando protocolo **ESC/POS** de **58mm** e **80mm** (ex: Goojprt, POS-5802, MPT-II).
-- **Conectividade Direta:** Comunicação via **Web Bluetooth API** em navegadores Chrome/Android sem necessidade de aplicativo auxiliar externo.
-- **Layout de Bobina Otimizado:** Recibo monocromático com largura compacta, corte automático de margens e QR Code de autenticação contábil impresso no rodapé.
-
-#### ⚙️ Especificações Técnicas e Sequências de Comandos ESC/POS
-
-| Parâmetro Técnico | Valor Padrão | Descrição Operacional |
-| :--- | :---: | :--- |
-| **Baud Rate / Conexão** | 9600 bps / BLE GATT | Serviço serial padrão Bluetooth (SPP / UUID `0xFFE0` ou similar) |
-| **Tabela de Caracteres** | CP860 / ISO-8859-1 | Codificação para suporte a acentuação gráfica do Português |
-| **Largura de Colunas** | 32 cols (58mm) / 48 cols (80mm) | Formatação de texto monoespaçado em recibo de bobina |
-
-| Ação na Impressora | Sequência de Controle (Hex / ASCII) | Efeito no Papel |
-| :--- | :---: | :--- |
-| **Inicialização** | `0x1B 0x40` (`ESC @`) | Limpa o buffer e restaura configurações padrão |
-| **Centralizar Texto** | `0x1B 0x61 0x01` (`ESC a 1`) | Centraliza cabeçalho e título do recibo |
-| **Alinhar à Esquerda** | `0x1B 0x61 0x00` (`ESC a 0`) | Alinha corpo descritivo das parcelas |
-| **Texto em Negrito** | `0x1B 0x45 0x01` (`ESC E 1`) | Destaque para o valor pago e nome do cliente |
-| **Fonte Dupla Altura/Largura**| `0x1D 0x21 0x11` (`GS ! 0x11`) | Destaque do valor total liquidado |
-| **Avanço de Linhas** | `0x1B 0x64 0x03` (`ESC d 3`) | Alimenta 3 linhas vazias antes de rasgar o papel |
-| **Corte Parcial/Total** | `0x1D 0x56 0x00` (`GS V 0`) | Aciona a guilhotina em modelos com cortador automático |
-
-#### 📶 Matriz de Hardware Homologado e Chunking Web Bluetooth (GATT)
-
-Em aparelhos móveis operando via **Web Bluetooth API**, a conexão GATT impõe um limite típico de MTU de 20 a 512 bytes. Para evitar estouro de buffer (*buffer overrun*) em impressoras portáteis econômicas:
-
-| Modelo / Fabricante | Largura / DPI | Conexão | Protocolo GATT | Estratégia de Transmissão |
-| :--- | :---: | :---: | :---: | :--- |
-| **Goojprt PT-210 / MPT-II** | 58mm / 203 DPI | BLE 4.0+ | Service `0xFFE0` / Char `0xFFE1` | Chunks de 20 bytes com delay de 15ms |
-| **POS-5802DD / Mini POS** | 58mm / 203 DPI | BLE 4.0+ | Service `0x4953` / Char `0xE781` | Chunks de 20 bytes com delay de 20ms |
-| **ZJ-5805DD / POS-8001** | 80mm / 203 DPI | BLE 4.2+ | Service `0x18F0` / Char `0x2AF1` | Chunks de 64 bytes com delay de 10ms |
-
-```typescript
-// Exemplo de envio fracionado (chunking) para evitar perda de caracteres no Bluetooth:
-async function printEscPosChunks(characteristic: BluetoothRemoteGATTCharacteristic, data: Uint8Array) {
-  const CHUNK_SIZE = 20; // Tamanho seguro de MTU BLE
-  for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-    const chunk = data.slice(i, i + CHUNK_SIZE);
-    await characteristic.writeValue(chunk);
-    await new Promise(resolve => setTimeout(resolve, 15)); // Intervalo de descompressão do buffer
-  }
-}
-```
-
----
-
-### ⚡ Arquitetura de Conciliação Pix Dinâmico e Webhooks (BaaS)
-
-Para comércios integrados a Provedores de Serviços de Pagamento (PSPs / BaaS), o sistema está preparado para conciliação instantânea via Pix Dinâmico:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Cliente
-    actor Cobrador
-    participant App as App Mobile
-    participant API as Backend Express
-    participant PSP as Gateway / Banco Pix
-
-    Cobrador->>App: Solicita pagamento via Pix
-    App->>API: POST /parcelas/:id/pix-qrcode
-    API->>PSP: Emissão de Cobrança Pix com TxID único
-    PSP-->>API: Copia e Cola + QR Code Dinâmico
-    API-->>App: Exibe QR Code na tela do celular
-    Cliente->>PSP: Efetua pagamento via app bancário
-    PSP->>API: Webhook assíncrono (HMAC validado)
-    API->>API: Baixa atômica de parcela e log de auditoria
-    API-->>App: Notificação em tempo real de confirmação
-```
-
-- **Idempotência por TxID:** Cada cobrança gerada possui identificador único `txid`, garantindo que retentativas de webhook não dupliquem quitações contábeis.
-- **Validação de Assinatura Criptográfica:** Payloads recebidos nos webhooks são validados com `HMAC-SHA256` contra segredo compartilhado, impedindo fraudes ou injeção de pagamentos falsos.
-
-#### 🛠️ Guia Operacional e Resiliência de Webhooks Pix
-
-Para manter a confiabilidade contábil mesmo em casos de indisponibilidade momentânea ou instabilidade de rota externa entre o PSP e a API:
-
-1. **Política de Retentativas com Backoff Exponencial (PSP ➔ API):**
-   | Tentativa | Intervalo Mínimo | Ação do Gateway BaaS | Ação da API Crediário |
-   | :---: | :---: | :--- | :--- |
-   | **1ª** | Imediato (0s) | Disparo síncrono do evento `pix.received` | Processamento e resposta `200 OK` em < 300ms |
-   | **2ª** | 5 segundos | Primeira retentativa automática em caso de timeout | Checagem de idempotência por `txid` |
-   | **3ª** | 30 segundos | Segunda retentativa com backoff | Log de aviso (*warning*) no monitoramento APM |
-   | **4ª** | 2 minutos | Terceira retentativa | Alerta de degradação temporária na fila de mensageria |
-   | **5ª** | 15 minutos | Quarta retentativa | Disparo de notificação para o canal de suporte |
-   | **Esgotado** | 1 hora | Envio para Dead-Letter Queue (DLQ) do PSP | Reconciliação sob demanda via endpoint gerencial |
-
-2. **Reconciliação Manual / Sob Demanda:**
-   - Caso um cliente comprove o pagamento na rua e a notificação push do webhook demore a propagar devido a oscilações da operadora de telefonia, o cobrador conta com o botão **"Verificar Pix Manualmente"** no app, disparando a checagem ativa contra o PSP via endpoint:
-     ```http
-     POST /api/parcelas/:id/pix-status-check
-     ```
-   - O backend consulta o status diretamente no endpoint do PSP e liquida a parcela imediatamente se confirmado.
-
----
-
-## 📐 Regras de Negócio Financeiras
-
-O sistema implementa lógica financeira robusta para garantir consistência das operações de crediário:
-
-### 📖 Glossário Financeiro do Crediário
-
-Para facilitar o entendimento de desenvolvedores, contadores e administradores, apresentamos os termos técnicos aplicados na regra de negócio:
-
-| Termo | Definição no Sistema |
+| **Resumo** | Prestação de contas do dia: vendido, cobrado e detalhes de cada operação. |
+| **Cobranças** | Parcelas pendentes e atrasadas para cobrar, com baixa de pagamento e contato com o cliente. |
+| **Nova Venda** | Venda com um ou mais produtos, entrada opcional e parcelamento mensal, quinzenal ou semanal. |
+| **Clientes** | Cadastro e edição, saldo devedor, parcelas do cliente, pagamento antecipado e alteração da data de vencimento. |
+| **Hist. Cobr.** | Extrato de cobranças de dias anteriores. |
+| **Hist. Vendas** | Extrato de vendas de dias anteriores. |
+
+### 🖥️ Painel do Gerente (desktop)
+
+| Aba | Descrição |
 | :--- | :--- |
-| **Carnê de Crediário** | Conjunto sequencial de parcelas geradas a partir de uma venda a prazo com vencimentos mensais programados. |
-| **Entrada (Down Payment)** | Valor inicial pago pelo cliente no ato da compra, abatido imediatamente do saldo total financiado. |
-| **Amortização em Cascata** | Aplicação automática de valores pagos a mais em relação ao valor da parcela atual diretamente sobre a parcela pendente subsequente. |
-| **Parcela Parcial (`PARCIAL`)** | Parcela cujo valor recebido foi menor que o valor total estipulado; permanece ativa com saldo remanescente em aberto. |
-| **Saldo Devedor Consolidado** | Soma total de todas as parcelas pendentes, atrasadas e saldos parciais de um cliente em todas as suas compras ativas. |
-| **Prestação de Contas** | Relatório diário de fechamento que concilia os pagamentos recebidos por cada cobrador com o dinheiro em caixa. |
-| **Liquidação Atômica** | Operação indivisível no banco de dados que garante a gravação do pagamento, atualização da parcela e criação da auditoria de forma inseparável. |
-| **Dupla Digitação** | Mecanismo de segurança na interface mobile exigindo digitar e confirmar o valor recebido antes de submeter a baixa. |
+| **Dashboard Inicial** | Visão geral da operação. |
+| **Funcionários** | Criação e listagem de usuários, e prestação de contas por funcionário. |
+| **Clientes** | Consulta e edição de clientes e saldo devedor. |
+| **Vendas** | Listagem e detalhes de vendas. |
+| **Cobranças** | Parcelas em aberto e ajuste manual de valor. |
+| **Relatório Mensal** | Consolidado por funcionário: vendido, cobrado e parcelas em atraso. |
+| **Produtos** | Catálogo (móveis e variedades). |
 
-### 🔄 Emissão de Vendas e Carnê com Transação Atômica
-
-A emissão de novas vendas gera um carnê completo de cobrança executado dentro de uma transação atômica única (`prisma.$transaction`), garantindo integridade ACID:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Gerente as Operador / Gerente
-    participant API as Venda Controller
-    participant Zod as Venda Validator
-    participant TX as Prisma $transaction
-    participant DB as PostgreSQL (Supabase)
-
-    Gerente->>API: POST /vendas (clienteId, itens, parcelas, entrada)
-    API->>Zod: Valida regras e itens da venda
-    Zod-->>API: Dados sanitizados
-    API->>TX: Inicia transação atômica isolada
-    TX->>DB: INSERT Venda (clienteId, vendedorId, valorTotal, tipoVenda)
-    TX->>DB: INSERT ItemVenda (lote de produtos vinculados)
-    opt Valor de Entrada > 0
-        TX->>DB: INSERT Pagamento (registro da entrada à vista)
-    end
-    TX->>DB: INSERT Parcela[] (lote de parcelas com rateio exato)
-    TX-->>API: Commit concluído com sucesso
-    API-->>Gerente: 201 Created (Carnê emitido e parcelas indexadas)
-```
-
-### 🔢 Cálculo de Parcelas e Algoritmo de Rateio Centesimal
-
-- O **valor financiado** é determinado por `valorTotal - valorEntrada`.
-- O **valor de entrada** é registrado como um pagamento separado no momento da venda.
-- As parcelas são geradas com **vencimentos mensais** subsequentes a partir da data da venda.
-- Parcelas com **pagamento parcial** ficam com status `PARCIAL` e o saldo restante é registrado.
-
-Em divisões financeiras com dízima periódica (ex: parcelar R$ 100,00 em 3 vezes), o sistema implementa compensação de centavos na primeira parcela para garantir a igualdade contábil estrita `Σ(parcelas) === valorFinanciado`:
-
-```typescript
-// Exemplo do algoritmo de rateio centesimal:
-const valorFinanciado = valorTotal - valorEntrada;
-const valorBaseParcela = Math.floor((valorFinanciado / numParcelas) * 100) / 100;
-const centavosRestantes = Math.round((valorFinanciado - (valorBaseParcela * numParcelas)) * 100) / 100;
-
-// Parcela 1: R$ 33,34 | Parcela 2: R$ 33,33 | Parcela 3: R$ 33,33 | Total = R$ 100,00
-```
-
-#### ⚖️ Proteção contra Erros de Ponto Flutuante (IEEE 754 Float Drift)
-Operações com valores monetários em JavaScript podem introduzir anomalias binárias (ex: `0.1 + 0.2 === 0.30000000000000004`). Para neutralizar esse risco:
-- **Representação Centesimal Inteira em Memória:** Cálculos intermediários multiplicam os valores por `100` (`Math.round(valor * 100)`), operando sobre centavos inteiros antes da divisão final.
-- **Arredondamento Bancário (Half-to-Even):** Em cálculos de amortização e juros, frações de meio centavo são arredondadas para o dígito par mais próximo conforme padrão contábil internacional (norma ISO/IEC/IEEE 754).
-- **Tipagem no Banco:** No PostgreSQL (Supabase), todas as colunas financeiras utilizam tipo `Decimal(10, 2)`, prevenindo perdas de precisão na persistência do Prisma ORM.
-
-### 📈 Cálculo de Juros de Mora Pro-Rata Die e Desconto por Pontualidade
-
-Para operações de cobrança com atraso ou incentivo à liquidação antecipada, o motor de regras financeiras adota convenções padronizadas de cálculo diário pro-rata:
-
-#### 1. Juros de Mora Diários e Multa Contratual
-- **Multa Moratória:** Percentual fixo (ex: 2,00%) aplicado uma única vez sobre o saldo devedor principal após o término do período de carência.
-- **Juros de Mora Diários (*Pro-Rata Die*):** Taxa mensal (ex: 1,00% a.m.) rateada linearmente por base de 30 dias:
-  $$\text{Juros Diários} = \text{Saldo Devedor} \times \left( \frac{\text{Taxa Mensal}}{30} \right) \times \text{Dias de Atraso}$$
-- **Janela de Carência Operacional:** Parâmetro configurável (padrão: 3 dias corridos) que isenta o cliente de multas em caso de feriados ou fins de semana bancários.
-
-#### 2. Desconto Regressivo por Antecipação
-- Quitações integrais realizadas com antecedência superior a 15 dias em relação ao vencimento têm direito a desconto proporcional sobre o encargo da parcela:
-  $$\text{Valor com Desconto} = \text{Valor Nominal} \times \left(1 - \frac{\text{Taxa Desconto Dia} \times \text{Dias Antecipados}}{100}\right)$$
-
-```typescript
-// Implementação segura com precisão centesimal (evitando IEEE 754 float drift):
-export function calcularLiquidacaoComEncargos(
-  valorNominal: number,
-  diasAtraso: number,
-  taxaMultaPct = 2.0,
-  taxaJurosMensalPct = 1.0,
-  diasCarencia = 3
-): { totalLiquidar: number; multa: number; juros: number } {
-  if (diasAtraso <= diasCarencia) {
-    return { totalLiquidar: valorNominal, multa: 0, juros: 0 };
-  }
-
-  const multaCentavos = Math.round((valorNominal * (taxaMultaPct / 100)) * 100);
-  const jurosDia = (taxaJurosMensalPct / 100) / 30;
-  const jurosCentavos = Math.round((valorNominal * jurosDia * diasAtraso) * 100);
-  const totalCentavos = Math.round(valorNominal * 100) + multaCentavos + jurosCentavos;
-
-  return {
-    totalLiquidar: totalCentavos / 100,
-    multa: multaCentavos / 100,
-    juros: jurosCentavos / 100
-  };
-}
-```
-
-### 💰 Lógica de Pagamento e Algoritmo de Amortização em Cascata
-
-Ao registrar um pagamento, o sistema aplica uma máquina de liquidação contábil atômica com distribuição automática de valores excedentes (*Cascade Amortization*):
-
-1. **Quitação Completa:** Se `valorPago === saldoRestanteParcela`, a parcela transiciona para `PAGA`.
-2. **Pagamento Parcial:** Se `0 < valorPago < saldoRestanteParcela`, o status muda para `PARCIAL` e o montante abatido é incrementado em `valorPago`.
-3. **Amortização em Cascata (Excedente):** Se `valorPago > saldoRestanteParcela`, a parcela atual é quitada como `PAGA` e o saldo remanescente (`excedente = valorPago - saldoRestanteParcela`) é distribuído sequencialmente entre as parcelas subsequentes da mesma venda:
-
-```typescript
-// Algoritmo de Amortização em Cascata executado em prisma.$transaction:
-let saldoAmortizar = valorRecebido;
-
-for (const parcela of parcelasPendentesOrdenadas) {
-  if (saldoAmortizar <= 0) break;
-
-  const saldoDevedorParcela = Number(parcela.valor) - Number(parcela.valorPago || 0);
-
-  if (saldoAmortizar >= saldoDevedorParcela) {
-    // Quitação integral da parcela atual
-    await tx.parcela.update({
-      where: { id: parcela.id },
-      data: { status: 'PAGA', valorPago: parcela.valor }
-    });
-    saldoAmortizar -= saldoDevedorParcela;
-  } else {
-    // Amortização parcial da próxima parcela e fim da cascata
-    await tx.parcela.update({
-      where: { id: parcela.id },
-      data: {
-        status: 'PARCIAL',
-        valorPago: Number(parcela.valorPago || 0) + saldoAmortizar
-      }
-    });
-    saldoAmortizar = 0;
-  }
-}
-// Se saldoAmortizar > 0 ao final, o valor é retornado como troco/devolução ao cliente
-```
-
-4. **Concorrência Segura:** Toda a cascata executa dentro de um bloco único `prisma.$transaction`, garantindo que se qualquer atualização falhar, nenhum centavo seja debitado indevidamente.
-
-#### 🔄 Fluxo de Liquidação Atômica de Parcela
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor C as Cobrador Mobile
-    participant API as Parcela Controller
-    participant TX as Prisma $transaction
-    participant DB as PostgreSQL (Supabase)
-
-    C->>API: PATCH /parcelas/:id/pagamento { valor: 150.00 }
-    API->>TX: Inicia transação atômica isolada
-    TX->>DB: SELECT parcela com bloqueio de concorrência
-    DB-->>TX: Estado atual (status, valorTotal, valorPago)
-    alt Parcela já se encontra PAGA
-        TX-->>API: Aborta transação (Rollback imediato)
-        API-->>C: 409 Conflict: Parcela já liquidada
-    else Saldo Pendente Válido
-        TX->>DB: INSERT Pagamento (valor, data, operadorId)
-        alt valor >= saldoRestante (Quitação / Excedente)
-            TX->>DB: UPDATE Parcela SET status = 'PAGA'
-            opt Existe valor excedente
-                TX->>DB: Amortiza sobra na próxima parcela pendente da venda
-            end
-        else Pagamento Parcial
-            TX->>DB: UPDATE Parcela SET status = 'PARCIAL', valorPago += valor
-        end
-        TX->>DB: INSERT Auditoria (usuário, ação, timestamp, saldoAnterior)
-        TX-->>API: Commit concluído com sucesso
-        API-->>C: 200 OK (Parcela atualizada + confirmação)
-    end
-```
-
-### 📊 Ciclo de Vida e Máquina de Estados de Parcelas
-
-Cada parcela emitida transita por estados bem definidos e fiscalizados por regras estritas de integridade contábil:
-
-```mermaid
-stateDiagram-v2
-    [*] --> PENDENTE: Emissão da Venda
-    PENDENTE --> ATRASADA: Data Atual > Data Vencimento
-    PENDENTE --> PARCIAL: Pagamento Parcial (< Valor Total)
-    PENDENTE --> PAGA: Quitação Integral
-    ATRASADA --> PARCIAL: Pagamento Parcial
-    ATRASADA --> PAGA: Quitação Integral (+ Juros/Mora se houver)
-    PARCIAL --> PAGA: Amortização Residual Concluída
-    PAGA --> ESTORNADA: Estorno Contábil Autorizado (Gerente)
-    ESTORNADA --> PENDENTE: Reabertura de Cobrança
-    PENDENTE --> CANCELADA: Venda Desfeita / Devolução de Mercadoria
-    ATRASADA --> CANCELADA: Renegociação Total / Inadimplência Prescrita
-```
-
-| Estado | Significado Contábil | Atores Permitidos | Ação Geradora / Transição |
-| :--- | :--- | :--- | :--- |
-| **`PENDENTE`** | Parcela ativa no prazo legal de vencimento | Sistema / Gerente | Criação da venda e rateio centesimal de carnê |
-| **`ATRASADA`** | Parcela em aberto com data de vencimento expirada | Cron Job Diário | Job matinal de conferência temporal (`dataVencimento < hoje`) |
-| **`PARCIAL`** | Amortização parcial recebida; saldo residual ativo | Cobrador / Gerente | Baixa de valor inferior ao nominal; atualiza `valorPago` |
-| **`PAGA`** | Quitação financeira total realizada | Cobrador / Gerente | Baixa integral com dupla conferência e registro atômico |
-| **`ESTORNADA`** | Liquidação revertida por retificação de lançamento | Apenas Gerente | Reversão atômica com justificativa contábil em auditoria |
-| **`CANCELADA`** | Parcela invalidada por devolução ou renegociação | Apenas Gerente | Cancelamento da venda de origem com descarte de títulos futuros |
-
-### 📅 Atualização Automática de Status
-
-Um job de atualização verifica parcelas `PENDENTE` e `PARCIAL` com `dataVencimento < hoje` e as marca automaticamente como `ATRASADA`, garantindo que o dashboard de inadimplência reflita a realidade em tempo real.
-
-### 🧾 Saldo Devedor do Cliente
-
-O **saldo devedor consolidado** de um cliente é calculado como:
-```
-Saldo = Σ(valor de todas as parcelas PENDENTE, ATRASADA e PARCIAL) - Σ(valorPago das PARCIAL)
-```
-
-### 🔒 Regra de Dupla Digitação (Anti-Erro Mobile)
-
-Na interface mobile, o cobrador precisa **confirmar o valor digitado duas vezes** antes de registrar um pagamento — prevenindo lançamentos errados por toque acidental em campo.
-
-### 💳 Pagamento Adiantado pela Ficha do Cliente
-
-Para proporcionar flexibilidade comercial quando o cliente deseja adiantar valores voluntariamente fora da rota diária:
-
-- **Acesso Rápido na Aba Clientes:** O operador pesquisa o cliente pelo nome ou telefone, independentemente de haver parcelas vencendo no dia ou em atraso.
-- **Liquidação por Ordem Cronológica (FIFO):** Caso o cliente pague um valor avulso sem especificar a parcela, o motor financeiro liquida a parcela pendente mais antiga em aberto, abatendo juros futuros se aplicável.
-- **Abatimento no Saldo Devedor Consolidado:** O valor pago reduz imediatamente o saldo devedor do cliente em todas as visões (Painel Desktop do Gerente e Mobile do Cobrador).
-- **Trilha de Auditoria:** O pagamento adiantado recebe tag `ORIGEM: FICHA_CLIENTE_ADIANTAMENTO` com ID do operador, data e hora exatas da transação.
-
-### 🏦 Conciliação Diária de Caixa e Gestão de Sangria
-
-Para garantir a acurácia dos valores físicos arrecadados em campo versus os registros no sistema:
-
-- **Conferência Cega de Fechamento:** No final do expediente, o cobrador apresenta o montante físico arrecadado antes de visualizar o relatório consolidado do sistema, reduzindo desvios operacionais.
-- **Segregação por Meio de Pagamento:**
-  - **Espécie (Dinheiro físico):** Depositado ou repassado diretamente no cofre gerencial mediante termo de entrega assinado.
-  - **Chave Pix / Transferência:** Conciliado automaticamente com o extrato bancário corporativo por conferência de comprovante digital e código autenticador.
-- **Sangria Preventiva de Rota:** Cobradores em rotas de alto volume realizam repasses intermediários ao longo do dia, mitigando risco patrimonial e mantendo o limite operacional de caixa seguro.
-
-```mermaid
-flowchart TD
-    Inicio["🌅 Início da Rota de Cobrança"] --> Arrecadacao["💵 Arrecadação de Parcelas (Espécie & Pix)"]
-    Arrecadacao --> ChecaLimite{"Saldo em Mãos > Limite?"}
-    ChecaLimite -- Sim --> Sangria["🏦 Sangria Preventiva (Repasse Parcial ao Gerente)"]
-    ChecaLimite -- Não --> Continua["🚶 Continuação da Rota"]
-    Sangria --> Continua
-    Continua --> FimRota["🏁 Fim do Expediente de Rua"]
-    FimRota --> ConfCega["📋 Cobrador Informa Total Físico (Conferência Cega)"]
-    ConfCega --> ValidaSistema{"Bate com Relatório do Sistema?"}
-    ValidaSistema -- Sim --> Fechamento["✅ Caixa Homologado & Termo Assinado"]
-    ValidaSistema -- Não --> Auditoria["🔍 Apuração de Divergência com Trilha de Auditoria"]
-    Auditoria --> Fechamento
-```
-
-#### 📐 Protocolo Matemático de Fechamento e Tolerância Contábil
-
-No momento da prestação de contas, a rotina de conferência cega aplica a seguinte equação de conciliação:
-
-$$\text{Divergência} = \text{TotalFísicoDeclarado} - \left( \sum \text{Pagamentos}_{\text{Espécie}} - \sum \text{Sangrias}_{\text{Efetuadas}} \right)$$
-
-| Resultado da Apuração | Classificação Contábil | Ação no Sistema | Trilha de Auditoria |
-| :--- | :--- | :--- | :--- |
-| **`Divergência === 0`** | ✅ Caixa Exato | Homologação instantânea do fechamento | Registro de encerramento padrão |
-| **`Divergência > 0`** | ⚠️ Sobra de Caixa | Registro de crédito avulso para conferência | Evento `SOBRA_CAIXA` com valor apurado |
-| **`Divergência < 0`** | 🚨 Falta de Caixa | Notificação à gerência e bloqueio de novo turno | Evento `FALTA_CAIXA` com justificativa obrigatória |
-
-#### 🛡️ Política de Limites de Sangria Preventiva por Rota
-
-Para minimizar a exposição a assaltos e perda patrimonial durante o deslocamento em campo:
-
-| Faixa Operacional | Limite Máximo em Mãos | Frequência de Sangria | Procedimento de Repasse |
-| :--- | :---: | :---: | :--- |
-| **Rota de Baixo Volume** | Até R$ 1.500,00 | Fechamento único | Entrega direta no caixa físico no final do expediente |
-| **Rota de Médio Volume** | R$ 1.500,00 a R$ 3.000,00 | 1 Sangria intermediária | Ponto de encontro homologado ou depósito em agência |
-| **Rota de Alta Densidade**| Acima de R$ 3.000,00 | Sangria a cada R$ 2.000,00 | Alerta no app mobile solicitando descarrego imediato |
+### 📲 PWA
+O app tem `manifest.json` e Service Worker. Pode ser instalado na tela inicial do celular e exibe um banner de instalação.
 
 ---
 
+## 📐 Regras de negócio
 
-### 🔄 Fluxo de Estorno Contábil e Protocolo de Retificação
+### Venda e carnê
+- A venda aceita **vários itens**, com cálculo automático de subtotal e total.
+- **Entrada** opcional (deve ser menor que o total). Só o valor financiado é parcelado.
+- **Periodicidade:** `MENSAL`, `QUINZENAL` (2 parcelas por mês) ou `SEMANAL` (4 por mês). O número de parcelas é multiplicado conforme a periodicidade.
+- O valor é dividido com arredondamento para baixo, e **o resto em centavos vai para a última parcela**, para o total bater exatamente.
+- Venda, itens e parcelas são criados em uma **única transação** (`prisma.$transaction`): ou grava tudo, ou nada.
 
-Em situações excepcionais onde um pagamento foi registrado incorretamente (ex: digitação de valor divergente ou baixa na ficha errada), a retificação segue um protocolo contábil blindado:
+### Parcelas
+```
+PENDENTE ──(pagamento parcial)──► PARCIAL ──(quita)──► PAGA
+    │                                 │
+    └──────(vencimento passou)────────┴──► ATRASADA ──(pagamento)──► PARCIAL / PAGA
+```
+- Parcelas vencidas são marcadas como `ATRASADA` automaticamente ao listar parcelas e gerar relatórios.
+- **Pagamento parcial** mantém a parcela como `PARCIAL` com o saldo restante.
+- **Excedente:** se o cliente paga mais que a parcela, o valor extra é abatido nas **próximas parcelas em aberto**, na ordem.
+- **Alterar vencimento:** recalcula o status (uma parcela atrasada volta a `PENDENTE` se a nova data for futura). Não é permitido em parcela já paga.
+- **Ajuste manual de valor:** só o Gerente.
+- Operações sensíveis em parcelas gravam um registro na tabela de **auditoria**.
 
-1. **Restrição por Privilégio:** Apenas usuários com perfil `GERENTE` possuem autorização para disparar o estorno. Cobradores de rua não possuem visibilidade nem rota para exclusão de pagamentos.
-2. **Reversão Atômica de Estado:** A operação reverte o status da parcela de `PAGA` para `PENDENTE` (ou `PARCIAL`, recalculando o saldo pago) e reajusta o saldo devedor consolidado do cliente de forma indivisível.
-3. **Imutabilidade e Registro de Auditoria:** O registro original de pagamento é mantido com anotação de cancelamento e uma entrada imutável de evento `ESTORNO_CONTABIL` é gravada na tabela `Auditoria`, exigindo justificativa textual obrigatória.
-4. **Impacto na Prestação de Contas:** O valor estornado é automaticamente deduzido da prestação de contas do cobrador no dia de referência, evitando divergência no fechamento físico de caixa.
+### Permissões
+
+| Ação | Gerente | Cobrador |
+| :--- | :---: | :---: |
+| Login, clientes, vendas, baixa de parcelas, alterar vencimento, produtos | ✅ | ✅ |
+| Prestação de contas do próprio dia | ✅ | ✅ |
+| Ajuste manual de parcela | ✅ | ❌ |
+| Listar e criar usuários | ✅ | ❌ |
+| Relatório mensal | ✅ | ❌ |
+| Prestação de contas de outros funcionários | ✅ | ❌ |
 
 ---
 
-## 🗂️ Estrutura do Projeto
+## 🧰 Stack
+
+| Camada | Tecnologias |
+| :--- | :--- |
+| **Frontend** | React 19, TypeScript, Vite 8, lucide-react, CSS próprio, PWA (Service Worker) |
+| **Backend** | Node.js, Express 5, TypeScript |
+| **Banco** | PostgreSQL (Supabase) via Prisma ORM 6 |
+| **Segurança** | JWT (cookie httpOnly), bcryptjs, Zod 4, Helmet, CORS, express-rate-limit |
+| **Infra** | Vercel (frontend + função serverless da API), Docker / Docker Compose + Nginx (alternativa) |
+| **Qualidade** | TypeScript `strict`, oxlint (frontend) |
+
+---
+
+## 🏗️ Arquitetura
+
+```mermaid
+flowchart LR
+    subgraph Cliente
+        M["📱 Cobrador (PWA)"]
+        D["💻 Gerente (Desktop)"]
+    end
+    subgraph Vercel
+        FE["Frontend React (Vite)"]
+        API["API Express (função serverless)"]
+    end
+    DB[("PostgreSQL<br/>Supabase")]
+
+    M --> FE
+    D --> FE
+    FE -- "fetch + cookie/JWT" --> API
+    API -- "Prisma" --> DB
+```
+
+O backend é dividido em `app.ts` (configura o Express) e `server.ts` (sobe o servidor HTTP). Isso permite rodar o mesmo código como função serverless na Vercel (`api/index.ts`) ou como container Docker.
+
+Fluxo de uma requisição: `rota → authMiddleware → roleMiddleware (se exigido) → validateBody (Zod) → controller → Prisma → resposta`.
+
+---
+
+## 🗂️ Estrutura do repositório
 
 ```
 CrediarioSysten/
-├── 📁 backend/                     # API REST (Node.js + Express + TypeScript)
-│   ├── 📁 prisma/
-│   │   └── schema.prisma           # Definição do banco de dados
-│   └── 📁 src/
-│       ├── app.ts                  # Configuração do Express (middlewares, rotas)
-│       ├── server.ts               # Servidor HTTP (modo local/Docker)
-│       ├── 📁 controllers/         # Lógica de negócio por domínio
-│       │   ├── authController.ts
-│       │   ├── clienteController.ts
-│       │   ├── vendaController.ts
-│       │   ├── parcelaController.ts
-│       │   ├── pagamentoController.ts
-│       │   ├── produtoController.ts
-│       │   ├── userController.ts
-│       │   ├── relatorioController.ts
-│       │   └── prestacaoContasController.ts
-│       ├── 📁 routes/              # Mapeamento de endpoints HTTP
-│       ├── 📁 middlewares/         # Auth, Role e tratamento de erros
-│       ├── 📁 validators/          # Schemas Zod de validação
-│       ├── 📁 lib/                 # Cliente Prisma singleton
-│       ├── 📁 config/              # Variáveis de ambiente e configurações
-│       └── 📁 scripts/             # Scripts de migração e backfill
-│
-├── 📁 frontend/                    # SPA React 19 + Vite + TypeScript
-│   └── 📁 src/
-│       ├── App.tsx                 # Roteamento principal e detecção de plataforma
-│       ├── 📁 components/
-│       │   ├── 📁 desktop/         # Painel gerencial (Dashboard, Relatórios, etc.)
-│       │   ├── 📁 mobile/          # Interface do cobrador de rua
-│       │   ├── 📁 auth/            # Tela de login
-│       │   ├── 📁 common/          # Componentes compartilhados
-│       │   └── 📁 layout/          # Estrutura de layout
-│       ├── 📁 services/            # Funções de chamada à API (fetch)
-│       ├── 📁 hooks/               # Custom hooks React
-│       ├── 📁 context/             # Context API (autenticação global)
-│       └── 📁 types/               # Tipos TypeScript compartilhados
-│
-├── 📁 api/                         # Entry point Serverless (Vercel)
-├── 📁 scripts/                     # Scripts auxiliares de infraestrutura
-├── docker-compose.yml              # Orquestração dos containers
-├── vercel.json                     # Configuração de rotas da Vercel
-└── package.json                    # Scripts raiz (dev, build, prisma)
+├── api/
+│   └── index.ts                # Entrada serverless da Vercel (reexporta o app Express)
+├── backend/
+│   ├── prisma/                 # schema.prisma e migrations
+│   └── src/
+│       ├── app.ts / server.ts  # Express (app) e servidor HTTP
+│       ├── controllers/        # auth, cliente, venda, parcela, pagamento, produto,
+│       │                       # user, relatorio e prestacaoContas
+│       ├── routes/             # Mapeamento dos endpoints
+│       ├── middlewares/        # auth, role, validate (Zod) e rateLimiter
+│       ├── validators/         # Schemas Zod
+│       ├── config/ lib/        # JWT e cliente Prisma
+│       └── scripts/            # Seeds, migrações pontuais e utilitários
+├── frontend/
+│   ├── public/                 # manifest.json, sw.js e ícones (PWA)
+│   └── src/
+│       ├── components/         # auth, desktop, mobile, layout e common
+│       ├── context/ hooks/     # AuthContext e useAuth
+│       └── services/api.ts     # Todas as chamadas à API
+├── scripts/                    # fazer-backup.ps1 e restaurar-backup.ps1
+├── docker-compose.yml
+├── vercel.json                 # Rewrites das rotas da API
+└── package.json                # Scripts da raiz
 ```
 
 ---
 
-## 🛠️ Como Executar Localmente
+## 🛠️ Rodando localmente
 
-
-### 🖥️ Pré-requisitos por Sistema Operacional
-
-Antes de iniciar, certifique-se de possuir os seguintes requisitos instalados de acordo com o seu sistema operacional:
-
-- **Node.js:** Versão 20.x LTS ou 22.x LTS ([Download](https://nodejs.org/))
-- **Git:** Versão 2.40+ ([Download](https://git-scm.com/))
-- **Docker & Docker Compose (Opcional):** Para execução em containers ([Download](https://www.docker.com/))
-
-<details>
-<summary><strong>Instruções para Windows (PowerShell)</strong></summary>
-
-```powershell
-# Verificar versões instaladas
-node -v
-npm -v
-git --version
-
-# Clonar e acessar diretório
-git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
-Set-Location CrediarioSysten
-git checkout develop
-```
-</details>
-
-<details>
-<summary><strong>Instruções para Linux (Ubuntu / Debian / Arch)</strong></summary>
+**Pré-requisitos:** Node.js 20+, npm e um banco PostgreSQL (pode ser um projeto Supabase gratuito).
 
 ```bash
-# Atualizar repositórios e instalar dependências essenciais
-sudo apt update && sudo apt install -y curl git build-essential
-
-# Instalar Node.js via NVM (recomendado)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source ~/.bashrc
-nvm install 20
-nvm use 20
-
-# Clonar repositório
+# 1. Clonar e entrar na branch de desenvolvimento
 git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
 cd CrediarioSysten
 git checkout develop
-```
-</details>
 
-<details>
-<summary><strong>Instruções para macOS (Homebrew / Zsh)</strong></summary>
-
-```zsh
-# Instalação via Homebrew
-brew install node git
-
-# Clonar repositório
-git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
-cd CrediarioSysten
-git checkout develop
-```
-</details>
-
----
-
-### 1. Clonar o repositório
-```bash
-git clone https://github.com/vitoraugustonb-cod/CrediarioSysten.git
-cd CrediarioSysten
-git checkout develop
-```
-
-### 2. Configurar o `.env` do Backend
-Crie o arquivo `backend/.env` com base no `backend/.env.example`:
-```env
-PORT=3300
-DATABASE_URL="postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres"
-JWT_SECRET="sua_chave_secreta_jwt"
-```
-
-### 3. Instalar dependências e sincronizar banco
-```bash
-# Na raiz do projeto:
+# 2. Dependências
 npm --prefix backend install
 npm --prefix frontend install
+
+# 3. Variáveis de ambiente do backend
+cp backend/.env.example backend/.env      # Windows: copy backend\.env.example backend\.env
+# edite backend/.env com DATABASE_URL, DIRECT_URL e JWT_SECRET
+
+# 4. Banco: gerar cliente Prisma e aplicar o schema
 npm run prisma:generate
+npm run prisma:migrate                    # dev  (ou: npm run prisma:push)
+
+# 5. Criar o primeiro usuário Gerente (a senha vem de uma variável, nunca do código)
+# Windows (PowerShell):  $env:SENHA_INICIAL='sua-senha-forte'; npm run seed
+# Linux / macOS:         SENHA_INICIAL='sua-senha-forte' npm run seed
+npm run seed
+
+# 6. Subir os dois lados (em terminais separados)
+npm run dev:backend      # API em http://localhost:3300
+npm run dev:frontend     # App em http://localhost:5173
 ```
 
-### 4. Iniciar servidores de desenvolvimento
-```bash
-# Backend (Porta 3300):
-npm run dev:backend
+O Vite já faz **proxy** das rotas da API para `localhost:3300`, então o frontend não precisa de `VITE_API_URL` no desenvolvimento.
 
-# Frontend (Porta 5173):
-npm run dev:frontend
-```
+> 🔑 Nenhuma senha fica escrita no código. Para **trocar a senha de um usuário existente** (altera só essa linha, sem apagar nada):
+>
+> ```powershell
+> $env:EMAIL_USUARIO='usuario@exemplo.com'; $env:NOVA_SENHA='nova-senha-forte'; npm --prefix backend run trocar-senha
+> ```
 
-### 5. Comandos de Manutenção do Prisma e Dados de Teste
-
-Para gerenciar o banco de dados e popular dados fictícios para homologação:
-
-```bash
-# Sincronizar o schema com o banco sem criar arquivos de migração
-npm --prefix backend run prisma db push
-
-# Abrir o Prisma Studio para inspeção visual dos registros (Porta 5555)
-npm --prefix backend run prisma studio
-
-# Gerar novamente os tipos do Prisma Client após alterações no schema
-npm run prisma:generate
-
-# Popular banco com dados fictícios de teste (semeadura de clientes e vendas)
-npm --prefix backend run seed
-```
-
-#### 🛡️ Estratégia de Migrações em Produção com Zero Downtime & Advisory Locks
-
-Para garantir a integridade estrutural do banco em ambientes distribuídos:
-
-1. **Separação de Ambientes (`db push` vs `migrate deploy`):**
-   - Em ambiente local de desenvolvimento, utiliza-se `prisma db push` para prototipação rápida.
-   - Na esteira de CI/CD e em produção, utiliza-se **exclusivamente** `prisma migrate deploy`, aplicando scripts SQL versionados de forma determinística.
-2. **Roteamento Obrigatório via Conexão Direta (`DIRECT_URL`):**
-   - Comandos de migração executam instruções DDL e demandam travas exclusivas de sessão (*Advisory Locks* do PostgreSQL).
-   - O PgBouncer (porta `6543` no Supabase) opera em modo de transação e descarta o estado da sessão, o que gera erro ao tentar adquirir advisory locks.
-   - Portanto, o Prisma CLI deve ser configurado com `directUrl = env("DIRECT_URL")` apontando para a porta direta `5432` do PostgreSQL.
-3. **Controle de Concorrência via Tabela `_prisma_migrations`:**
-   - O Prisma registra cada migração aplicada com checksum SHA-256 e timestamp na tabela interna `_prisma_migrations`.
-   - Se duas instâncias de deploy tentarem executar migrações simultaneamente, a trava transacional bloqueia a segunda execução, prevenindo duplicações ou corrupção de schema.
-
-### 6. Automação de Verificações com Pre-commit Hooks
-
-Para garantir que nenhum commit chegue quebrado à branch `develop`, recomenda-se rodar as validações estáticas antes de versionar:
+### Docker (alternativa)
 
 ```bash
-# Executar checagem de tipos estáticos sem gerar arquivos
-npm --prefix backend run tsc -- --noEmit
-npm --prefix frontend run tsc -- --noEmit
-
-# Validar integridade dos modelos e relações do Prisma
-npx --prefix backend prisma validate
+docker compose up --build
 ```
-
-### 🔧 Troubleshooting (Resolução de Problemas Comuns)
-
-| Sintoma / Erro | Causa Mais Comum | Solução Recomendada |
-| :--- | :--- | :--- |
-| `prepared statement does not exist` | Conexão via PgBouncer sem parâmetro | Adicione `?pgbouncer=true` ao final do `DATABASE_URL` |
-| `P1001: Can't reach database server` | Senha com caracteres especiais ou IP | Codifique caracteres da senha em URL encode ou use `DIRECT_URL` |
-| `CORS Error: Missing Allow Origin` | Frontend rodando em porta diferente do .env | Verifique se `FRONTEND_URL=http://localhost:5173` está no `backend/.env` |
-| `Cookie não persiste após login local` | Flag `secure: true` exigindo HTTPS | Configure `NODE_ENV=development` no `.env` para permitir cookies HTTP locais |
-| `prisma db push` trava ou falha | Tentativa de migrar via Pooler (6543) | Certifique-se de preencher a variável `DIRECT_URL` apontando para a porta 5432 |
-| `Bluetooth Device NotFoundError` | Mini-impressora desligada ou sem pareamento | Ligue a impressora térmica, ative o Bluetooth do Android e autorize a permissão no Chrome |
-| `429 Too Many Requests (Login)` | Excedido limite de 5 tentativas em 15min | Aguarde a janela do rate limiter expirar ou reinicie a sessão a partir de outro IP seguro |
-| `NetworkError / Failed to fetch` | Queda momentânea de conexão 3G/4G na rua | O app exibe alerta no topo da tela preservando os dados digitados para reenvio seguro |
-| `Vercel Cold Start Delay (> 3s)` | Inicialização a frio da função Serverless | Ocorre apenas na 1ª requisição após ociosidade; chamadas subsequentes respondem em < 150ms |
-| `PrismaClientInitializationError` | Conexões esgotadas no pooler do Supabase | Reduza o `connection_limit` na connection string ou ative o PgBouncer Transaction Mode |
-| `Prisma engine not compatible (libssl)` | Discrepância de versão OpenSSL (Linux/Alpine/WSL2) | Defina `binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]` no schema |
-| `Port 3300 already in use (EADDRINUSE)` | Processo Node anterior órfão em segundo plano | No Windows: `Stop-Process -Id (Get-NetTCPConnection -LocalPort 3300).OwningProcess -Force` |
-
-#### ⚡ Procedimento de Mitigação de Cold Starts e Pool do Prisma
-
-1. **Keep-Alive Automatizado (Aquecimento):**
-   - Para manter a função serverless ativa durante o horário comercial de cobrança (08h às 18h), pode-se configurar um cron job externo gratuito (ex: Cron-Job.org ou GitHub Actions) fazendo `GET /health` a cada 10 minutos.
-2. **Flags Obrigatórias na Conexão do PgBouncer:**
-   - Para evitar conflito de *prepared statements* em instâncias serverless temporárias, certifique-se de usar a flag `pgbouncer=true` e timeout adequado:
-   ```env
-   DATABASE_URL="postgres://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
-   ```
-
-#### 🔍 Diagnóstico de Timeouts no Prisma Client (Códigos P1001 e P2024)
-
-Caso ocorram interrupções intermitentes de acesso ao banco em horários de pico operacional:
-
-1. **Diferenciação dos Códigos de Falha:**
-   - **`P1001 (Connection Refused / Unreachable)`:** O servidor backend não consegue abrir o socket TCP com o Supabase. Costuma ser causado por bloqueio de firewall corporativo na porta 6543, erro de DNS ou queda no host do banco.
-   - **`P2024 (Connection Pool Timeout)`:** O pool de conexões do Prisma Client esgotou. Todas as conexões alocadas estão ocupadas por queries lentas ou transações sem fechamento adequado (`COMMIT`/`ROLLBACK`).
-2. **Comando de Teste de Conectividade Direta:**
-   ```bash
-   # Teste rápido de abertura de porta via terminal (Linux/macOS):
-   nc -zv aws-0-sa-east-1.pooler.supabase.com 6543
-
-   # Teste equivalente no Windows PowerShell:
-   Test-NetConnection -ComputerName aws-0-sa-east-1.pooler.supabase.com -Port 6543
-   ```
-3. **Calibragem do Parâmetro `pool_timeout`:**
-   Em rotas com geração pesada de relatórios, recomenda-se estender o timeout de fila do Prisma Client no arquivo `.env`:
-   ```env
-   DATABASE_URL="postgresql://...?pgbouncer=true&connection_limit=10&pool_timeout=20"
-   ```
+Backend em `http://localhost:3300` e frontend (Nginx) em `http://localhost`. O backend lê `backend/.env`.
 
 ---
 
-## 🔐 Contas de Acesso Padrão
-
-| Perfil | E-mail | Senha Padrão | Escopo de Acesso |
-| :--- | :--- | :--- | :--- |
-| **Gerente** | `gerente@crediario.com` | `gerente123` | Acesso total administrativo |
-| **Vendedor / Cobrador** | `vendedor@crediario.com` | `vendedor123` | Interface mobile de cobrança de rua |
-
----
-
-## 🌐 Referência da API REST
-
-### Autenticação
-- `POST /login` - Autenticação com rate limiting (5 req/15min) e cookie httpOnly
-- `POST /logout` - Encerramento de sessão e limpeza de cookies
-- `GET /health` - Status operacional do servidor
-
-### Clientes
-- `POST /clientes` - Cadastro de cliente (Validação Zod)
-- `GET /clientes` - Listagem geral de clientes
-- `GET /clientes/:id` - Detalhes do cliente
-- `GET /clientes/:id/saldo` - Saldo devedor consolidado
-- `PATCH /clientes/:id` - Atualização cadastral
-
-### Vendas
-- `POST /vendas` - Emissão de venda e carnê de parcelas (Transação Atômica)
-- `GET /vendas` - Listagem de vendas
-- `GET /vendas/:id` - Detalhes da venda e itens
-
-### Parcelas & Cobrança
-- `GET /parcelas` - Listagem de parcelas ativas com filtros
-- `GET /parcelas/historico` - Histórico de parcelas quitadas
-- `PATCH /parcelas/:id/pagamento` - Baixa de pagamento com concorrência segura
-- `PATCH /parcelas/:id/ajuste` - Ajuste de valor (Apenas Gerente)
-- `PATCH /parcelas/:id/data-vencimento` - Prorrogação de vencimento
-
-### Produtos
-- `POST /produtos` - Cadastro de produto no catálogo (Apenas Gerente)
-- `GET /produtos` - Listagem do catálogo com filtro por categoria
-- `GET /produtos/:id` - Detalhes do produto
-- `PATCH /produtos/:id` - Atualização de nome, preço ou categoria (Apenas Gerente)
-
-### Usuários
-- `GET /usuarios` - Listagem de operadores cadastrados (Apenas Gerente)
-- `POST /usuarios` - Criação de novo operador (Apenas Gerente)
-- `PATCH /usuarios/:id/status` - Ativação/desativação instantânea de conta (Apenas Gerente)
-
-### Dashboard & Relatórios
-- `GET /relatorios/dashboard` - KPIs financeiros em tempo real (faturamento, inadimplência, projeções)
-- `GET /relatorios/mensal` - Relatório consolidado por mês com totais e médias
-- `GET /pagamentos` - Histórico completo de pagamentos recebidos
-
-### Prestação de Contas
-- `GET /prestacao-contas` - Resumo diário de arrecadação por cobrador (Apenas Gerente)
-- `GET /prestacao-contas/pessoal` - Resumo do próprio cobrador no dia atual
-
-### 📑 Paginação Baseada em Cursor (Cursor-Based Pagination)
-
-Para otimizar o tempo de resposta em tabelas com milhares de registros e evitar os gargalos de desempenho da paginação tradicional por `OFFSET` (*scanning* linear $O(N)$ no PostgreSQL), as rotas `/clientes`, `/parcelas` e `/pagamentos` suportam navegação baseada em cursor estável:
-
-| Parâmetro Query | Tipo | Padrão | Descrição Técnica |
-| :--- | :---: | :---: | :--- |
-| **`cursor`** | `number` / `string` | `null` | Identificador único (ID) do último registro recebido no lote anterior. |
-| **`take`** | `number` | `20` | Quantidade de registros solicitados por página (mínimo: 1, máximo: 100). |
-| **`orderBy`** | `string` | `id` | Coluna indexada de ordenação determinística (`id`, `dataVencimento`, `createdAt`). |
-| **`direction`** | `string` | `desc` | Sentido da navegação sequencial (`asc` para ascendente, `desc` para descendente). |
-
-#### 📨 Headers de Controle de Paginação na Resposta HTTP
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-X-Cursor-Next: 1042
-X-Has-More: true
-X-Page-Size: 20
-X-Total-Count: 3840
-```
-
-- **Resiliência a Inserções Concorrentes:** Como a busca se apoia em `WHERE id < :cursor ORDER BY id DESC LIMIT :take`, novas vendas ou clientes cadastrados em tempo real não causam registros repetidos nem omissão de itens na rolagem do cobrador.
-
-### 📦 Exemplos de Payloads (Request & Response)
-
-<details>
-<summary><strong>POST /login — Autenticação de Operador</strong></summary>
-
-**Request Body:**
-```json
-{
-  "email": "gerente@crediario.com",
-  "senha": "suasenhaforte"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "usuario": {
-    "id": 1,
-    "nome": "Administrador Geral",
-    "email": "gerente@crediario.com",
-    "perfil": "GERENTE"
-  },
-  "message": "Autenticado com sucesso"
-}
-```
-> O token JWT é transmitido de forma transparente via header `Set-Cookie: token=...; HttpOnly; Secure; SameSite=Lax`.
-</details>
-
-<details>
-<summary><strong>POST /vendas — Emissão de Venda e Carnê Automático</strong></summary>
-
-**Request Body:**
-```json
-{
-  "clienteId": 4,
-  "tipoVenda": "MOVEIS",
-  "valorEntrada": 100.00,
-  "numParcelas": 6,
-  "itens": [
-    { "produtoId": 2, "quantidade": 1, "precoUnitario": 700.00 }
-  ]
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "id": 12,
-  "clienteId": 4,
-  "valorTotal": 700.00,
-  "valorEntrada": 100.00,
-  "numParcelas": 6,
-  "parcelas": [
-    { "numero": 1, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-04-15T00:00:00.000Z" },
-    { "numero": 2, "valor": 100.00, "status": "PENDENTE", "dataVencimento": "2026-05-15T00:00:00.000Z" }
-  ]
-}
-```
-</details>
-
-<details>
-<summary><strong>PATCH /parcelas/:id/pagamento — Baixa com Dupla Conferência</strong></summary>
-
-**Request Body:**
-```json
-{
-  "valorPago": 100.00,
-  "confirmacaoValor": 100.00
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "sucesso": true,
-  "parcela": {
-    "id": 35,
-    "numero": 1,
-    "status": "PAGA",
-    "valor": 100.00,
-    "valorPago": 100.00
-  },
-  "excedenteAmortizado": 0.00,
-  "recibo": {
-    "codigoAutenticacao": "AUTH-7894-B6",
-    "dataPagamento": "2026-03-15T14:32:10.000Z",
-    "operador": "João Silva (Cobrador)"
-  }
-}
-```
-</details>
-
-### 📨 Headers HTTP Globais e Convenção de Envelope REST
-
-Todas as requisições enviadas ao backend devem seguir os cabeçalhos padronizados:
-
-| Header HTTP | Valor / Formato | Obrigatório | Descrição |
-| :--- | :--- | :---: | :--- |
-| **`Content-Type`** | `application/json` | ✅ Em POST/PATCH | Indica que o payload do corpo está serializado em JSON. |
-| **`Accept`** | `application/json` | ✅ | Especifica que o cliente espera a resposta em formato JSON. |
-| **`Cookie`** | `token=<jwt>` | Automático | Enviado nativamente pelo navegador em requisições autenticadas (`credentials: 'include'`). |
-| **`X-Requested-With`** | `XMLHttpRequest` | ⚠️ Opcional | Auxilia na mitigação de requisições forjadas entre sites (CSRF). |
-
-### 🛡️ Catálogo de Schemas Zod de Validação de Entrada
-
-A integridade das entidades é garantida na camada de entrada através de schemas estritos com validação em whitelist (`z.object({...}).strict()`), bloqueando injeção de parâmetros espúrios e sanitizando tipos primitivos:
-
-| Schema Zod | Entidade / Rota | Regras Principais de Validação | Tratamento de Violação |
-| :--- | :--- | :--- | :--- |
-| **`clienteSchema`** | `POST /clientes`, `PATCH /clientes/:id` | `nome` (3 a 100 caracteres, trim), `telefone` (regex `^\(\d{2}\)\s\d{4,5}-\d{4}$`), `referencias` (opcional, max 255 chars). | `400 Bad Request` com lista de campos |
-| **`vendaSchema`** | `POST /vendas` | `clienteId` (int > 0), `tipoVenda` (Enum `MOVEIS`, `ELETRO`, etc.), `valorEntrada` (número >= 0 com 2 decimais), `numParcelas` (int 1 a 36), `itens` (array min 1). | `400 Bad Request` (`FINANCIAL_VALIDATION_ERROR`) |
-| **`pagamentoSchema`** | `PATCH /parcelas/:id/pagamento` | `valorPago` (float > 0), `confirmacaoValor` (refine: `confirmacaoValor === valorPago` para dupla digitação). | `400 Bad Request` (`DUPLA_DIGITACAO_DIVERGENTE`) |
-| **`loginSchema`** | `POST /login` | `email` (formato RFC 5322, lowercase), `senha` (string min 6 chars sem espaços em branco no início/fim). | `401 Unauthorized` (`AUTH_INVALID_CREDENTIALS`) |
-| **`ajusteParcelaSchema`** | `PATCH /parcelas/:id/ajuste` | `novoValor` (float > 0), `motivo` (string min 10 e max 500 chars para trilha de auditoria contábil). | `400 Bad Request` (Justificativa obrigatória) |
-| **`prorrogarSchema`** | `PATCH /parcelas/:id/data-vencimento`| `novaDataVencimento` (ISO 8601 > data atual), `motivo` (min 10 chars). | `400 Bad Request` (Data deve ser futura) |
-| **`produtoSchema`** | `POST /produtos`, `PATCH /produtos/:id` | `nome` (min 2 chars), `preco` (float > 0), `categoria` (Enum `CategoriaProduto`). | `400 Bad Request` (Preço e categoria válidos) |
-| **`usuarioSchema`** | `POST /usuarios` | `nome` (min 3 chars), `email` (único, formato email), `senha` (min 6), `perfil` (`GERENTE` ou `VENDEDOR_COBRADOR`). | `400 Bad Request` / `409 Conflict` (P2002) |
-
-```typescript
-// Exemplo de schema estrito com dupla digitação anti-erro:
-export const pagamentoSchema = z.object({
-  valorPago: z.number().positive('O valor deve ser maior que zero'),
-  confirmacaoValor: z.number().positive('A confirmação deve ser maior que zero')
-}).strict().refine((data) => data.valorPago === data.confirmacaoValor, {
-  message: 'O valor digitado e a confirmação devem ser rigorosamente idênticos',
-  path: ['confirmacaoValor']
-});
-```
-
-### ⚠️ Padronização de Códigos de Status HTTP & Respostas de Erro
-
-A API utiliza envelopes JSON estruturados inspirados na **RFC 7807 (Problem Details for HTTP APIs)** para respostas de erro, garantindo tratamento unificado no frontend e alertas claros para o usuário:
-
-```mermaid
-flowchart TD
-    Req["🌐 HTTP Request"] --> Controller["⚙️ Controller de Domínio"]
-    Controller -->|Erro de Schema| ZodErr["⚠️ ZodError"]
-    Controller -->|Erro de Banco| PrismaErr["🗄️ Prisma KnownRequestError"]
-    Controller -->|Regra de Negócio| BizErr["🛑 Domain Business Error"]
-    Controller -->|Exceção Inesperada| Uncaught["💥 Unhandled Exception"]
-
-    ZodErr --> ErrorMiddleware["🛡️ Middleware Global de Erros (src/middlewares/errorHandler.ts)"]
-    PrismaErr --> ErrorMiddleware
-    BizErr --> ErrorMiddleware
-    Uncaught --> ErrorMiddleware
-
-    ErrorMiddleware -->|400 Bad Request| RespZod["Envelopado: VALIDATION_ERROR"]
-    ErrorMiddleware -->|409 / 404 / 503| RespPrisma["Mapeado: Códigos Semânticos P2002/P2025/P1001"]
-    ErrorMiddleware -->|400 / 403 / 409| RespBiz["Envelopado: FINANCIAL_VALIDATION_ERROR"]
-    ErrorMiddleware -->|500 Internal Error| Resp500["Envelopado: Oculta Stack em Produção"]
-```
-
-```json
-{
-  "erro": "Saldo informado inválido para quitação",
-  "codigo": "FINANCIAL_VALIDATION_ERROR",
-  "status": 400,
-  "timestamp": "2026-03-29T10:30:00.000Z",
-  "path": "/api/parcelas/35/pagamento",
-  "detalhes": [
-    {
-      "campo": "valorPago",
-      "mensagem": "O valor informado não pode ser negativo ou nulo"
-    }
-  ]
-}
-```
-
-#### 📋 Conformidade com a Especificação RFC 7807 / RFC 9457 (Problem Details)
-| Atributo RFC | Tipo | Equivalente no Crediário System | Descrição |
-| :--- | :---: | :--- | :--- |
-| **`type`** | URI / String | `https://crediario.local/errors/{codigo}` | URI identificadora do tipo de erro ou código textual semântico |
-| **`title`** | String | `erro` | Resumo legível e curto da condição de falha |
-| **`status`** | Integer | `status` | Código de status HTTP gerado pelo servidor |
-| **`detail`** | String | `detalhes[].mensagem` | Explicação humana detalhada sobre a falha |
-| **`instance`** | String | `path` | URI relativa do recurso acessado no momento do erro |
-
-### 📑 Catálogo Estruturado de Códigos de Negócio
-
-Para além dos códigos HTTP tradicionais, a API expõe códigos semânticos padronizados no campo `codigo` do payload JSON de erro:
-
-| Código de Negócio | HTTP | Causa Raiz | Ação Recomendada pelo Frontend |
-| :--- | :---: | :--- | :--- |
-| `AUTH_INVALID_CREDENTIALS` | `401` | E-mail ou senha incorretos informados no login | Exibir alerta de credenciais e focar no campo e-mail |
-| `AUTH_TOKEN_EXPIRED` | `401` | Sessão expirada ou cookie httpOnly ausente | Redirecionar usuário para `/login` com aviso |
-| `USER_ACCOUNT_INACTIVE` | `403` | Operador desativado pela gerência | Bloquear acesso e orientar contato com a gerência |
-| `ACCESS_DENIED_ROLE` | `403` | Cobrador tentando acessar rota de administração | Exibir aviso de privilégio insuficiente |
-| `FINANCIAL_VALIDATION_ERROR` | `400` | Valor negativo, zero ou entrada maior que venda | Destacar campos com validação Zod no formulário |
-| `PARCELA_ALREADY_PAID` | `409` | Parcela já liquidada por outro operador | Atualizar status da parcela e notificar quitação prévia |
-| `CONCURRENCY_CONFLICT` | `409` | Duas baixas disparadas simultaneamente no mesmo registro | Solicitar recarregamento dos dados para checar novo saldo |
-| `CLIENTE_NOT_FOUND` | `404` | Identificador de cliente não localizado no banco | Informar que a ficha do cliente pode ter sido removida |
-| `RATE_LIMIT_EXCEEDED` | `429` | Mais de 5 tentativas erradas de login em 15min | Exibir cronômetro de espera antes de nova tentativa |
-| `VALOR_EXCEDE_SALDO` | `400` | Valor ofertado excede o total remanescente do carnê | Solicitar confirmação ou ajustar para liquidação total |
-| `PARCELA_BLOQUEADA_AUDITORIA` | `423` | Parcela em análise ou processo de conciliação | Aguardar conclusão do processo administrativo |
-| `ESTORNO_NAO_PERMITIDO` | `403` | Tentativa de estorno fora da janela permitida pelo gerente | Notificar necessidade de autorização da gerência |
-| `DATABASE_CONNECTION_ERROR` | `500` | Timeout de conexão com o pooler PostgreSQL | Exibir modal de instabilidade temporária com retry |
-
-### 🗄️ Mapeamento de Exceções do Prisma ORM para Contratos HTTP
-
-O middleware global de erros intercepta instâncias de `PrismaClientKnownRequestError` e as converte deterministicamente em respostas semânticas com código e status adequados:
-
-| Código Prisma | Descrição Nativa da Engine | Código Semântico API | Status HTTP | Causa Típica no Crediário System |
-| :--- | :--- | :--- | :---: | :--- |
-| **`P2002`** | Unique constraint failed | `DUPLICATE_ENTRY` | `409 Conflict` | Tentativa de cadastrar cliente com CPF ou e-mail já existente |
-| **`P2025`** | Record to update not found | `RECORD_NOT_FOUND` | `404 Not Found` | Operador tentando liquidar parcela que foi excluída ou inexistente |
-| **`P2003`** | Foreign key constraint failed | `RELATION_INTEGRITY_ERROR` | `400 Bad Request` | Tentativa de vincular venda a um `clienteId` inexistente |
-| **`P2034`** | Transaction failed due to write conflict | `CONCURRENCY_CONFLICT` | `409 Conflict` | Dois cobradores registraram pagamento da mesma parcela simultaneamente |
-| **`P1001`** | Can't reach database server | `DATABASE_UNAVAILABLE` | `503 Service Unavailable` | Queda momentânea ou manutenção no Supabase PostgreSQL |
-| **`P1008`** | Operations timed out | `DATABASE_TIMEOUT` | `504 Gateway Timeout` | Consulta massiva de relatório excedeu o timeout de 10s no pooler |
-
-```typescript
-// Exemplo de interceptação no middleware global de erros
-if (err instanceof Prisma.PrismaClientKnownRequestError) {
-  switch (err.code) {
-    case 'P2002':
-      return res.status(409).json({ erro: 'Registro duplicado detectado', codigo: 'DUPLICATE_ENTRY' });
-    case 'P2025':
-      return res.status(404).json({ erro: 'Registro não localizado', codigo: 'RECORD_NOT_FOUND' });
-    case 'P2034':
-      return res.status(409).json({ erro: 'Conflito de concorrência na transação', codigo: 'CONCURRENCY_CONFLICT' });
-  }
-}
-```
-
----
-
-| Código HTTP | Significado | Aplicação no Sistema |
-| :---: | :--- | :--- |
-| **`200 OK`** | Sucesso | Leitura de dados, atualizações de parcelas e relatórios |
-| **`201 Created`** | Criado com Sucesso | Nova venda emitida, cliente cadastrado ou produto incluído |
-| **`400 Bad Request`** | Erro de Validação | Falha de validação no schema Zod ou valor contábil inconsistente |
-| **`401 Unauthorized`** | Não Autenticado | Ausência de cookie de sessão, token expirado ou inválido |
-| **`403 Forbidden`** | Acesso Negado | Cobrador tentando acessar endpoints exclusivos da gerência |
-| **`404 Not Found`** | Recurso Inexistente | Cliente, parcela ou produto não localizado pelo identificador |
-| **`409 Conflict`** | Conflito de Estado | Concorrência: tentativa de baixar parcela que já foi liquidada |
-| **`429 Too Many Requests`** | Taxa Excedida | Bloqueio de IP por exceder 5 tentativas de login em 15 minutos |
-| **`500 Internal Error`** | Erro de Servidor | Falha não prevista capturada pelo middleware global de tratamento |
-
----
-
-
-
-
-## 🗃️ Modelo de Dados (Prisma Schema)
-
-O banco de dados é modelado com **Prisma ORM** e possui as seguintes entidades principais:
-
-### 📊 Diagrama Entidade-Relacionamento (ERD)
-
-O diagrama abaixo ilustra a modelagem relacional completa do banco de dados no PostgreSQL (Supabase), demonstrando cardinalidades, chaves e trilha de auditoria:
-
-```mermaid
-erDiagram
-    USUARIO {
-        int id PK
-        string nome
-        string email UK
-        string senha
-        PerfilUsuario perfil
-        boolean ativo
-        datetime criadoEm
-    }
-
-    CLIENTE {
-        int id PK
-        string nome
-        string telefone
-        string referencias
-        datetime criadoEm
-    }
-
-    PRODUTO {
-        int id PK
-        string nome
-        decimal preco
-        CategoriaProduto categoria
-        datetime criadoEm
-    }
-
-    VENDA {
-        int id PK
-        int clienteId FK
-        int vendedorId FK
-        decimal valorTotal
-        decimal valorEntrada
-        int numParcelas
-        TipoVenda tipoVenda
-        datetime dataVenda
-    }
-
-    ITEM_VENDA {
-        int id PK
-        int vendaId FK
-        int produtoId FK
-        int quantidade
-        decimal precoUnitario
-    }
-
-    PARCELA {
-        int id PK
-        int vendaId FK
-        int numero
-        decimal valor
-        decimal valorPago
-        date dataVencimento
-        StatusParcela status
-        datetime criadoEm
-    }
-
-    PAGAMENTO {
-        int id PK
-        int parcelaId FK
-        int vendaId FK
-        int operadorId FK
-        decimal valor
-        datetime dataPagamento
-    }
-
-    AUDITORIA {
-        int id PK
-        int parcelaId FK
-        int usuarioId FK
-        string acao
-        string dadosAnteriores
-        string dadosNovos
-        datetime timestamp
-    }
-
-    USUARIO ||--o{ VENDA : "emite"
-    USUARIO ||--o{ PAGAMENTO : "recebe"
-    USUARIO ||--o{ AUDITORIA : "registra"
-    CLIENTE ||--o{ VENDA : "compra"
-    VENDA ||--|{ ITEM_VENDA : "possui"
-    PRODUTO ||--o{ ITEM_VENDA : "compoe"
-    VENDA ||--|{ PARCELA : "gera carnet"
-    VENDA ||--o{ PAGAMENTO : "recebe amortizacoes"
-    PARCELA ||--o{ PAGAMENTO : "liquidada por"
-    PARCELA ||--o{ AUDITORIA : "possui trilha"
-```
-
-### Entidades e Relacionamentos
-
-```
-Usuario ──────────────┐
-  ├── id, nome, email │  (GERENTE | VENDEDOR_COBRADOR)
-  ├── perfil (enum)   │
-  └── ativo (bool)    │
-                      │ 1:N
-Cliente ──────────────┤
-  ├── id, nome        │
-  ├── telefone        │
-  └── referencias     │
-                      │
-Produto ──────────────┤
-  ├── id, nome        │
-  ├── preco (Decimal) │
-  └── categoria (enum)│  (MOVEIS | VARIEDADES)
-                      │
-Venda ────────────────┤
-  ├── clienteId       │
-  ├── vendedorId      │
-  ├── valorTotal      │
-  ├── valorEntrada    │
-  ├── numParcelas     │
-  └── tipoVenda (enum)│
-        │
-        ├── ItemVenda[] (produtos da venda)
-        ├── Parcela[]  (carnê de cobrança)
-        └── Pagamento[] (histórico financeiro)
-
-Parcela ──────────────┤
-  ├── numero, valor   │
-  ├── valorPago       │
-  ├── dataVencimento  │
-  └── status (enum)   │  (PENDENTE | PAGA | ATRASADA | PARCIAL)
-        └── Auditoria[] (rastreio de alterações)
-```
-
-### Enums do Schema
-
-| Enum | Valores |
-| :--- | :--- |
-| `PerfilUsuario` | `GERENTE`, `VENDEDOR_COBRADOR` |
-| `StatusParcela` | `PENDENTE`, `PAGA`, `ATRASADA`, `PARCIAL` |
-| `CategoriaProduto` | `MOVEIS`, `VARIEDADES` |
-| `TipoVenda` | `MOVEIS`, `VARIEDADES` |
-
-### 📜 Trilha de Auditoria e Imutabilidade Contábil
-
-Para prevenir fraudes, divergências de caixa e garantir rastreabilidade jurídica completa:
-
-- **Arquitetura Append-Only:** A tabela `Auditoria` opera em modo estritamente aditivo. Nenhuma operação via API possui permissão de `UPDATE` ou `DELETE` sobre registros de auditoria.
-- **Eventos Monitorados:**
-  - `BAIXA_PARCELA`: Quitação regular pelo cobrador na rota com valor e timestamp.
-  - `AMORTIZACAO_EXCEDENTE`: Aplicação automática de saldo remanescente na parcela seguinte.
-  - `AJUSTE_VALOR_GERENCIA`: Alteração excepcional de valor ou concessão de desconto pelo Gerente.
-  - `PRORROGACAO_DATA`: Adiamento acordado de vencimento com justificativa registrada.
-  - `ESTORNO_CONTABIL`: Cancelamento de baixa com reintegração do saldo devedor original.
-- **Formato dos Dados Gravados:**
-  ```json
-  {
-    "acao": "AJUSTE_VALOR_GERENCIA",
-    "usuarioId": 1,
-    "parcelaId": 42,
-    "dadosAnteriores": "{\"valor\": 180.00, \"status\": \"PENDENTE\"}",
-    "dadosNovos": "{\"valor\": 150.00, \"status\": \"PENDENTE\", \"motivo\": \"Desconto promocional autorizado\"}",
-    "timestamp": "2026-09-19T22:08:00.000Z"
-  }
-  ```
-
-### ⚖️ Matriz de Severidade e Alertas de Auditoria
-
-Para auditoria rápida e triagem forense, cada ação do sistema possui uma classificação de impacto operacional:
-
-| Evento de Auditoria | Severidade | Notificação Gerencial | Ação de Conformidade |
-| :--- | :---: | :---: | :--- |
-| `BAIXA_PARCELA` | ⚪ Baixa | Registro silencioso | Conferência padrão na prestação de contas |
-| `AMORTIZACAO_EXCEDENTE` | 🔵 Informativa | Registro silencioso | Validação automática da ordem de vencimentos |
-| `PRORROGACAO_DATA` | 🟡 Média | Exibição em relatório | Justificativa comercial exigida no ato |
-| `AJUSTE_VALOR_GERENCIA` | 🟠 Alta | Destaque no dashboard | Exige anuência expressa da diretoria |
-| `ESTORNO_CONTABIL` | 🔴 Crítica | Alerta imediato no painel | Abertura de protocolo de averiguação interna |
-
-### 🔗 Matriz de Integridade Referencial e Ações de Chave Estrangeira (FKs)
-
-Para blindar a base contábil contra deleções acidentais e perda de rastreabilidade de pagamentos:
-
-| Relação (Origem ➔ Destino) | Campo FK | Regra de Exclusão (`onDelete`) | Justificativa de Engenharia |
-| :--- | :--- | :---: | :--- |
-| `Cliente` ➔ `Venda` | `Venda.clienteId` | `RESTRICT` | Impede a deleção de clientes com compras ou histórico de títulos emitidos |
-| `Venda` ➔ `Parcela` | `Parcela.vendaId` | `RESTRICT` | Carnês e parcelas ativas não podem ser excluídos diretamente |
-| `Parcela` ➔ `Pagamento` | `Pagamento.parcelaId` | `RESTRICT` | Protege os recibos e comprovantes financeiros de quitação |
-| `Venda` ➔ `ItemVenda` | `ItemVenda.vendaId` | `CASCADE` | Itens pertencem estritamente ao cabeçalho da venda comercial |
-| `Usuario` ➔ `Venda` | `Venda.vendedorId` | `RESTRICT` | Preserva a comissão e auditoria de vendas mesmo se o operador for desligado |
-
----
-
-## ⚙️ Variáveis de Ambiente
+## ⚙️ Variáveis de ambiente
 
 ### Backend (`backend/.env`)
 
-| Variável | Obrigatória | Padrão | Descrição | Exemplo |
-| :--- | :---: | :---: | :--- | :--- |
-| `PORT` | ✅ | `3300` | Porta local para o servidor HTTP Express | `3300` |
-| `DATABASE_URL` | ✅ | — | Connection string do Supabase via **Transaction Pooler** (porta 6543). | `postgresql://postgres.[REF]:[SENHA]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true` |
-| `DIRECT_URL` | ✅ | — | Connection string **direta** do Supabase (porta 5432) para migrações Prisma. | `postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres` |
-| `JWT_SECRET` | ✅ | — | Chave de assinatura e decodificação dos tokens JWT (mínimo 32 caracteres). | `uma_string_longa_e_aleatoria_aqui` |
-| `NODE_ENV` | ⚠️ | `development` | Ambiente de execução (`development`, `production` ou `test`). | `production` |
-| `FRONTEND_URL` | ⚠️ | `http://localhost:5173` | Origem do frontend autorizada pelo CORS para tráfego com cookies. | `https://meudominio.com` |
-
-> **Dica de Segurança:** Nunca comite o arquivo `.env` no repositório. Ele já está listado no `.gitignore`. Use um gerador de chaves como `openssl rand -base64 32` para o `JWT_SECRET`.
-
-### Frontend (`frontend/.env`)
-
-| Variável | Obrigatória | Padrão | Descrição | Exemplo |
-| :--- | :---: | :---: | :--- | :--- |
-| `VITE_API_URL` | ✅ | `http://localhost:3300` | URL base da API REST consumida pelo cliente React SPA. | `https://crediario-systen-mu.vercel.app` |
-
-### Vercel (Painel de Variáveis)
-
-Configure as seguintes variáveis no painel da Vercel em **Settings → Environment Variables**:
-
-| Variável | Ambiente | Descrição |
-| :--- | :--- | :--- |
-| `DATABASE_URL` | Production | Connection string do Pooler do Supabase |
-| `DIRECT_URL` | Production | Connection string direta (para migrações de deploy) |
-| `JWT_SECRET` | Production | Chave JWT de produção (diferente do local) |
-| `NODE_ENV` | Production | Definir como `production` |
-
----
-
-## ⚡ Performance e Otimizações
-
-O sistema foi projetado com foco em eficiência tanto no backend quanto no frontend:
-
-### Backend
-
-| Otimização | Implementação | Impacto |
-| :--- | :--- | :--- |
-| **Connection Pooling** | PgBouncer via Supabase (porta 6543) | Elimina gargalos de conexão em ambiente Serverless com múltiplas invocações simultâneas |
-| **Singleton Prisma** | Instância única via `lib/prisma.ts` | Reutilização da pool de conexões entre requisições — evita overhead de reconexão |
-| **Serverless Cold Start** | Build compacto separado (`api/index.ts`) | Inicialização rápida das Serverless Functions na Vercel |
-| **Índices no Banco** | `@unique` em emails, `@id` com `autoincrement` | Consultas rápidas em lookups frequentes de usuários e clientes |
-| **Queries Seletivas** | `select: {}` no Prisma | Retorna apenas os campos necessários — reduz payload e processamento |
-
-### 🗄️ Indexação e Otimização no PostgreSQL
-
-Para sustentar milhares de parcelas sem degradação de tempo de resposta em consultas de rua:
-
-| Nome do Índice | Tabela / Colunas | Tipo | Caso de Uso / Query Acelerada | Ganho Médio de Latência |
-| :--- | :--- | :---: | :--- | :---: |
-| **`idx_parcelas_status_vencimento`** | `Parcela (status, dataVencimento)` | B-Tree Composto | Filtragem matinal de títulos atrasados e vencendo hoje na rota do cobrador. | `~450ms ➔ < 12ms` |
-| **`idx_vendas_cliente_data`** | `Venda (clienteId, dataVenda)` | B-Tree Composto | Consulta de histórico de compras e consolidação instantânea de saldo devedor. | `~320ms ➔ < 8ms` |
-| **`idx_pagamentos_operador_data`** | `Pagamento (operadorId, dataPagamento)` | B-Tree Composto | Agregação do fechamento diário e prestação de contas de caixa. | `~280ms ➔ < 6ms` |
-| **`idx_auditoria_parcela_timestamp`** | `Auditoria (parcelaId, timestamp DESC)` | B-Tree | Reconstituição cronológica e forense de alterações na parcela. | `~190ms ➔ < 5ms` |
-| **`idx_cliente_telefone`** | `Cliente (telefone)` | B-Tree | Localização rápida por telefone em atendimentos e WhatsApp. | `~150ms ➔ < 4ms` |
-
-- **Modo Transaction do PgBouncer:** Mantém as conexões ativas apenas durante a execução de transações SQL, liberando slots imediatamente após o commit, permitindo que dezenas de instâncias serverless compartilhem um pool compacto de 15 conexões sem rejeição de tráfego.
-
-#### 🧹 Manutenção Preventiva de Índices e Autovacuum Tuning
-Em operações de cobrança intensa com centenas de atualizações de status por minuto, o PostgreSQL gera tuplas mortas (*dead tuples*) na tabela `Parcela`. Para evitar *bloat* e degradação de performance:
-
-- **Ajuste de Parâmetros de Autovacuum para Tabelas Críticas:**
-  ```sql
-  -- Reduzir limiar de disparo de autovacuum nas tabelas de alta escrita
-  ALTER TABLE "Parcela" SET (autovacuum_vacuum_scale_factor = 0.05);
-  ALTER TABLE "Parcela" SET (autovacuum_vacuum_cost_limit = 1000);
-  ALTER TABLE "AuditLog" SET (autovacuum_vacuum_scale_factor = 0.02);
-  ```
-- **Reindexação Concorrente sem Bloqueio de Escrita:**
-  ```sql
-  -- Executado mensalmente via Supabase SQL Editor para desfragmentar B-Trees:
-  REINDEX TABLE CONCURRENTLY "Parcela";
-  REINDEX TABLE CONCURRENTLY "Pagamento";
-  ```
-
-### 🔬 Profiling de Memória e Monitoramento de Event Loop no Node.js
-
-Para sustentar alta volumetria sem travamentos ou degradação progressiva de memória (*memory leaks*):
-
-- **Monitoramento de Latência do Event Loop:**
-  O backend utiliza a API nativa `perf_hooks.monitorEventLoopDelay()` para rastrear picos de bloqueio causados por serializações pesadas ou manipulação síncrona de dados:
-  ```typescript
-  import { monitorEventLoopDelay } from 'perf_hooks';
-  const histogram = monitorEventLoopDelay({ resolution: 10 });
-  histogram.enable();
-
-  // Alerta emitido caso o percentil 99 do delay supere 50ms
-  setInterval(() => {
-    const p99 = histogram.percentile(99) / 1e6; // ms
-    if (p99 > 50) {
-      console.warn(`[PERF ALERT] Event Loop Lag P99: ${p99.toFixed(2)}ms`);
-    }
-    histogram.reset();
-  }, 30000);
-  ```
-- **Dimensionamento de Heap em Containers Docker:**
-  Em ambientes containerizados com limites estritos de memória cgroup (ex: VPS com 1 GB de RAM), o V8 é configurado com flag explícita para evitar o encerramento abrupto pelo *OOM Killer*:
-  ```bash
-  NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=64" node dist/server.js
-  ```
-- **Inspeção e Heap Snapshot sob Demanda:**
-  Para auditoria de consumo em homologação, o Node.js pode ser iniciado com `--inspect=0.0.0.0:9229`, permitindo conectar via `chrome://inspect` para captura e comparação diferencial de Heap Snapshots entre rotas de exportação de relatórios.
+| Variável | Obrigatória | Descrição |
+| :--- | :---: | :--- |
+| `DATABASE_URL` | ✅ | Conexão do banco. No Supabase, use o **Transaction Pooler** (porta 6543, `?pgbouncer=true`). |
+| `DIRECT_URL` | ✅ | Conexão direta (porta 5432), usada pelo Prisma nas migrações. |
+| `JWT_SECRET` | ✅ em produção | Chave de assinatura dos tokens. Em produção, o servidor **não inicia** sem ela. |
+| `PORT` | ❌ | Porta local (padrão do projeto: `3300`). |
+| `JWT_EXPIRES_IN` | ❌ | Validade do token (padrão `24h`). |
+| `FRONTEND_URL` | ❌ | Origem extra liberada no CORS. Domínios `*.vercel.app` e `localhost` já são aceitos. |
 
 ### Frontend
 
-| Otimização | Implementação | Impacto |
-| :--- | :--- | :--- |
-| **Code Splitting** | Vite + Rollup automático | Bundle separado por rota — carrega apenas o código necessário |
-| **HMR (Dev)** | Vite Hot Module Replacement | Atualização instantânea em desenvolvimento sem recarregar a página |
-| **Build Otimizado** | `vite build` com tree-shaking | Remoção de código morto e minificação do bundle de produção |
-| **Edge CDN** | Vercel Edge Network | Assets estáticos distribuídos globalmente com latência mínima |
-| **Favicon SVG** | Ícone vetorial escalável | Carregamento ultra-rápido e qualidade perfeita em qualquer resolução |
+| Variável | Descrição |
+| :--- | :--- |
+| `VITE_API_URL` | URL base da API. Se vazia, usa o mesmo domínio (caso da Vercel) ou o proxy do Vite. |
 
-### 🚀 Métricas de Core Web Vitals e Compressão de Assets
-
-Para assegurar carregamento instantâneo em conexões de dados móveis 3G/4G:
-
-- **Compressão Brotli & Gzip:** Ativada por padrão na Edge da Vercel e Nginx local, reduzindo o payload JavaScript/CSS inicial em mais de 70%.
-- **Metas de Web Vitals:**
-  - **LCP (Largest Contentful Paint):** `< 1.5s` (Renderização ultra-rápida do painel e fichas de clientes).
-  - **INP (Interaction to Next Paint):** `< 100ms` (Feedback tátil imediato em cliques de baixa e seleção).
-  - **CLS (Cumulative Layout Shift):** `< 0.05` (Zero descolamento visual ao renderizar valores monetários).
+Nunca versione arquivos `.env` (já estão no `.gitignore`).
 
 ---
 
-## 🧪 Testes e Qualidade de Código
+## 🌐 API REST
 
+Todas as rotas, exceto `/login`, `/logout` e `/health`, exigem autenticação (cookie httpOnly ou header `Authorization: Bearer <token>`).
 
-### Estratégia de Testes
+| Método | Rota | Acesso | Descrição |
+| :--- | :--- | :---: | :--- |
+| `POST` | `/login` | público | Login (limite de 5 tentativas / 15 min por IP). |
+| `POST` | `/logout` | público | Encerra a sessão e limpa o cookie. |
+| `GET` | `/health` | público | Verificação de saúde. |
+| `GET` `POST` | `/clientes` | logado | Listar e cadastrar clientes. |
+| `GET` `PATCH` | `/clientes/:id` | logado | Detalhe e atualização. |
+| `GET` | `/clientes/:id/saldo` | logado | Saldo devedor e parcelas do cliente. |
+| `GET` `POST` | `/produtos` | logado | Listar e cadastrar produtos. |
+| `POST` `GET` | `/vendas` | logado | Registrar venda (gera o carnê) e listar. |
+| `GET` | `/vendas/:id` | logado | Detalhe da venda. |
+| `GET` | `/vendas/dias-fechados` | logado | Dias anteriores com vendas. |
+| `GET` | `/vendas/extrato-dia?data=` | logado | Extrato de vendas de um dia. |
+| `GET` | `/parcelas` | logado | Parcelas em aberto (atualiza as atrasadas). |
+| `GET` | `/parcelas/historico` | logado | Parcelas pagas. |
+| `PATCH` | `/parcelas/:id/pagamento` | logado | Baixa de pagamento (total, parcial ou com excedente). |
+| `PATCH` | `/parcelas/:id/data-vencimento` | logado | Altera o vencimento. Aceita `dataVencimento` ou `novaDataVencimento` (`YYYY-MM-DD`). |
+| `PATCH` | `/parcelas/:id/observacao` | logado | Registra observação. |
+| `PATCH` | `/parcelas/:id/contato` | logado | Registra data/hora do contato com o cliente. |
+| `PATCH` | `/parcelas/:id/ajuste` | **Gerente** | Ajuste manual de valor (com motivo). |
+| `GET` | `/pagamentos/dias-fechados` | logado | Dias anteriores com cobranças. |
+| `GET` | `/pagamentos/extrato-dia?data=` | logado | Extrato de cobranças de um dia. |
+| `GET` | `/prestacao-contas/dia` | logado | Resumo do próprio dia. |
+| `GET` | `/prestacao-contas/dia/:usuarioId` | logado | Resumo do dia de um funcionário. |
+| `GET` `POST` | `/usuarios` | **Gerente** | Listar e criar usuários. |
+| `GET` | `/relatorios/mensal` | **Gerente** | Consolidado mensal por funcionário. |
 
-O projeto adota uma abordagem de qualidade em camadas, priorizando confiabilidade nas operações financeiras:
+Erros de validação retornam `400` com `{ "erro": "...", "detalhes": [{ "campo", "mensagem" }] }`. Os demais erros seguem o formato `{ "erro": "mensagem" }`.
 
-| Camada | Ferramentas | Cobertura Alvo |
-| :--- | :--- | :--- |
-| **Validação de Contratos** | Zod Schemas | 100% dos endpoints |
-| **Tipagem Estática** | TypeScript (strict) | 100% do codebase |
-| **Testes de Integração** | Jest + Supertest (planejado) | Controllers críticos |
-| **Testes E2E** | Playwright (planejado) | Fluxos principais |
+---
 
-### Qualidade de Código
+## 🗃️ Modelo de dados
 
-O projeto aplica boas práticas de engenharia de software para garantir manutenibilidade:
-
-- **TypeScript Strict Mode:** Ativado no `tsconfig.json` — sem `any` implícito, sem variáveis não tipadas.
-- **Validação em Whitelist (Zod):** Todo dado externo é validado e transformado antes de tocar o banco.
-- **Tratamento de Erros Centralizado:** Middleware global de erros com mensagens genéricas em produção para evitar vazamento de informações sensíveis.
-- **Transações Atômicas:** Operações críticas de múltiplos passos usam `prisma.$transaction` — nunca deixam o banco em estado inconsistente.
-- **Singleton do Prisma:** Previne o esgotamento de conexões em ambiente Serverless (apenas uma instância do `PrismaClient` por process).
-- **Git Flow:** Código só chega à `main` via Pull Request revisado — sem commits diretos na branch de produção.
-
-### 🔍 Pirâmide de Testes e Estratégia de Homologação
-
-O projeto adota uma matriz progressiva de testes para garantir que nenhuma alteração de código quebre as regras contábeis ou fluxos de tela:
-
+```mermaid
+erDiagram
+    Usuario ||--o{ Venda : "vende"
+    Usuario ||--o{ Parcela : "cobra"
+    Usuario ||--o{ Pagamento : "recebe"
+    Cliente ||--o{ Venda : "compra"
+    Cliente ||--o{ Pagamento : "paga"
+    Venda ||--o{ ItemVenda : "contém"
+    Venda ||--o{ Parcela : "gera"
+    Venda ||--o{ Pagamento : "recebe"
+    Produto ||--o{ ItemVenda : "compõe"
+    Parcela ||--o{ Auditoria : "registra"
 ```
-       ▲
-      / \      [E2E: Playwright] - Fluxo completo de venda e baixa de parcela
-     /───\
-    /     \    [Integração: Supertest + Vitest] - Endpoints da API com banco de teste
-   /───────\
-  /         \  [Unitários: Zod + Cálculos] - Matemática de rateio e juros
- /───────────\
-/             \ [Estático: TypeScript Strict + ESLint + Prettier]
-```
 
-- **Testes Unitários:** Foco em funções puras de cálculo de parcelas, validação de entradas financeiras e schemas Zod.
-- **Testes de Integração:** Validação da atomicidade das transações do Prisma (`$transaction`), garantindo rollback em caso de falha.
-- **Auditoria Contínua:** Verificação automática de integridade referencial e tipagem semântica antes de cada commit.
+| Modelo | Papel |
+| :--- | :--- |
+| `Usuario` | Funcionário com perfil `GERENTE` ou `VENDEDOR_COBRADOR`, hash de senha e flag `ativo`. |
+| `Cliente` | Nome, telefone, endereço e referências. |
+| `Produto` | Nome, descrição, preço e categoria (`MOVEIS` / `VARIEDADES`). |
+| `Venda` | Cliente, vendedor, total, entrada, número de parcelas e tipo (`MOVEIS` / `VARIEDADES`). |
+| `ItemVenda` | Produto, quantidade, valor unitário e subtotal. |
+| `Parcela` | Número, valor, valor pago, vencimento, pagamento, status, observação e último contato. |
+| `Pagamento` | Histórico de cada valor recebido (base dos extratos e da prestação de contas). |
+| `Auditoria` | Registro de ações sobre parcelas (usuário, ação, detalhes e data). |
 
-### 🧪 Automação de Testes de Integração com Vitest & Supertest
+Valores monetários usam `Decimal(10,2)`. A definição completa está em [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma).
 
-Para certificar que as regras financeiras não sofram regressões, a suíte de testes valida os contratos de ponta a ponta:
+---
+
+## 🔒 Segurança
+
+- **Autenticação:** JWT válido por 24h, enviado em **cookie `httpOnly`** (`Secure` e `SameSite=None` em produção) e também aceito via header `Bearer`.
+- **Senhas:** armazenadas com hash `bcrypt`.
+- **Autorização:** `roleMiddleware` restringe rotas administrativas ao Gerente.
+- **Validação de entrada:** schemas **Zod** com whitelist nos corpos de requisição.
+- **Rate limit:** login com 5 tentativas / 15 min por IP, e API geral com 120 requisições / min.
+- **Headers e CORS:** Helmet e CORS com credenciais, restrito a origens conhecidas e `*.vercel.app`.
+- **Corpo da requisição** limitado a 1 MB.
+- **Erros em produção:** mensagens genéricas, sem stack trace.
+- **Transações atômicas** nas operações financeiras críticas.
+
+---
+
+## ☁️ Deploy
+
+Produção na **Vercel** (frontend + API serverless) com banco no **Supabase**.
+
+- `vercel.json` define o diretório de saída (`frontend/dist`) e os *rewrites* que enviam as rotas da API para `api/index.ts`. **Ao criar uma rota nova na API, adicione o prefixo dela ao padrão de rewrite.**
+- O build roda `npm run vercel-build`: instala dependências, gera o Prisma Client e compila o frontend.
+- Configure `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET` e `NODE_ENV=production` nas variáveis de ambiente da Vercel.
+- O deploy automático é disparado por push na branch **`main`**.
+
+---
+
+## 💾 Backup e scripts de manutenção
 
 ```bash
-# Executar suíte de testes de integração com Vitest
-npm --prefix backend run test
-
-# Executar testes em modo watch durante desenvolvimento
-npm --prefix backend run test:watch
-
-# Gerar relatório de cobertura de testes
-npm --prefix backend run test:coverage
+npm --prefix backend run backup      # gera um dump em backups/ (PowerShell)
 ```
+- `scripts/fazer-backup.ps1` e `scripts/restaurar-backup.ps1` fazem backup e restauração do banco. A pasta `backups/` não é versionada.
+- `backend/src/scripts/` reúne seeds, migrações pontuais (`backfillPagamentos`, `migrateMultiplosProdutos`) e scripts de teste manual.
 
-- **Isolamento de Estado:** Cada bateria de testes executa contra um banco de testes descartável ou schema temporário isolado.
-- **Asserção de Rollback Atômico:** Testes injetam falhas deliberadas para assegurar que falhas parciais não deixem resíduos no banco.
-- **Simulação de Concorrência:** Disparo de `Promise.all()` simultâneo simulando duas baixas concorrentes para certificar retorno de HTTP 409 (`CONCURRENCY_CONFLICT`).
-
-#### 🎯 Metas Mínimas de Cobertura de Código (Vitest Thresholds)
-A esteira de integração contínua impõe bloqueio caso a cobertura do backend fique abaixo dos patamares:
-
-| Métrica de Cobertura | Mínimo Exigido | Módulos Críticos (Cálculos & Auth) |
-| :--- | :---: | :---: |
-| **Linhas (`lines`)** | `85%` | `95%` |
-| **Declarações (`statements`)** | `85%` | `95%` |
-| **Funções (`functions`)** | `90%` | `100%` |
-| **Ramificações (`branches`)** | `80%` | `90%` |
-
-#### ⏱️ Mocks Determinísticos para Regras Financeiras Temporais
-Testes que envolvem cálculo de juros diários (*pro-rata die*) e expiração de sessões JWT utilizam congelamento de relógio via Vitest:
-```typescript
-beforeEach(() => {
-  // Fixar data em 2026-03-15T00:00:00Z para evitar variações de fuso horário
-  vi.useFakeTimers();
-  vi.setSystemTime(new Date('2026-03-15T00:00:00.000Z'));
-});
-
-afterEach(() => {
-  vi.useRealTimers();
-});
-```
-
-### 🏋️ Testes de Carga e Estresse de Concorrência com k6
-
-Para certificar que a API Express e o PgBouncer suportam os picos de tráfego das equipes de cobrança em campo sem degradação:
-
-```javascript
-// Exemplo de cenário de teste de estresse (load-test.js)
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-
-export const options = {
-  stages: [
-    { duration: '30s', target: 20 }, // Rampa de subida para 20 cobradores simultâneos
-    { duration: '1m', target: 50 },  // Pico matinal com 50 cobradores registrando baixas
-    { duration: '30s', target: 0 },  // Desaceleração controlada
-  ],
-  thresholds: {
-    http_req_duration: ['p(95)<300'], // 95% das baixas devem responder em menos de 300ms
-    http_req_failed: ['rate<0.01'],    // Menos de 1% de falhas permitidas
-  },
-};
-
-export default function () {
-  const payload = JSON.stringify({
-    valorPago: 50.00,
-    formaPagamento: 'ESPECIE',
-    duplaConfirmacao: true,
-  });
-
-  const params = {
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer test-token' },
-  };
-
-  const res = http.patch('http://localhost:3000/api/parcelas/1/pagar', payload, params);
-  check(res, { 'status is 200 or 409': (r) => r.status === 200 || r.status === 409 });
-  sleep(1);
-}
-```
-
-```bash
-# Execução do teste de carga
-k6 run tests/load/load-test.js
-```
-
-### 🎭 Matriz de Cenários de Testes Ponta a Ponta (E2E) com Playwright
-
-Para validar a integridade dos fluxos entre a interface visual React e os endpoints de backend, a suíte de testes E2E homologa os caminhos operacionais críticos:
-
-| ID | Fluxo Operacional | Dispositivo Simulado | Asserções de Aceite |
-| :---: | :--- | :---: | :--- |
-| **E2E-01** | Login com Proteção Brute-force | Desktop (1920x1080) | Bloqueio no 6º envio consecutivo com mensagem amigável e contador regressivo. |
-| **E2E-02** | Emissão de Nova Venda & Carnê | Desktop (1920x1080) | Geração correta de itens, cálculo de entrada à vista e criação atômica das parcelas. |
-| **E2E-03** | Baixa Mobile com Dupla Digitação | Mobile (Pixel 7 / 412x915) | Validação de divergência entre campos e geração de comprovante pós-confirmação. |
-| **E2E-04** | Detecção de Conflito Concorrente | Emulação Multi-Aba | Exibição de alerta visual `409 Conflict` e atualização automática do saldo em tela. |
-| **E2E-05** | Fechamento Diário & Sangria | Desktop (1920x1080) | Conferência de totais por forma de pagamento (Dinheiro, Pix) e registro de sangria. |
-
-```bash
-# Executar todos os testes ponta a ponta em modo headless:
-npx playwright test
-
-# Executar testes simulando dispositivo móvel de cobrador:
-npx playwright test --project="Mobile Chrome"
-```
+> 🛑 **Atenção:** `resetBanco.ts` e `limparBanco.ts` **apagam dados**. Nunca os execute contra o banco de produção.
 
 ---
 
-### Como Rodar Verificações
+## 🌿 Fluxo de trabalho (Git)
 
-```bash
-# Verificação de tipos TypeScript
-npm --prefix backend run tsc -- --noEmit
-
-# Verificação de tipos TypeScript (Frontend)
-npm --prefix frontend run tsc -- --noEmit
-```
-
-### 📋 Roteiro de Testes Manuais e Homologação Operacional
-
-Para validação em ambiente de homologação (*staging*) antes de liberar novas versões aos cobradores:
-
-| # | Cenário Operacional | Entrada / Ação do Usuário | Resultado Esperado |
-| :-: | :--- | :--- | :--- |
-| **01** | Baixa Exata de Parcela | Informar o valor exato no mobile com dupla digitação | Parcela muda para `PAGA` e comprovante WhatsApp é liberado |
-| **02** | Pagamento Parcial | Informar valor menor que a parcela devida | Status muda para `PARCIAL`, exibindo saldo devedor restante |
-| **03** | Amortização Excedente | Pagar valor superior ao saldo da parcela | Parcela atual é quitada e sobra é abatida na próxima em aberto |
-| **04** | Bloqueio de Concorrência | Disparar duas baixas simultâneas na mesma parcela | Uma operação é confirmada e a segunda recebe HTTP `409 Conflict` |
-| **05** | Fechamento de Turno | Cobrador acessa resumo no final da rota | Somatório confere com o total em espécie e Pix recolhidos |
+- `develop`: desenvolvimento diário. Todo commit entra aqui.
+- `main`: produção. Recebe apenas merges de `develop` depois de testado e validado.
+- Mensagens de commit seguem [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`).
+- Mudanças de schema devem ser **retrocompatíveis**, sem perda de dados.
 
 ---
 
-## 📊 Observabilidade, Logs e Monitoramento
+## 🗺️ Próximos passos
 
-A aplicação conta com padrões de telemetria e rastreabilidade para auditoria financeira e diagnóstico de operação:
+Ideias planejadas, ainda **não implementadas**:
 
-### 1. Health Checks Automatizados
-- Endpoint de monitoramento: `GET /health`
-- Resposta de disponibilidade:
-  ```json
-  {
-    "status": "ok",
-    "timestamp": "2026-03-15T21:00:00.000Z",
-    "database": "connected"
-  }
-  ```
-
-### 2. Logs Estruturados de Auditoria
-Operações financeiras críticas (baixas de cobrança, ajustes manuais e logins) emitem eventos estruturados em JSON para integração com ferramentas de análise (Vercel Logs, Logtail, Grafana Loki):
-
-```json
-{
-  "level": "info",
-  "timestamp": "2026-03-15T14:32:10.142Z",
-  "event": "PARCELA_PAGA",
-  "operadorId": 2,
-  "parcelaId": 35,
-  "valorRecebido": 100.00,
-  "ipOrigem": "177.18.xxx.xxx"
-}
-```
-
-### 3. Trilha de Auditoria Contábil (`Auditoria`)
-Toda mutação nas parcelas gera um registro permanente na tabela `Auditoria` com snapshot anterior, novo estado e operador responsável, prevenindo contestações financeiras.
-
-### 4. Métricas de APM e Rastreamento de Latência por Rota (SLIs/SLOs)
-
-Para monitorar o desempenho da API em condições reais de tráfego móvel de rua, o sistema adota metas de nível de serviço (SLOs) estritas:
-
-| Rota / Endpoint | Método | SLO Latência (p95) | SLO Disponibilidade | Ação de Alerta em Desvio |
-| :--- | :---: | :---: | :---: | :--- |
-| `/login` | `POST` | `< 250ms` | `99.9%` | Investigação de ataque de força bruta ou lentidão de hashing bcrypt. |
-| `/parcelas` | `GET` | `< 120ms` | `99.95%` | Análise de explain-plan no índice `idx_parcelas_status_vencimento`. |
-| `/parcelas/:id/pagamento` | `PATCH` | `< 300ms` | `99.99%` | Verificação de contenção de locks na transação do PostgreSQL. |
-| `/relatorios/dashboard` | `GET` | `< 400ms` | `99.5%` | Avaliação de queries de agregação e consumo de conexões no PgBouncer. |
-| `/health` | `GET` | `< 50ms` | `99.99%` | Acionamento imediato do plantão de infraestrutura (Pager). |
-
-#### 📡 Blueprint de Métricas Prometheus e Rastreamento OpenTelemetry (OTel)
-Para observabilidade em larga escala em clusters Kubernetes ou dashboards Grafana:
-
-| Nome da Métrica Prometheus | Tipo | Labels | Descrição de Operação |
-| :--- | :---: | :--- | :--- |
-| `crediario_http_request_duration_seconds` | Histogram | `method, route, status` | Latência da requisição HTTP dividida por buckets (p50, p95, p99) |
-| `crediario_parcelas_liquidadas_total` | Counter | `forma_pagamento, operador_id` | Contagem cumulativa de baixas financeiras registradas |
-| `crediario_pgbouncer_active_connections` | Gauge | `pool_type` | Conexões ativas no pool Supabase PgBouncer |
-| `crediario_rate_limit_blocks_total` | Counter | `route, ip_hash` | Bloqueios disparados por excesso de requisições maliciosas |
-
-- **Rastreamento de Ponta a Ponta (W3C Trace Context):**
-  Requisições carregam os cabeçalhos padrão `traceparent` e `tracestate`, permitindo correlação direta entre o log de auditoria no backend, a query executada no PostgreSQL e a ação do cobrador no frontend mobile.
-
-### 5. Esteira de Auditoria Forense e Sanitização de Logs (LGPD)
-
-Para conciliar a necessidade de rastreamento forense de incidentes com a conformidade estrita à LGPD:
-
-- **Contrato de Log Estruturado JSON:**
-  ```json
-  {
-    "timestamp": "2026-03-27T10:15:30.120Z",
-    "level": "INFO",
-    "traceId": "req_8f7b2c9a-1123-4b82",
-    "userId": 4,
-    "userRole": "COBRADOR",
-    "action": "LIQUIDACAO_PARCELA",
-    "resourceId": "parcela_1042",
-    "durationMs": 42,
-    "ip": "177.136.xxx.xxx",
-    "metadata": {
-      "valor": 150.00,
-      "formaPagamento": "PIX",
-      "cpfTitular": "***.***.789-00"
-    }
-  }
-  ```
-- **Regras de Expurgamento (*Log Redaction*):**
-  - **Credenciais:** O campo `password` ou `senha` é automaticamente excluído do payload antes de qualquer serialização de log.
-  - **Tokens & Cookies:** Headers `Authorization` e cookies `session` são substituídos pelo token literal `[REDACTED]`.
-  - **Dados Cadastrais Pessoais:** CPFs e chaves Pix passam por regex de mascaramento preservando apenas dígitos finais para auditoria de suporte.
-
-#### 🔒 Matriz de Classificação de Dados e Pseudonimização (LGPD)
-
-| Categoria do Dado | Exemplo no Sistema | Tratamento na Emissão de Log | Finalidade Regulatória |
-| :--- | :--- | :--- | :--- |
-| **Credenciais** | Senhas em texto claro, hashes bcrypt | Expurgamento total (`omit`) | Prevenção de vazamento acidental em agregadores |
-| **Tokens de Acesso** | JWT, cookies de sessão, Bearer tokens | Substituição por `[REDACTED]` | Mitigação de sequestro de sessão por operadores de monitoramento |
-| **Dados Pessoais (PII)**| CPF, telefone de clientes | Mascaramento parcial (`***.***.123-00`) | Atendimento ao princípio da necessidade e minimização (Art. 6º LGPD) |
-| **Identificadores de Rede**| Endereço IP do operador | Pseudonimização via Hash Salgado diário | Detecção de abuso mantendo privacidade do titular |
-| **Dados Financeiros** | Valores de quitação, IDs de parcela | Preservação íntegra (sem expurgo) | Exigência legal de auditoria contábil e fiscal |
-
-```typescript
-// Pseudonimização de IP para logs em conformidade com LGPD:
-import crypto from 'crypto';
-
-export function pseudonymizeIp(ip: string, dailySalt: string): string {
-  return crypto.createHmac('sha256', dailySalt).update(ip).digest('hex').substring(0, 16);
-}
-```
-
-### 6. Política de Rotação de Arquivos de Log e Retenção Regulatória
-
-Para prevenir esgotamento de disco em servidores VPS e cumprir prazos legais de guarda de documentos e trilhas contábeis:
-
-| Categoria do Log | Mecanismo de Coleta | Rotação / Limite | Retenção Ativa | Destino Final / Expiração |
-| :--- | :--- | :---: | :---: | :--- |
-| **Erros e Exceções** | `error.log` (Winston) | Diária ou 20 MB | 90 dias | Compactação Gzip e descarte automático |
-| **Acessos HTTP** | `access.log` (Morgan) | Diária ou 50 MB | 30 dias | Purgado automaticamente após 30 dias |
-| **Eventos de Segurança** | `security.log` (Auth/RL) | Diária | 180 dias | Arquivamento frio para auditoria interna |
-| **Trilha de Auditoria** | Tabela `Auditoria` (DB) | Sem partição | **5 anos** | Mandatório pelo Código Civil Brasileiro (Art. 206) |
-
-```typescript
-// Configuração do transportador de rotação diária de logs (Winston):
-import DailyRotateFile from 'winston-daily-rotate-file';
-
-export const fileRotateTransport = new DailyRotateFile({
-  filename: 'logs/crediario-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '90d',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  )
-});
-```
+- [ ] Testes automatizados (API e fluxos principais)
+- [ ] Notificações push para parcelas vencendo no dia
+- [ ] Exportação de relatórios (PDF / Excel)
+- [ ] Modo offline para cobranças em campo
+- [ ] Renegociação de dívidas
+- [ ] Cobrança via Pix
 
 ---
-
-## ❓ Perguntas Frequentes (FAQ)
-
-<details>
-<summary><strong>1. Como o sistema lida com pagamentos concorrentes na mesma parcela?</strong></summary>
-<p>Utilizamos blocos de transações atômicas nativas do Prisma (<code>prisma.$transaction</code>). Durante a liquidação, o registro da parcela é bloqueado e verificado novamente para assegurar que nenhuma outra requisição tenha alterado o saldo remanescente entre a leitura e a escrita.</p>
-</details>
-
-<details>
-<summary><strong>2. O sistema funciona offline no celular do cobrador?</strong></summary>
-<p>Atualmente a aplicação exige conectividade com a internet para garantir a sincronização em tempo real das cobranças. O suporte offline completo via Service Workers e IndexedDB está listado em nosso Roadmap para a versão v1.2.</p>
-</details>
-
-<details>
-<summary><strong>3. É possível rodar a aplicação em um VPS tradicional sem depender da Vercel?</strong></summary>
-<p>Sim! O repositório inclui configuração completa do <code>docker-compose.yml</code> com Nginx e Node.js Alpine, permitindo deploy autônomo com um único comando em instâncias AWS EC2, DigitalOcean, Hetzner ou servidores locais.</p>
-</details>
-
-<details>
-<summary><strong>4. Como é calculada a prestação de contas dos cobradores?</strong></summary>
-<p>O sistema agrega todos os pagamentos baixados pelo operador no dia corrente, filtrando por data e identificador do usuário autenticado. O gerente obtém tanto o fechamento individual quanto consolidado da equipe.</p>
-</details>
-
-<details>
-<summary><strong>5. Como funciona o estorno de um pagamento registrado incorretamente?</strong></summary>
-<p>Por diretrizes de compliance contábil, operadores de rua não possuem privilégio de exclusão ou estorno. Caso ocorra inconsistência, o perfil <strong>Gerente</strong> realiza a retificação pela rota gerencial <code>PATCH /parcelas/:id/ajuste</code>, gerando rastro indelével de auditoria.</p>
-</details>
-
-<details>
-<summary><strong>6. O sistema aplica juros ou encargos automáticos em parcelas vencidas?</strong></summary>
-<p>O sistema segue a prática de carnê de valor de parcela contratado no ato da venda. Encargos ou descontos pontuais podem ser concedidos pelo gerente ou ajustados no fechamento da renegociação, mantendo transparência com o consumidor.</p>
-</details>
-
-<details>
-<summary><strong>7. O que ocorre se a internet do cobrador oscilar durante a baixa de uma parcela?</strong></summary>
-<p>A transação opera sob bloco atômico no PostgreSQL. Se o pacote de rede for interrompido antes do commit, o banco executa rollback integral. Se o commit tiver ocorrido, nova tentativa retornará o status atualizado sem debitar ou duplicar a quitação.</p>
-</details>
-
-<details>
-<summary><strong>8. Como agir em caso de furto ou perda do celular do cobrador em campo?</strong></summary>
-<p>O gerente acessa imediatamente o painel desktop em <code>/usuarios</code> e clica em <strong>Desativar Operador</strong>. O middleware de autenticação revoga instantaneamente o token JWT na próxima requisição do dispositivo, impedindo qualquer acesso indevido à base de clientes.</p>
-</details>
-
-<details>
-<summary><strong>9. Como é realizada a renegociação de múltiplas parcelas em atraso?</strong></summary>
-<p>O gerente pode unificar as parcelas vencidas em um novo acordo comercial ajustando valores e prazos, mantendo o histórico de auditoria vinculado à venda original para preservar a idoneidade contábil.</p>
-</details>
-
----
-
-## 🗺️ Roadmap & Milestones
-
-Cronograma e metas de evolução das próximas versões do sistema:
-
-### 🚀 v1.1 — Produtividade e Relatórios (Q2 2026)
-- [ ] **Notificações Push (PWA):** Alertas automáticos para o cobrador sobre parcelas vencidas no dia
-- [ ] **Filtros Avançados no Dashboard:** Segmentação de KPIs por cobrador, período e categoria de produto
-- [ ] **Exportação de Relatórios (PDF/Excel):** Geração de relatórios financeiros mensais para download
-
-### 📋 v1.2 — Resiliência Operacional (Q3 2026)
-- [ ] **Modo Offline (Service Worker):** Cache local de cobranças do dia para uso sem internet em campo
-- [ ] **Histórico de Auditoria Detalhado:** Log completo de todas as alterações por usuário com visualização no painel
-- [ ] **Renegociação de Dívidas:** Fluxo guiado para reestruturação de carnês com novos prazos e condições
-
-### 💳 v2.0 — Integração Financeira & Mobilidade (Q4 2026)
-- [ ] **Foto de Comprovante:** Upload de imagem do comprovante no ato do pagamento via câmera mobile
-- [ ] **Integração PIX Dinâmico:** Geração de QR Code Pix no momento da cobrança com baixa automática
-- [ ] **Multi-empresa (SaaS):** Suporte a múltiplos comércios na mesma instância com isolamento de dados
-- [ ] **Score de Crédito Automático:** Análise preditiva de risco e pontualidade por histórico do cliente
-
----
-
-## 🤝 Contribuição & Convenções
-
-Contribuições são muito bem-vindas! Para contribuir com o projeto, siga o fluxo abaixo:
-
-### Como Contribuir
-
-1. **Fork** o repositório no GitHub
-2. **Clone** seu fork localmente:
-   ```bash
-   git clone https://github.com/SEU_USUARIO/CrediarioSysten.git
-   ```
-3. **Crie uma branch** a partir de `develop`:
-   ```bash
-   git checkout develop
-   git checkout -b feature/minha-nova-funcionalidade
-   ```
-4. **Faça suas alterações** seguindo os padrões do projeto
-5. **Commit** suas mudanças com mensagens descritivas:
-   ```bash
-   git commit -m "feat(cobranca): adiciona notificacao push para parcelas vencidas"
-   ```
-6. **Push** para seu fork:
-   ```bash
-   git push origin feature/minha-nova-funcionalidade
-   ```
-7. **Abra um Pull Request** apontando de sua branch para `develop` neste repositório
-
-### Convenção de Commits
-
-O projeto adota o padrão [Conventional Commits](https://www.conventionalcommits.org/):
-
-| Prefixo | Quando Usar | Exemplo Prático |
-| :--- | :--- | :--- |
-| `feat:` | Nova funcionalidade para o usuário | `feat(auth): adiciona suporte a login biometrico` |
-| `fix:` | Correção de bug no sistema | `fix(parcelas): corrige arredondamento de centavos no rateio` |
-| `docs:` | Alteração ou adição em documentações | `docs(readme): adiciona guia de deploy e diagrama de arquitetura` |
-| `refactor:` | Refatoração sem alteração de comportamento externo | `refactor(db): otimiza queries de agregacao no relatorio mensal` |
-| `perf:` | Mudança de código voltada a ganho de desempenho | `perf(frontend): implementa lazy loading de rotas desktop` |
-| `test:` | Adição ou ajuste de testes automatizados | `test(api): adiciona testes de integracao para o fluxo de quitação` |
-| `chore:` | Ajustes de manutenção de build, pacotes ou CI/CD | `chore(deps): atualiza versao do prisma orm para 6.4` |
-
-### ✅ Checklist para Abertura de Pull Request
-
-Antes de submeter o seu Pull Request apontando para a branch `develop`, confirme se todas as etapas abaixo foram cumpridas:
-
-- [ ] **Compilação Estática:** O código compila sem erros (`npm --prefix backend run tsc -- --noEmit` e `npm --prefix frontend run tsc -- --noEmit`).
-- [ ] **Conventional Commits:** Todas as mensagens de commit seguem estritamente o formato `tipo(escopo): descricao concisa`.
-- [ ] **Variáveis de Ambiente:** Nenhuma chave secreta, senha, token ou arquivo `.env` foi adicionado acidentalmente ao commit.
-- [ ] **Dual-Platform:** Modificações de interface foram testadas tanto no layout Desktop (gerência) quanto no Mobile (cobrador).
-- [ ] **Atomicidade de Transações:** Operações financeiras com múltiplos passos utilizam obrigatoriamente `prisma.$transaction`.
-- [ ] **Documentação Atualizada:** O [README.md](README.md) ou schemas associados foram atualizados refletindo as novas rotas ou regras.
-
-### 🏷️ Política de Versionamento Semântico (SemVer) e Tags de Release
-
-O projeto segue as diretrizes do [Semantic Versioning 2.0.0](https://semver.org/lang/pt-BR/) (`MAJOR.MINOR.PATCH`):
-
-| Segmento | Quando Incrementar | Gatilho Típico no Crediário System | Exemplo |
-| :---: | :--- | :--- | :---: |
-| **`MAJOR`** | Modificações incompatíveis na API ou migrações que exigem intervenção manual no banco. | Mudança estrutural no modelo relacional ou quebra de contratos de autenticação. | `1.0.0 ➔ 2.0.0` |
-| **`MINOR`** | Adição de novas funcionalidades com total compatibilidade retroativa. | Novo endpoint de relatório, suporte a Pix dinâmico ou novo módulo de impressão. | `1.0.0 ➔ 1.1.0` |
-| **`PATCH`** | Correções de bugs, pequenas melhorias de performance ou ajustes de segurança sem quebra. | Ajuste no cálculo de rateio de centavos ou correção de layout em modais. | `1.0.1 ➔ 1.0.2` |
-
-- **Criação de Tags Git:** Lançamentos oficiais homologados recebem tags anotadas criadas a partir da branch `main`:
-  ```bash
-  git tag -a v1.0.3 -m "release: versao 1.0.3 com melhorias tecnicas estruturais e documentacao"
-  git push origin v1.0.3
-  ```
-
-#### 🚀 Checklist de Prontidão de Release (Release Readiness)
-
-Antes de gerar a tag oficial de release e efetuar o deploy em produção a partir da `main`:
-
-- [x] **Homologação Concluída:** Todos os testes de integração e cenários de concorrência aprovados na branch `develop`.
-- [x] **Schema Sincronizado:** Nenhuma migração pendente no Supabase PostgreSQL via `prisma db push` / `DIRECT_URL`.
-- [x] **Build Limpo:** Frontend compilado sem alertas críticos no Rollup/Vite (`npm run build:frontend`).
-- [x] **Changelog Atualizado:** Seção correspondente preenchida no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
-- [x] **Variáveis de Ambiente Auditadas:** Segredos JWT e connection poolers validados no painel da Vercel.
-
----
-
-### Reportar Bugs
-
-Abra uma [Issue](https://github.com/vitoraugustonb-cod/CrediarioSysten/issues) descrevendo:
-- **Comportamento esperado** vs **comportamento atual**
-- **Passos para reproduzir** o problema
-- **Ambiente** (SO, browser, versão do Node.js)
-
----
-
-## 📋 Changelog
-
-Histórico de lançamentos e versões do **Crediário System**:
-
-### [1.0.2] - 2026-03-28
-- **Políticas RLS Supabase:** Documentação de isolamento e regras de Row Level Security no PostgreSQL.
-- **Webhooks Pix Dinâmico:** Guia operacional com retentativas, backoff exponencial e reconciliação ativa.
-- **Máquina de Estados de Parcelas:** Diagrama de estados Mermaid e regras de transição contábil.
-- **Profiling de Memória Node.js:** Monitoramento de event loop delay e dimensionamento de heap V8.
-- **Rate Limiting Granular:** Matriz de proteção contra abuso e força bruta por rota com headers RFC 6585.
-- **Mapeamento de Erros Prisma:** Tabela semântica de exceções da engine Prisma para códigos HTTP.
-- **Auditoria Forense & LGPD:** Padrão de logs estruturados JSON e políticas de expurgamento (*log redaction*).
-- **Acessibilidade Digital:** Matriz de conformidade com diretrizes internacionais WCAG 2.1 nível AA.
-- **Failover & Redundância DNS:** Protocolo de contingência estática e chaveamento com TTL reduzido.
-- **Testes de Carga com k6:** Script de simulação de alta concorrência com 50 usuários simultâneos.
-
-### [1.0.1] - 2026-03-26
-- **Jornada de Personas:** Detalhamento dos fluxos de trabalho de Gerente, Cobrador e Balcão.
-- **Capacidade e Escala Supabase:** Matriz de dimensionamento de conexões diretas vs PgBouncer (Free/Pro).
-- **Códigos de Erro Semânticos:** Expansão do catálogo de erros de domínio contábil da API.
-- **Conciliação e Sangria:** Diagrama Mermaid de conferência cega e sangria preventiva diária.
-- **Impressão Térmica ESC/POS:** Tabela de comandos de controle hexadecimais e conectividade BLE.
-- **Troubleshooting e Resiliência:** Procedimento de mitigação de cold starts e pooling do Prisma.
-- **Privacidade e LGPD:** Política de expiração de links assinados para relatórios e downloads.
-- **Qualidade Local:** Guia de checagens estáticas e automação com pre-commit hooks.
-- **Protocolo de Incidentes:** Procedimento operacional de contingência em campo para cobradores.
-
-### [1.0.0] - 2026-03-10
-- **Lançamento Inicial:** Arquitetura unificada React 19 + Vite e backend Express TypeScript.
-- **Dual-Platform:** Detecção automática de dispositivos e telas dedicadas para gerentes e cobradores.
-- **Segurança Financeira:** Rate limit, cookies httpOnly e validação rígida via Zod.
-- **Concorrência Segura:** Transações atômicas com Prisma para baixas de pagamentos sem duplicidade.
-- **Suporte a Nuvem:** Integração nativa com Vercel Serverless e Supabase PostgreSQL.
-
----
-
-## 📞 Matriz de SLAs Operacionais e Canais de Suporte
-
-Para assegurar a continuidade ininterrupta das equipes de cobrança em campo e conciliação contábil:
-
-| Nível de Severidade | Definição de Impacto | Tempo Máximo de Resposta | Resolução Alvo (RTO) | Canal de Acionamento |
-| :---: | :--- | :---: | :---: | :--- |
-| **S1 (Crítico)** | Sistema indisponível, falha geral de login ou erro em transações atômicas | < 15 minutos | < 1 hora | Plantão de Infraestrutura / Pager |
-| **S2 (Alto)** | Lentidão severa no mobile ou falha na integração com banco de dados | < 1 hora | < 4 horas | Canal prioritário de suporte interno |
-| **S3 (Médio)** | Falha pontual em impressão térmica ESC/POS ou exportação de relatórios | < 4 horas | < 24 horas | Abertura de chamado técnico |
-| **S4 (Baixo)** | Dúvidas operacionais, sugestões de melhorias visuais ou ajustes cosméticos | < 24 horas | Próxima sprint | Fórum de Issues do GitHub |
-
-### 🚨 Protocolo de Resposta a Incidentes de Cobrança em Campo
-
-Para manter o fluxo de arrecadação mesmo durante interrupções de serviço de nível S1 ou S2:
-
-1. **Procedimento de Contingência Física (Recibo Canhoto):** Caso o sistema apresente indisponibilidade de rede por mais de 10 minutos na rota, o cobrador deve emitir o recibo físico pré-impresso de contingência com assinatura mútua do cliente.
-2. **Sinalização Imediata:** Notificar o canal de plantão gerencial informando o bairro e o tipo de erro visualizado na tela do celular.
-3. **Sincronização Retroativa de Caixa:** Tão logo a conectividade seja restaurada, a gerência lança as baixas pendentes no modo de conferência retroativa mantendo a data e horário originais de quitação.
-
----
-
-## 👤 Autor & Agradecimentos
 
 <div align="center">
-  <p>Desenvolvido com dedicação por <strong>Vitor Augusto</strong>.</p>
-  <p>
-    <a href="https://github.com/vitoraugustonb-cod" target="_blank">
-      <img src="https://img.shields.io/badge/GitHub-vitoraugustonb--cod-181717?style=for-the-badge&logo=github" alt="GitHub Profile">
-    </a>
-  </p>
-  <p>
-    <em>Agradecimentos especiais à comunidade de código aberto pelo fornecimento das tecnologias fundamentais que compõem este ecossistema: React, TypeScript, Node.js, Express, Prisma ORM, Vite, Supabase, Vercel e Docker.</em>
-  </p>
+
+Desenvolvido por **Vitor Augusto** · [GitHub](https://github.com/vitoraugustonb-cod)
+
 </div>
-
----
-
-## 📜 Licença
-
-Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.

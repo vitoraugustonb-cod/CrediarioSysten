@@ -2,9 +2,13 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma.js';
 
 async function main() {
-  const email = 'vendedor@crediario.com';
-  const senhaPlana = 'vendedor123';
+  const email = (process.env.EMAIL_VENDEDOR || 'vendedor@crediario.com').trim().toLowerCase();
+  const senhaPlana = process.env.SENHA_INICIAL || '';
   const nome = 'Vendedor Cobrador 01';
+
+  if (senhaPlana.length < 8) {
+    throw new Error('Defina SENHA_INICIAL (mínimo 8 caracteres) nas variáveis de ambiente.');
+  }
 
   const usuarioExistente = await prisma.usuario.findUnique({
     where: { email }
@@ -31,7 +35,6 @@ async function main() {
   console.log(`📌 ID: ${vendedor.id}`);
   console.log(`📌 Nome: ${vendedor.nome}`);
   console.log(`📌 E-mail: ${vendedor.email}`);
-  console.log(`📌 Senha padrão: ${senhaPlana}`);
   console.log(`📌 Perfil: ${vendedor.perfil}`);
 }
 
