@@ -514,7 +514,10 @@ export async function alterarDataVencimentoParcelaAPI(
 ): Promise<Parcela> {
   return await fetchWithAuth(`/parcelas/${id}/data-vencimento`, token, {
     method: 'PATCH',
-    body: JSON.stringify({ dataVencimento }),
+    body: JSON.stringify({
+      dataVencimento,
+      novaDataVencimento: dataVencimento,
+    }),
   });
 }
 

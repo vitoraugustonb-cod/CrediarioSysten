@@ -438,19 +438,20 @@ export const alterarDataVencimentoParcela = async (req: Request, res: Response):
       return;
     }
 
-    const { dataVencimento } = req.body;
+    const rawData = req.body.dataVencimento || req.body.novaDataVencimento;
 
-    if (!dataVencimento || typeof dataVencimento !== 'string') {
+    if (!rawData || typeof rawData !== 'string') {
       res.status(400).json({ erro: 'A nova data de vencimento é obrigatória.' });
       return;
     }
 
     let novaData: Date;
-    if (typeof dataVencimento === 'string' && dataVencimento.includes('-')) {
-      const [yyyy, mm, dd] = dataVencimento.split('-').map(Number);
+    const datePart = rawData.split('T')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [yyyy, mm, dd] = datePart.split('-').map(Number);
       novaData = new Date(yyyy, mm - 1, dd, 12, 0, 0);
     } else {
-      novaData = new Date(dataVencimento);
+      novaData = new Date(rawData);
     }
 
     if (isNaN(novaData.getTime())) {

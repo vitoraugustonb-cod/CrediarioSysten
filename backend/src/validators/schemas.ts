@@ -94,8 +94,22 @@ export const ajustarParcelaSchema = z.object({
 });
 
 export const alterarVencimentoSchema = z.object({
-  novaDataVencimento: z.string().min(1, 'Nova data de vencimento é obrigatória'),
+  dataVencimento: z.string().min(1, 'Data de vencimento é obrigatória').optional(),
+  novaDataVencimento: z.string().min(1, 'Nova data de vencimento é obrigatória').optional(),
   motivo: z.string().optional().nullable()
+}).refine(
+  (data) => Boolean(data.dataVencimento || data.novaDataVencimento),
+  {
+    message: 'Data de vencimento é obrigatória',
+    path: ['dataVencimento']
+  }
+).transform((data) => {
+  const dataFinal = (data.dataVencimento || data.novaDataVencimento) as string;
+  return {
+    ...data,
+    dataVencimento: dataFinal,
+    novaDataVencimento: dataFinal
+  };
 });
 
 export const observacaoSchema = z.object({
