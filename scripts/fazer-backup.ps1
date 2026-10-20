@@ -57,6 +57,33 @@ if (Test-Path $BackupFilePathLocal) {
     Write-Host "[SUCESSO] BACKUP GERADO COM SUCESSO!" -ForegroundColor Green
     Write-Host "Arquivo: $BackupFileName ($([math]::Round($FileSize, 2)) KB)" -ForegroundColor Yellow
     Write-Host "Local: $BackupFilePathLocal" -ForegroundColor Gray
+
+    # Politica de retencao estrita e segura:
+    # 1. Filtra exclusivamente arquivos 'backup_crediario_*.sql' dentro da pasta de backups
+    # 2. Garante que os 5 backups mais recentes NUNCA sejam apagados
+    # 3. Dos backups restantes, apaga apenas aqueles que tiverem mais de 30 dias
+    $RetentionDays = 30
+    $MinKeepCount = 5
+    $CutoffDate = (Get-Date).AddDays(-$RetentionDays)
+
+    $AllBackups = Get-ChildItem -Path $BackupsDir -Filter "backup_crediario_*.sql" -File | Sort-Object LastWriteTime -Descending
+
+    if ($AllBackups.Count -gt $MinKeepCount) {
+        $OldCandidates = $AllBackups | Select-Object -Skip $MinKeepCount
+        $DeletedCount = 0
+        foreach ($oldFile in $OldCandidates) {
+            if ($oldFile.LastWriteTime -lt $CutoffDate) {
+                Remove-Item -Path $oldFile.FullName -Force
+                Write-Host ">>> [Limpeza] Backup antigo removido (+30 dias): $($oldFile.Name)" -ForegroundColor DarkGray
+                $DeletedCount++
+            }
+        }
+        if ($DeletedCount -eq 0) {
+            Write-Host ">>> Retencao: Nenhum backup com mais de $RetentionDays dias precisou ser removido." -ForegroundColor Gray
+        }
+    } else {
+        Write-Host ">>> Retencao: Pasta com $($AllBackups.Count) backup(s) (minimo seguro de $MinKeepCount mantido). Nenhum arquivo foi removido." -ForegroundColor Gray
+    }
 } else {
     Write-Error "Falha: O arquivo de backup nao foi encontrado apos a execucao."
 }
