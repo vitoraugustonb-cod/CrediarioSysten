@@ -204,7 +204,21 @@ async function fetchWithAuth(
     headers,
   });
 
-  const data = await response.json();
+  // Sessão renovável: o backend devolve um token novo quando o atual está perto de expirar
+  const tokenRenovado = response.headers.get('X-Token-Renovado');
+  if (tokenRenovado && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:token-renovado', { detail: tokenRenovado }));
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    // Sessão expirada/inválida: força volta à tela de login em vez de exibir erros nas telas
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:sessao-expirada'));
+    }
+    throw new Error('Sua sessão expirou. Faça login novamente.');
+  }
 
   if (!response.ok) {
     throw new Error(data.erro || data.message || 'Erro ao comunicar com o servidor');

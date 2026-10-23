@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config/jwt.js';
+import {
+  JWT_SECRET,
+  HEADER_TOKEN_RENOVADO,
+  gerarToken,
+  definirCookieSessao,
+  deveRenovarToken
+} from '../config/jwt.js';
 import { TokenPayload } from '../types/express.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -26,7 +32,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload & { iat?: number; exp?: number };
 
     // 3. Validação em tempo real no banco: usuário existe e está ativo?
     const usuarioBanco = await prisma.usuario.findUnique({
@@ -50,6 +56,14 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       perfil: usuarioBanco.perfil,
       nome: usuarioBanco.nome
     };
+
+    // 4. Sessão renovável: se o token já passou da metade da validade, emite um novo.
+    //    Assim, quem usa o app com frequência nunca é deslogado.
+    if (deveRenovarToken(decoded.iat, decoded.exp)) {
+      const novoToken = gerarToken(usuarioBanco);
+      res.setHeader(HEADER_TOKEN_RENOVADO, novoToken);
+      definirCookieSessao(res, novoToken);
+    }
 
     next();
   } catch (error) {
