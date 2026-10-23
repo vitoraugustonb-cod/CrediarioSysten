@@ -244,7 +244,7 @@ Backend em `http://localhost:3300` e frontend (Nginx) em `http://localhost`. O b
 | `DIRECT_URL` | ✅ | Conexão direta (porta 5432), usada pelo Prisma nas migrações. |
 | `JWT_SECRET` | ✅ em produção | Chave de assinatura dos tokens. Em produção, o servidor **não inicia** sem ela. |
 | `PORT` | ❌ | Porta local (padrão do projeto: `3300`). |
-| `JWT_EXPIRES_IN` | ❌ | Validade do token (padrão `24h`). |
+| `JWT_EXPIRES_IN` | ❌ | Validade do token (padrão `7d`). É renovado automaticamente após metade da validade enquanto o usuário usa o app. |
 | `FRONTEND_URL` | ❌ | Origem extra liberada no CORS. Domínios `*.vercel.app` e `localhost` já são aceitos. |
 
 ### Frontend

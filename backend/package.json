@@ -13,7 +13,8 @@
     "seed": "tsx src/scripts/seedGerente.ts",
     "trocar-senha": "tsx src/scripts/trocarSenha.ts",
     "reset-db": "tsx src/scripts/resetBanco.ts",
-    "backup": "powershell -ExecutionPolicy Bypass -File ../scripts/fazer-backup.ps1"
+    "backup": "powershell -ExecutionPolicy Bypass -File ../scripts/fazer-backup.ps1",
+    "test": "tsx --test tests/*.test.ts"
   },
   "keywords": [],
   "author": "",

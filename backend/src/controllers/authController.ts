@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/jwt.js';
+import { gerarToken, definirCookieSessao, limparCookieSessao } from '../config/jwt.js';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -39,19 +38,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, perfil: usuario.perfil, nome: usuario.nome },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-    );
+    const token = gerarToken(usuario);
 
     // Configurar Cookie httpOnly seguro para proteger contra ataques de XSS
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' permite cross-site no deploy com HTTPS na Vercel
-      maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    });
+    definirCookieSessao(res, token);
 
     res.json({
       token,
@@ -69,10 +59,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const logout = (req: Request, res: Response): void => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-  });
+  limparCookieSessao(res);
   res.json({ status: 'ok', message: 'Logout realizado com sucesso.' });
 };
