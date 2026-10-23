@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Search, 
   UserPlus, 
+  Users,
   Phone,
   MapPin, 
   X,
@@ -464,12 +465,84 @@ export const ClientesView: React.FC = () => {
         });
       })();
 
+  const totalSaldoDevedor = useMemo(() => {
+    return clientes.reduce((acc, c) => acc + (Number(c.saldoDevedor) || 0), 0);
+  }, [clientes]);
+
   const totalJaPagoCliente = pagamentosRealizados.reduce((acc: number, p: any) => {
     return acc + p.valorTotalPago;
   }, 0);
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '20px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '20px' }}>
+      {/* Contador superior discreto da carteira e total a receber */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '6px',
+          padding: '2px 4px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          {/* Tag Quantidade de Clientes */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Users size={14} color="var(--primary-800)" />
+            <span style={{ fontSize: '0.80rem', fontWeight: 700, color: 'var(--primary-800)' }}>
+              Carteira:
+            </span>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                backgroundColor: 'var(--accent-50)',
+                color: 'var(--accent-600)',
+                padding: '2px 7px',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid #BFDBFE',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {loading ? '...' : `${clientes.length} ${clientes.length === 1 ? 'cliente' : 'clientes'}`}
+            </span>
+          </div>
+
+          {/* Tag Total a Receber da Carteira Inteira */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ fontSize: '0.80rem', fontWeight: 700, color: 'var(--text-light, #94A3B8)' }}>
+              •
+            </span>
+            <DollarSign size={13} color="#15803D" style={{ margin: '0 -2px' }} />
+            <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#166534' }}>
+              A receber:
+            </span>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                backgroundColor: '#DCFCE7',
+                color: '#15803D',
+                padding: '2px 7px',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid #86EFAC',
+                letterSpacing: '0.02em',
+              }}
+              title="Soma de todos os saldos devedores dos clientes desta carteira"
+            >
+              {loading ? '...' : `R$ ${totalSaldoDevedor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            </span>
+          </div>
+        </div>
+
+        {busca.trim() !== '' && !loading && (
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            {clientesFiltrados.length} {clientesFiltrados.length === 1 ? 'encontrado' : 'encontrados'}
+          </span>
+        )}
+      </div>
+
       {/* Search Bar & Add Button */}
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1 }}>
