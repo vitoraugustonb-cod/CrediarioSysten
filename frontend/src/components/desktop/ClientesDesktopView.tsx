@@ -330,6 +330,22 @@ export const ClientesDesktopView: React.FC = () => {
                       </div>
                     </div>
 
+                    {(() => {
+                      const valNum = parseFloat(valorPagoInput || '0');
+                      const valParcelaAtual = Number(parcelaParaPagamento.valor);
+                      const valJaPago = parcelaParaPagamento.valorPago ? Number(parcelaParaPagamento.valorPago) : 0;
+                      const faltaQuitar = Math.max(0, valParcelaAtual - valJaPago);
+                      if (valNum > 0 && valNum < faltaQuitar) {
+                        const diferenca = Math.round((faltaQuitar - valNum) * 100) / 100;
+                        return (
+                          <div style={{ padding: '8px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', color: '#92400E' }}>
+                            ⚡ <strong>Pagamento Parcial:</strong> Esta parcela será quitada hoje e o saldo de <strong>R$ {diferenca.toFixed(2)}</strong> será transferido para a próxima parcela.
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
                     <button
                       type="submit"
                       disabled={salvandoPagamento}

@@ -154,27 +154,127 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
 
       let valorParaEstaParcela = 0;
       let excedente = 0;
+      let diferencaNaoPaga = 0;
+      let proximaParcelaAlvo: any = null;
 
       if (valorPagoNum >= faltaQuitarAtual) {
         valorParaEstaParcela = valorParcelaNum; // completa a parcela
-        excedente = valorPagoNum - faltaQuitarAtual;
+        excedente = Math.round((valorPagoNum - faltaQuitarAtual) * 100) / 100;
       } else {
-        valorParaEstaParcela = valorJaPago + valorPagoNum;
+        // PAGAMENTO PARCIAL:
+        // O cliente pagou menos do que o valor total/restante da parcela.
+        // A parcela é quitada hoje com o valor pago para que o cliente saia da rota de cobrança de hoje,
+        // e a diferença restante é transferida automaticamente para a próxima parcela.
+        diferencaNaoPaga = Math.round((faltaQuitarAtual - valorPagoNum) * 100) / 100;
+        valorParaEstaParcela = Math.round((valorJaPago + valorPagoNum) * 100) / 100;
         excedente = 0;
       }
 
-      const novoStatusAtual: StatusParcela = valorParaEstaParcela >= valorParcelaNum
-        ? StatusParcela.PAGA
-        : StatusParcela.PARCIAL;
+      // Se houver diferença não paga (pagamento parcial), transfere para a próxima parcela
+      if (diferencaNaoPaga > 0) {
+        const proximaParcela = await tx.parcela.findFirst({
+          where: {
+            vendaId: parcela.vendaId,
+            numero: { gt: parcela.numero },
+            status: { in: [StatusParcela.PENDENTE, StatusParcela.PARCIAL, StatusParcela.ATRASADA] }
+          },
+          orderBy: { numero: 'asc' }
+        });
+
+        if (proximaParcela) {
+          proximaParcelaAlvo = proximaParcela;
+          const vNextOriginal = Number(proximaParcela.valor);
+          const novoValorNext = Math.round((vNextOriginal + diferencaNaoPaga) * 100) / 100;
+          const obsAntiga = proximaParcela.observacao ? `${proximaParcela.observacao} | ` : '';
+          const novaObsNext = `${obsAntiga}+R$ ${diferencaNaoPaga.toFixed(2)} transferido da Parcela #${parcela.numero} (restante não pago)`;
+
+          await tx.parcela.update({
+            where: { id: proximaParcela.id },
+            data: {
+              valor: novoValorNext,
+              observacao: novaObsNext
+            }
+          });
+
+          await tx.auditoria.create({
+            data: {
+              parcelaId: proximaParcela.id,
+              usuarioId: usuario.id,
+              acao: 'VALOR_TRANSFERIDO_PARCELA_ANTERIOR',
+              detalhes: `Recebeu acréscimo de R$ ${diferencaNaoPaga.toFixed(2)} transferido da Parcela #${parcela.numero}. Novo valor: R$ ${novoValorNext.toFixed(2)}.`
+            }
+          });
+        } else {
+          // Última parcela da venda: gera a próxima parcela para comportar o saldo restante
+          const todasParcelas = await tx.parcela.findMany({
+            where: { vendaId: parcela.vendaId },
+            orderBy: { numero: 'asc' }
+          });
+
+          let diasIntervalo = 30; // Padrão mensal
+          if (todasParcelas.length >= 2) {
+            const pPenultima = todasParcelas[todasParcelas.length - 2];
+            const pUltima = todasParcelas[todasParcelas.length - 1];
+            const diffMs = pUltima.dataVencimento.getTime() - pPenultima.dataVencimento.getTime();
+            const diffDias = Math.round(diffMs / (1000 * 60 * 60 * 24));
+            if (diffDias > 0) {
+              diasIntervalo = diffDias;
+            }
+          }
+
+          const novaDataVencimento = new Date(parcela.dataVencimento);
+          novaDataVencimento.setDate(novaDataVencimento.getDate() + diasIntervalo);
+
+          const novoNumero = parcela.numero + 1;
+          const novaParcelaCriada = await tx.parcela.create({
+            data: {
+              vendaId: parcela.vendaId,
+              cobradorId: parcela.cobradorId || usuario.id,
+              numero: novoNumero,
+              valor: diferencaNaoPaga,
+              status: StatusParcela.PENDENTE,
+              dataVencimento: novaDataVencimento,
+              observacao: `Gerada automaticamente: R$ ${diferencaNaoPaga.toFixed(2)} transferido da Parcela #${parcela.numero} (restante não pago)`
+            }
+          });
+
+          await tx.venda.update({
+            where: { id: parcela.vendaId },
+            data: { numParcelas: { increment: 1 } }
+          });
+
+          await tx.auditoria.create({
+            data: {
+              parcelaId: novaParcelaCriada.id,
+              usuarioId: usuario.id,
+              acao: 'NOVA_PARCELA_CRIADA_TRANSFERENCIA',
+              detalhes: `Parcela #${novoNumero} criada com valor de R$ ${diferencaNaoPaga.toFixed(2)} transferido da Parcela #${parcela.numero}.`
+            }
+          });
+
+          proximaParcelaAlvo = novaParcelaCriada;
+        }
+      }
+
+      // Parcela atual é quitada hoje com o valor efetivamente pago
+      const novoStatusAtual: StatusParcela = StatusParcela.PAGA;
+      const novoValorParcela: number = diferencaNaoPaga > 0 ? valorParaEstaParcela : valorParcelaNum;
+
+      const obsAtualAntiga = parcela.observacao ? `${parcela.observacao} | ` : '';
+      const novaObsAtual = diferencaNaoPaga > 0
+        ? `${obsAtualAntiga}Quitada com pagamento parcial de R$ ${valorPagoNum.toFixed(2)} (R$ ${diferencaNaoPaga.toFixed(2)} transferido para a Parcela #${proximaParcelaAlvo?.numero})`
+        : parcela.observacao;
 
       // 1. Atualizar a parcela principal clicada (atribuindo cobradorId ao usuario que recebeu o pagamento)
       const parcelaAtualizada = await tx.parcela.update({
         where: { id: parcelaId },
         data: {
           cobradorId: usuario.id,
+          valor: novoValorParcela,
           valorPago: valorParaEstaParcela,
           dataPagamento: dataPagamentoFinal,
-          status: novoStatusAtual
+          status: novoStatusAtual,
+          observacao: novaObsAtual
         },
         include: {
           cobrador: { select: { id: true, nome: true, email: true } },
@@ -234,11 +334,17 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
       const vencBR = `${diaV}/${mesV}/${anoV}`;
 
       const prefixoAdiantado = isAdiantado ? `[Adiantamento] ` : '';
-      const detalhesTexto = excedente > 0
-        ? `${prefixoAdiantado}Quitou Parcela #${parcela.numero} (Venc: ${vencBR}) e adiantou excedente de R$ ${excedente.toFixed(2)}`
-        : isAdiantado
-          ? `Pagamento Adiantado de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero} (Venc: ${vencBR})`
-          : `Pagamento de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero}`;
+      let detalhesTexto = '';
+
+      if (diferencaNaoPaga > 0) {
+        detalhesTexto = `${prefixoAdiantado}Pagamento parcial de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero} (Venc: ${vencBR}). Parcela quitada e restante de R$ ${diferencaNaoPaga.toFixed(2)} transferido para a Parcela #${proximaParcelaAlvo?.numero}.`;
+      } else if (excedente > 0) {
+        detalhesTexto = `${prefixoAdiantado}Quitou Parcela #${parcela.numero} (Venc: ${vencBR}) e adiantou excedente de R$ ${excedente.toFixed(2)}`;
+      } else if (isAdiantado) {
+        detalhesTexto = `Pagamento Adiantado de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero} (Venc: ${vencBR})`;
+      } else {
+        detalhesTexto = `Pagamento de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero}`;
+      }
 
       await tx.pagamento.create({
         data: {
@@ -256,7 +362,11 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
         data: {
           parcelaId: parcelaId,
           usuarioId: usuario.id,
-          acao: isAdiantado ? 'PAGAMENTO_ADIANTADO_REGISTRADO' : 'PAGAMENTO_REGISTRADO',
+          acao: diferencaNaoPaga > 0
+            ? 'PAGAMENTO_PARCIAL_COM_TRANSFERENCIA'
+            : isAdiantado
+              ? 'PAGAMENTO_ADIANTADO_REGISTRADO'
+              : 'PAGAMENTO_REGISTRADO',
           detalhes: `${detalhesTexto}. Registrado pelo cobrador.`
         }
       });
