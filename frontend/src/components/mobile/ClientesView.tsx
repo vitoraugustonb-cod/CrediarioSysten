@@ -1076,6 +1076,22 @@ export const ClientesView: React.FC = () => {
                                 />
                               </div>
 
+                              {(() => {
+                                const valNum = parseFloat(valorPagoInput || '0');
+                                const valParcelaAtual = Number(parcelaParaPagamento.valor);
+                                const valJaPago = parcelaParaPagamento.valorPago ? Number(parcelaParaPagamento.valorPago) : 0;
+                                const faltaQuitar = Math.max(0, valParcelaAtual - valJaPago);
+                                if (valNum > 0 && valNum < faltaQuitar) {
+                                  const diferenca = Math.round((faltaQuitar - valNum) * 100) / 100;
+                                  return (
+                                    <div style={{ padding: '10px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: '#92400E', lineHeight: 1.4 }}>
+                                      ⚡ <strong>Pagamento Parcial:</strong> Ao pagar <strong>R$ {valNum.toFixed(2)}</strong>, esta parcela será <strong>quitada</strong> e o restante de <strong>R$ {diferenca.toFixed(2)}</strong> será transferido automaticamente para a próxima parcela!
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>
                                   Data do Pagamento
@@ -1593,6 +1609,22 @@ export const ClientesView: React.FC = () => {
                 Para evitar pagamentos acidentais com valor incorreto, <strong>digite novamente o valor a ser registrado</strong> (R$ <strong>{parseFloat(valorPagoInput || '0').toFixed(2)}</strong>):
               </p>
             </div>
+
+            {(() => {
+              const valNum = parseFloat(valorPagoInput || '0');
+              const valParcelaAtual = Number(parcelaParaPagamento.valor);
+              const valJaPago = parcelaParaPagamento.valorPago ? Number(parcelaParaPagamento.valorPago) : 0;
+              const faltaQuitar = Math.max(0, valParcelaAtual - valJaPago);
+              if (valNum > 0 && valNum < faltaQuitar) {
+                const diferenca = Math.round((faltaQuitar - valNum) * 100) / 100;
+                return (
+                  <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #FCD34D', padding: '10px 12px', borderRadius: 'var(--radius-md)', marginBottom: '14px', fontSize: '0.8rem', color: '#92400E', lineHeight: 1.35 }}>
+                    ⚡ <strong>Pagamento Parcial:</strong> Esta parcela será quitada e os <strong>R$ {diferenca.toFixed(2)}</strong> restantes serão transferidos para a próxima parcela do cliente.
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <form onSubmit={handleConfirmarEExecutarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>

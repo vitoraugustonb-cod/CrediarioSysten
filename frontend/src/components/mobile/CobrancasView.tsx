@@ -1324,6 +1324,22 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
+              {(() => {
+                const valNum = parseFloat(valorPagoInput || '0');
+                const valParcelaAtual = Number(parcelaSelecionada.valor);
+                const valJaPago = parcelaSelecionada.valorPago ? Number(parcelaSelecionada.valorPago) : 0;
+                const faltaQuitar = Math.max(0, valParcelaAtual - valJaPago);
+                if (valNum > 0 && valNum < faltaQuitar) {
+                  const diferenca = Math.round((faltaQuitar - valNum) * 100) / 100;
+                  return (
+                    <div style={{ padding: '10px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: '#92400E', textAlign: 'left', lineHeight: 1.4 }}>
+                      ⚡ <strong>Pagamento Parcial:</strong> Ao receber <strong>R$ {valNum.toFixed(2)}</strong>, esta parcela será <strong>quitada hoje</strong> e liberará a rota. O restante de <strong>R$ {diferenca.toFixed(2)}</strong> será transferido automaticamente para a próxima parcela!
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
               {parcelaSelecionada.dataVencimento.substring(0, 10) > getDataHojeLocal() && (
                 <div style={{ padding: '10px 12px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: '#065F46' }}>
                   💡 <strong>Pagamento Adiantado:</strong> Esta parcela vence em <strong>{formatarDataBR(parcelaSelecionada.dataVencimento)}</strong>. O recebimento constará no seu <strong>Resumo do Dia</strong> de hoje.
@@ -1451,9 +1467,25 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
               Confirmar Valor Recebido
             </h3>
             
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: 1.4 }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 10px 0', lineHeight: 1.4 }}>
               Digite novamente o valor exato recebido (<strong>R$ {parseFloat(valorPagoInput || '0').toFixed(2)}</strong>) para confirmar a baixa:
             </p>
+
+            {(() => {
+              const valNum = parseFloat(valorPagoInput || '0');
+              const valParcelaAtual = Number(parcelaSelecionada.valor);
+              const valJaPago = parcelaSelecionada.valorPago ? Number(parcelaSelecionada.valorPago) : 0;
+              const faltaQuitar = Math.max(0, valParcelaAtual - valJaPago);
+              if (valNum > 0 && valNum < faltaQuitar) {
+                const diferenca = Math.round((faltaQuitar - valNum) * 100) / 100;
+                return (
+                  <div style={{ padding: '8px 10px', backgroundColor: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 'var(--radius-md)', fontSize: '0.78rem', color: '#92400E', textAlign: 'left', marginBottom: '12px', lineHeight: 1.35 }}>
+                    ⚡ <strong>Atenção:</strong> Quitando parcela com pagamento parcial de R$ {valNum.toFixed(2)}. Os <strong>R$ {diferenca.toFixed(2)}</strong> restantes serão somados à próxima parcela.
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <form onSubmit={handleConfirmarEExecutarPagamento} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
