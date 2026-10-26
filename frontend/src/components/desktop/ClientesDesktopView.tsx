@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Search,
-  DollarSign
+  DollarSign,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -9,6 +10,7 @@ import {
   getSaldoCliente, 
   getClientePorId,
   registrarPagamentoAPI,
+  baixarClientesExcelAPI,
   type Cliente, 
   type SaldoDevedorCliente 
 } from '../../services/api';
@@ -41,6 +43,7 @@ export const ClientesDesktopView: React.FC = () => {
   const [dataPagamentoInput, setDataPagamentoInput] = useState<string>('');
   const [salvandoPagamento, setSalvandoPagamento] = useState<boolean>(false);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+  const [exportandoExcel, setExportandoExcel] = useState<boolean>(false);
 
   const carregarClientes = useCallback(async () => {
     setLoading(true);
@@ -121,6 +124,20 @@ export const ClientesDesktopView: React.FC = () => {
     c.endereco.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const handleExportarExcel = async () => {
+    if (exportandoExcel) return;
+    setExportandoExcel(true);
+    try {
+      await baixarClientesExcelAPI(token);
+      setMensagemSucesso('📊 Planilha Excel gerada e baixada com sucesso!');
+      setTimeout(() => setMensagemSucesso(null), 4000);
+    } catch (err: any) {
+      alert(`❌ Erro ao baixar planilha Excel: ${err.message}`);
+    } finally {
+      setExportandoExcel(false);
+    }
+  };
+
   // Extrair parcelas em aberto
   const parcelasEmAberto = historicoVendas
     .flatMap((v: any) => (v.parcelas || []).map((p: any) => ({ ...p, venda: v })))
@@ -129,7 +146,7 @@ export const ClientesDesktopView: React.FC = () => {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-800)' }}>
             Base Geral de Clientes
@@ -138,6 +155,31 @@ export const ClientesDesktopView: React.FC = () => {
             Consulte dados cadastrais, histórico de dívidas e registre pagamentos adiantados.
           </p>
         </div>
+
+        <button
+          onClick={handleExportarExcel}
+          disabled={exportandoExcel}
+          title="Baixar planilha Excel com todos os clientes da carteira"
+          style={{
+            height: '42px',
+            padding: '0 18px',
+            borderRadius: 'var(--radius-md)',
+            backgroundColor: '#107C41',
+            color: '#FFFFFF',
+            border: 'none',
+            fontWeight: 700,
+            fontSize: '0.88rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: exportandoExcel ? 'not-allowed' : 'pointer',
+            boxShadow: 'var(--shadow-sm)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <FileSpreadsheet size={18} />
+          <span>{exportandoExcel ? 'Baixando...' : 'Exportar Excel (.xlsx)'}</span>
+        </button>
       </div>
 
       {/* Search Filter */}

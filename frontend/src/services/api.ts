@@ -551,3 +551,38 @@ export async function registrarContatoParcelaAPI(
   });
 }
 
+// 23. GET /clientes/exportar-excel — Baixar planilha Excel (.xlsx) com 11 colunas completas
+export async function baixarClientesExcelAPI(
+  token: string | null = null,
+  vendedorId?: number
+): Promise<void> {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const queryParams = vendedorId ? `?vendedorId=${vendedorId}` : '';
+  const response = await fetch(`${API_BASE_URL}/clientes/exportar-excel${queryParams}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.erro || 'Falha ao baixar planilha de clientes.');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dataHoje = new Date().toISOString().substring(0, 10);
+  a.download = `clientes_crediario_${dataHoje}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
