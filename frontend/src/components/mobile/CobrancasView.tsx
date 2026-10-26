@@ -137,7 +137,7 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
   const abrirDetalhe = (p: Parcela) => {
     setParcelaSelecionada(p);
     setValorPagoInput(String(p.valor));
-    setDataPagamentoInput(new Date().toISOString().substring(0, 10));
+    setDataPagamentoInput(getDataHojeLocal());
     setObservacaoInput(p.observacao || '');
   };
 
@@ -1037,18 +1037,41 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    padding: '3px 8px',
-                    borderRadius: 'var(--radius-full)',
-                    backgroundColor: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#EFF6FF' : '#FEE2E2',
-                    color: getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '#1D4ED8' : '#B91C1C',
-                    fontWeight: 800,
-                    fontSize: '0.74rem'
-                  }}
-                >
-                  {getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status) === 'COBRAR_HOJE' ? '🔵 Cobrar Hoje' : '🔴 Atrasado'}
-                </span>
+                {(() => {
+                  const dataVenc = parcelaSelecionada.dataVencimento.substring(0, 10);
+                  const hoje = getDataHojeLocal();
+                  if (dataVenc > hoje) {
+                    return (
+                      <span
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: 'var(--radius-full)',
+                          backgroundColor: '#DCFCE7',
+                          color: '#15803D',
+                          fontWeight: 800,
+                          fontSize: '0.74rem'
+                        }}
+                      >
+                        🟢 Adiantamento (Venc: {formatarDataBR(parcelaSelecionada.dataVencimento)})
+                      </span>
+                    );
+                  }
+                  const statusC = getStatusCobranca(parcelaSelecionada.dataVencimento, parcelaSelecionada.status);
+                  return (
+                    <span
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: 'var(--radius-full)',
+                        backgroundColor: statusC === 'COBRAR_HOJE' ? '#EFF6FF' : '#FEE2E2',
+                        color: statusC === 'COBRAR_HOJE' ? '#1D4ED8' : '#B91C1C',
+                        fontWeight: 800,
+                        fontSize: '0.74rem'
+                      }}
+                    >
+                      {statusC === 'COBRAR_HOJE' ? '🔵 Cobrar Hoje' : '🔴 Atrasado'}
+                    </span>
+                  );
+                })()}
 
                 {foiContatadoHoje(parcelaSelecionada.ultimoContatoEm) && (
                   <span
@@ -1165,7 +1188,11 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 }}
               >
                 <DollarSign size={18} />
-                <span>Registrar Pagamento</span>
+                <span>
+                  {parcelaSelecionada.dataVencimento.substring(0, 10) > getDataHojeLocal()
+                    ? 'Adiantar Pagamento'
+                    : 'Registrar Pagamento'}
+                </span>
               </button>
 
               {/* Botão Mandar Mensagem no WhatsApp */}
@@ -1297,6 +1324,12 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
+              {parcelaSelecionada.dataVencimento.substring(0, 10) > getDataHojeLocal() && (
+                <div style={{ padding: '10px 12px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: '#065F46' }}>
+                  💡 <strong>Pagamento Adiantado:</strong> Esta parcela vence em <strong>{formatarDataBR(parcelaSelecionada.dataVencimento)}</strong>. O recebimento constará no seu <strong>Resumo do Dia</strong> de hoje.
+                </div>
+              )}
+
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
                   Data do Pagamento *
@@ -1317,6 +1350,9 @@ export const CobrancasView: React.FC<CobrancasViewProps> = ({ onNavigate }) => {
                     boxSizing: 'border-box'
                   }}
                 />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '3px' }}>
+                  Data em que o valor foi recebido pelo cobrador (entra na prestação de contas desta data)
+                </span>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>

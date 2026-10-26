@@ -14,6 +14,14 @@ import {
 } from '../../services/api';
 import { Modal } from '../common/Modal';
 
+function getDataHojeLocal(): string {
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
 export const ClientesDesktopView: React.FC = () => {
   const { token } = useAuth();
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -73,7 +81,7 @@ export const ClientesDesktopView: React.FC = () => {
     const valorRestante = Number(p.valor) - (p.valorPago ? Number(p.valorPago) : 0);
     setParcelaParaPagamento(p);
     setValorPagoInput(valorRestante.toFixed(2));
-    setDataPagamentoInput(new Date().toISOString().substring(0, 10));
+    setDataPagamentoInput(getDataHojeLocal());
   };
 
   const handleConfirmarPagamento = async (e: React.FormEvent) => {

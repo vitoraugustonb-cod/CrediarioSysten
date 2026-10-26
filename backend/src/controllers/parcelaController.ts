@@ -226,6 +226,20 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
       }
 
       // 3. Registrar a transação histórica real e imutável de pagamento
+      const vencimentoStr = parcela.dataVencimento.toISOString().substring(0, 10);
+      const pagamentoStr = dataPagamentoFinal.toISOString().substring(0, 10);
+      const isAdiantado = vencimentoStr > pagamentoStr;
+
+      const [anoV, mesV, diaV] = vencimentoStr.split('-');
+      const vencBR = `${diaV}/${mesV}/${anoV}`;
+
+      const prefixoAdiantado = isAdiantado ? `[Adiantamento] ` : '';
+      const detalhesTexto = excedente > 0
+        ? `${prefixoAdiantado}Quitou Parcela #${parcela.numero} (Venc: ${vencBR}) e adiantou excedente de R$ ${excedente.toFixed(2)}`
+        : isAdiantado
+          ? `Pagamento Adiantado de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero} (Venc: ${vencBR})`
+          : `Pagamento de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero}`;
+
       await tx.pagamento.create({
         data: {
           vendaId: parcela.vendaId,
@@ -234,9 +248,7 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
           parcelaId: parcela.id,
           valorPago: valorPagoNum,
           dataPagamento: dataPagamentoFinal,
-          detalhes: excedente > 0
-            ? `Quitou Parcela #${parcela.numero} e adiantou excedente de R$ ${excedente.toFixed(2)}`
-            : `Pagamento de R$ ${valorPagoNum.toFixed(2)} na Parcela #${parcela.numero}`
+          detalhes: detalhesTexto
         }
       });
 
@@ -244,8 +256,8 @@ export const registrarPagamento = async (req: Request, res: Response): Promise<v
         data: {
           parcelaId: parcelaId,
           usuarioId: usuario.id,
-          acao: 'PAGAMENTO_REGISTRADO',
-          detalhes: `Pagamento de R$ ${valorPagoNum} registrado.`
+          acao: isAdiantado ? 'PAGAMENTO_ADIANTADO_REGISTRADO' : 'PAGAMENTO_REGISTRADO',
+          detalhes: `${detalhesTexto}. Registrado pelo cobrador.`
         }
       });
 

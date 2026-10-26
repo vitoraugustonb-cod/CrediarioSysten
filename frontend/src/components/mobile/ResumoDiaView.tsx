@@ -26,6 +26,16 @@ function getDataHojeLocal(): string {
   return `${ano}-${mes}-${dia}`;
 }
 
+function formatarDataBR(dataStr?: string | null): string {
+  if (!dataStr) return '';
+  const match = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, ano, mes, dia] = match;
+    return `${dia}/${mes}/${ano}`;
+  }
+  return dataStr;
+}
+
 export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
   const { token } = useAuth();
   const [dataSel, setDataSel] = useState<string>(getDataHojeLocal());
@@ -214,6 +224,11 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
                   {resumo.qtdCobrancas} {resumo.qtdCobrancas === 1 ? 'recebimento' : 'recebimentos'}
                 </span>
+                {Boolean(resumo.totalAdiantado && resumo.totalAdiantado > 0) && (
+                  <span style={{ fontSize: '0.72rem', color: '#15803D', fontWeight: 700, display: 'block', marginTop: '4px', backgroundColor: '#DCFCE7', padding: '2px 6px', borderRadius: '4px' }}>
+                    🟢 Inclui R$ {(resumo.totalAdiantado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} adiantados ({resumo.qtdAdiantados || 0})
+                  </span>
+                )}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', paddingTop: '6px', borderTop: '1px dashed var(--border-subtle, #E2E8F0)', fontSize: '0.72rem', color: detalheAberto === 'cobrancas' ? '#16A34A' : 'var(--text-muted)', fontWeight: 700 }}>
@@ -276,8 +291,8 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
                       style={{
                         padding: '12px 14px',
                         borderRadius: 'var(--radius-md)',
-                        backgroundColor: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
+                        backgroundColor: c.isAdiantamento ? '#F0FDF4' : '#F8FAFC',
+                        border: c.isAdiantamento ? '1px solid #86EFAC' : '1px solid #E2E8F0',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -285,9 +300,27 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
                       }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '0.92rem', color: 'var(--primary-800)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '0.92rem', color: 'var(--primary-800)', flexWrap: 'wrap' }}>
                           <User size={15} color="var(--accent-600)" />
                           <span>{c.clienteNome}</span>
+                          {c.isAdiantamento && (
+                            <span
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-full)',
+                                backgroundColor: '#DCFCE7',
+                                color: '#15803D',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                border: '1px solid #86EFAC'
+                              }}
+                            >
+                              🟢 Adiantado {c.dataVencimento ? `(Venc: ${formatarDataBR(c.dataVencimento)})` : ''}
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span>{c.produtoNome}</span>
@@ -299,7 +332,7 @@ export const ResumoDiaView: React.FC<ResumoDiaViewProps> = ({ onNavigate }) => {
                           )}
                         </div>
                         {c.detalhes && (
-                          <div style={{ fontSize: '0.72rem', color: '#166534', marginTop: '2px' }}>
+                          <div style={{ fontSize: '0.72rem', color: c.isAdiantamento ? '#15803D' : '#166534', marginTop: '2px', fontWeight: c.isAdiantamento ? 600 : 400 }}>
                             {c.detalhes}
                           </div>
                         )}
