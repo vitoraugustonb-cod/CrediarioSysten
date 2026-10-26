@@ -19,7 +19,8 @@ import {
   Clock,
   Pencil,
   CalendarClock,
-  Save
+  Save,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { 
@@ -30,6 +31,7 @@ import {
   registrarPagamentoAPI,
   atualizarClienteAPI,
   alterarDataVencimentoParcelaAPI,
+  baixarClientesExcelAPI,
   type Cliente, 
   type SaldoDevedorCliente 
 } from '../../services/api';
@@ -132,6 +134,7 @@ export const ClientesView: React.FC = () => {
   const [editEndereco, setEditEndereco] = useState<string>('');
   const [editReferencias, setEditReferencias] = useState<string>('');
   const [salvandoEdicaoCliente, setSalvandoEdicaoCliente] = useState<boolean>(false);
+  const [exportandoExcel, setExportandoExcel] = useState<boolean>(false);
 
   // Alterar Data Vencimento Parcela State
   const [parcelaParaAltData, setParcelaParaAltData] = useState<any | null>(null);
@@ -321,6 +324,20 @@ export const ClientesView: React.FC = () => {
       alert(`❌ Erro ao registrar pagamento: ${err.message}`);
     } finally {
       setSalvandoPagamento(false);
+    }
+  };
+
+  const handleExportarExcel = async () => {
+    if (exportandoExcel) return;
+    setExportandoExcel(true);
+    try {
+      await baixarClientesExcelAPI(token);
+      setMensagemSucesso('📊 Planilha Excel gerada e baixada com sucesso!');
+      setTimeout(() => setMensagemSucesso(null), 4000);
+    } catch (err: any) {
+      alert(`❌ Erro ao baixar planilha Excel: ${err.message}`);
+    } finally {
+      setExportandoExcel(false);
     }
   };
 
@@ -570,28 +587,57 @@ export const ClientesView: React.FC = () => {
           />
         </div>
 
-        <button
-          onClick={() => setModalNovoCliente(true)}
-          style={{
-            height: '48px',
-            padding: '0 16px',
-            borderRadius: 'var(--radius-lg)',
-            backgroundColor: 'var(--accent-600)',
-            color: '#FFFFFF',
-            border: 'none',
-            fontWeight: 700,
-            fontSize: '0.88rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <UserPlus size={18} />
-          <span>Novo Cliente</span>
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={handleExportarExcel}
+            disabled={exportandoExcel}
+            title="Baixar planilha Excel com todos os clientes da carteira"
+            style={{
+              height: '48px',
+              padding: '0 12px',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: '#107C41',
+              color: '#FFFFFF',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '0.84rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: exportandoExcel ? 'not-allowed' : 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <FileSpreadsheet size={18} />
+            <span>{exportandoExcel ? 'Baixando...' : 'Excel'}</span>
+          </button>
+
+          <button
+            onClick={() => setModalNovoCliente(true)}
+            style={{
+              height: '48px',
+              padding: '0 14px',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'var(--accent-600)',
+              color: '#FFFFFF',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <UserPlus size={18} />
+            <span>Novo</span>
+          </button>
+        </div>
       </div>
 
       {loading && (
