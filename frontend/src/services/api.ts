@@ -73,6 +73,9 @@ export interface CobrancaDetalheItem {
   detalhes: string;
   dataPagamento: string;
   criadoEm: string;
+  isAdiantamento?: boolean;
+  parcelaNumero?: number | null;
+  dataVencimento?: string | null;
 }
 
 export interface VendaDetalheItem {
@@ -92,8 +95,11 @@ export interface PrestacaoContasDia {
   totalVendidoMoveis: number;
   totalVendidoVariedades: number;
   totalCobrado: number;
+  totalCobradoNormal?: number;
+  totalAdiantado?: number;
   qtdVendas: number;
   qtdCobrancas: number;
+  qtdAdiantados?: number;
   cobrancasDetalhes?: CobrancaDetalheItem[];
   vendasDetalhes?: VendaDetalheItem[];
 }

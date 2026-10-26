@@ -1087,6 +1087,9 @@ export const ClientesView: React.FC = () => {
                                   onChange={(e) => setDataPagamentoInput(e.target.value)}
                                   style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid #86EFAC', fontSize: '0.92rem', outline: 'none' }}
                                 />
+                                <span style={{ fontSize: '0.72rem', color: '#15803D', display: 'block', marginTop: '3px' }}>
+                                  Data em que o valor foi recebido pelo cobrador (entra no Resumo do Dia desta data)
+                                </span>
                               </div>
 
                               <button
